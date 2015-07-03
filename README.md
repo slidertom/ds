@@ -1,6 +1,6 @@
 # ds
 Sqlite, Ms SQL, DAO mbd databases access system. Recordset, table based interface.
-
+'''
 dsDatabase db;
 db.OpenDB(_T("mdb.sqlite"));
 
@@ -16,3 +16,4 @@ loader.GetFieldString(_T("Code"));
 loader.Edit();
     loader.SetFieldString(_T("Code"), _T("New_Code"));
 loader.Update();
+'''
