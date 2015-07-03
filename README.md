@@ -1,5 +1,10 @@
 # ds
-Sqlite, Ms SQL, DAO mbd databases access system. Recordset, table based interface.
+Sqlite (read-write), 
+Ms DAO mbd (read-write),
+Ms SQL (read-only),
+databases access system. 
+
+Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
 
 ```C++
 dsDatabase db;
