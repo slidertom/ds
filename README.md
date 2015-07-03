@@ -1,4 +1,4 @@
-# ds
+# ds - Data Access System
 #####Sqlite (read-write), Ms DAO mbd (read-write), Ms SQL (read-only),
 databases access system. 
 
