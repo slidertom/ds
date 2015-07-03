@@ -1,7 +1,6 @@
 # ds
 Sqlite, Ms SQL, DAO mbd databases access system. Recordset, table based interface.
 
-
 dsDatabase db;
 db.OpenDB(_T("mdb.sqlite"));
 
