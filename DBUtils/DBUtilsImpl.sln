@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DBUtilsImpl", "DBUtilsImpl.vcxproj", "{6A3BF33C-7A87-651E-CF30-F48DB2B132B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		UnicodeDebug|Win32 = UnicodeDebug|Win32
+		UnicodeRelease|Win32 = UnicodeRelease|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A3BF33C-7A87-651E-CF30-F48DB2B132B1}.UnicodeDebug|Win32.ActiveCfg = UnicodeDebug|Win32
+		{6A3BF33C-7A87-651E-CF30-F48DB2B132B1}.UnicodeDebug|Win32.Build.0 = UnicodeDebug|Win32
+		{6A3BF33C-7A87-651E-CF30-F48DB2B132B1}.UnicodeRelease|Win32.ActiveCfg = UnicodeRelease|Win32
+		{6A3BF33C-7A87-651E-CF30-F48DB2B132B1}.UnicodeRelease|Win32.Build.0 = UnicodeRelease|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
