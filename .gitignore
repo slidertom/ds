@@ -6,7 +6,6 @@
 *.ipch
 *.lastbuildstate
 *.log
-*.filters
 *.pdb
 *.rc
 *.user

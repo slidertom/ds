@@ -1,0 +1,112 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Dao">
+      <UniqueIdentifier>{2a40d28a-1036-4447-a12a-6d41f433323b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AdoDotNet">
+      <UniqueIdentifier>{f5e9303a-be09-4be2-86c4-aece5abd9b1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LogImpl">
+      <UniqueIdentifier>{c014d4c5-0e2e-4c15-b92d-30e2f020aba6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SqLite">
+      <UniqueIdentifier>{e2801fdf-4b6e-46ca-b7f1-e8c18712218b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Dao\DaoDatabaseImpl.cpp">
+      <Filter>Dao</Filter>
+    </ClCompile>
+    <ClCompile Include="Dao\DaoRecordsetImpl.cpp">
+      <Filter>Dao</Filter>
+    </ClCompile>
+    <ClCompile Include="DBUtilsImpl.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="AdoDotNet\AdoDotNetDatabaseImpl.cpp">
+      <Filter>AdoDotNet</Filter>
+    </ClCompile>
+    <ClCompile Include="AdoDotNet\AdoDotNetImpl.cpp">
+      <Filter>AdoDotNet</Filter>
+    </ClCompile>
+    <ClCompile Include="AdoDotNet\AdoDotNetRecordsetImpl.cpp">
+      <Filter>AdoDotNet</Filter>
+    </ClCompile>
+    <ClCompile Include="LogImpl\LogImpl.cpp">
+      <Filter>LogImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="Dao\DaoErrorHandler.cpp">
+      <Filter>Dao</Filter>
+    </ClCompile>
+    <ClCompile Include="Dao\DAOExtensions.cpp">
+      <Filter>Dao</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite\SqLiteDatabaseImpl.cpp">
+      <Filter>SqLite</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite\SqLiteRecordsetImpl.cpp">
+      <Filter>SqLite</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite\SqLiteUtil.cpp">
+      <Filter>SqLite</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite\SqLiteErrorHandler.cpp">
+      <Filter>SqLite</Filter>
+    </ClCompile>
+    <ClCompile Include="dsDatabase.cpp" />
+    <ClCompile Include="dsTable.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Dao\DaoDatabaseImpl.h">
+      <Filter>Dao</Filter>
+    </ClInclude>
+    <ClInclude Include="Dao\DaoRecordsetImpl.h">
+      <Filter>Dao</Filter>
+    </ClInclude>
+    <ClInclude Include="AbsDatabase.h" />
+    <ClInclude Include="AbsRecordset.h" />
+    <ClInclude Include="DBUtilsImpl.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="AdoDotNet\AdoDotNetDatabaseImpl.h">
+      <Filter>AdoDotNet</Filter>
+    </ClInclude>
+    <ClInclude Include="AdoDotNet\AdoDotNetImpl.h">
+      <Filter>AdoDotNet</Filter>
+    </ClInclude>
+    <ClInclude Include="AdoDotNet\AdoDotNetRecordsetImpl.h">
+      <Filter>AdoDotNet</Filter>
+    </ClInclude>
+    <ClInclude Include="Dao\DaoDatabaseUtil.h">
+      <Filter>Dao</Filter>
+    </ClInclude>
+    <ClInclude Include="Dao\DaoBinaryFieldUtil.h">
+      <Filter>Dao</Filter>
+    </ClInclude>
+    <ClInclude Include="Dao\DAOExtensions.h">
+      <Filter>Dao</Filter>
+    </ClInclude>
+    <ClInclude Include="LogImpl\LogImpl.h">
+      <Filter>LogImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="Dao\DaoErrorHandler.h">
+      <Filter>Dao</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite\SqLiteDatabaseImpl.h">
+      <Filter>SqLite</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite\SqLiteRecordsetImpl.h">
+      <Filter>SqLite</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite\SqLiteUtil.h">
+      <Filter>SqLite</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite\SqLiteErrorHandler.h">
+      <Filter>SqLite</Filter>
+    </ClInclude>
+    <ClInclude Include="DatabaseType.h" />
+    <ClInclude Include="dsDatabaseListener.h" />
+    <ClInclude Include="dsDatabase.h" />
+    <ClInclude Include="dsTable.h" />
+    <ClInclude Include="dsConfig.h" />
+  </ItemGroup>
+</Project>
