@@ -1,7 +1,5 @@
 # ds
-#####Sqlite (read-write), 
-#####Ms DAO mbd (read-write),
-#####Ms SQL (read-only),
+#####Sqlite (read-write), Ms DAO mbd (read-write), Ms SQL (read-only),
 databases access system. 
 
 Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
