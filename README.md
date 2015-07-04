@@ -9,7 +9,8 @@ Text, Long/Integer, Blob, Double/Real field types are supported.
 Samples:
 ```C++
 dsDatabase db;
-db.OpenDB(_T("database.sqlite"));
+db.OpenDB(_T("database.sqlite")); // sqlite database 
+//db.OpenDB(_T("database.mdb")); // MS mdb database 
 
 dsTable loader(&db, _T("Table_Name");
 loader.AddNew();
