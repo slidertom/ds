@@ -4,6 +4,7 @@ databases access system.
 
 Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
 
+Samples:
 ```C++
 dsDatabase db;
 db.OpenDB(_T("database.sqlite"));
@@ -33,7 +34,7 @@ public:
 
 // Attributes
 public:
-	KEY_LONG(Id,   _T("ID"));
+    KEY_LONG(Id,   _T("ID"));
     KEY_TEXT(Code, _T("CODE"));
     FIELD_TEXT(Descr, _T("DESCRIPTION"));
 };
@@ -47,7 +48,8 @@ loader.AddNew();
 loader.Update();
 
 loader.DeleteById(nNewId); // do delete one record ID=nNewId
-loader.DeleteAllByCode(_T("New")); // do delete all records from the Table1 with the code value: New
+// do delete all records from the Table1 with the code value: New
+loader.DeleteAllByCode(_T("New")); 
 
 // do iterate all Table1 records and do retrieve code values
 if ( loader.MoveFirst() )
