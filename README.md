@@ -33,7 +33,7 @@ class CCodeDescrLoader : public dsTable
 public:
 	CCodeDescrLoader(dsDatabase *pDatabase, LPCTSTR sTableName)
 	: dsTable(pDatabase, sTableName) { }
-	virtual ~CIdLoader() { }
+	virtual ~CCodeDescrLoader() { }
 
 // Attributes
 public:
