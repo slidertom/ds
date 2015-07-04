@@ -4,6 +4,8 @@ databases access system.
 
 Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
 
+Text, Long/Integer, Blob, Double/Real field types are supported.
+
 Samples:
 ```C++
 dsDatabase db;
