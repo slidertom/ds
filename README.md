@@ -31,13 +31,11 @@ loader.Update();
 ```C++
 class CCodeDescrLoader : public dsTable
 {
-// Contruction/Destruction
 public:
 	CCodeDescrLoader(dsDatabase *pDatabase, LPCTSTR sTableName)
 	: dsTable(pDatabase, sTableName) { }
 	virtual ~CCodeDescrLoader() { }
 
-// Attributes
 public:
     KEY_LONG(Id,   _T("ID"));
     KEY_TEXT(Code, _T("CODE"));
