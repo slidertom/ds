@@ -2,7 +2,9 @@
 #####Sqlite (read-write), Ms DAO mbd (read-write), Ms SQL (read-only),
 databases access system. 
 
-Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
+DS is an easy to use C++ SQLite3, DAO, Ms SQL wrapper.
+
+Provides Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
 
 Text, Long/Integer, Blob, Double/Real field types are supported.
 
