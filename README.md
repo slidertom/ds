@@ -4,8 +4,8 @@ databases access system.
 
 DS is an easy to use C++ SQLite3, DAO, Ms SQL wrapper.
 
-Provides Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
-
+Provides a Recordset (MFC: CDaoRecordSet, CRecordset) like  interface for a SQLite3, MsSQL, DAO databases.
+ 
 Text, Long/Integer, Blob, Double/Real field types are supported.
 
 Samples:
