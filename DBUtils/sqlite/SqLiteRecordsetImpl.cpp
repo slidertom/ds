@@ -7,8 +7,6 @@
 
 #include "sqlite/sqlite3.h"
 
-#include "sstream"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -159,23 +157,19 @@ bool CSqLiteRecordsetImpl::Delete()
 {
     const int nRowId = ::sqlite3_column_int(m_stmt, 0); // 0 column always holds row id
 
-    CStdStringA sDelete;
-	sDelete.Format("DELETE FROM %s WHERE ROWID = %d", m_sTable.c_str(), nRowId);
-
-    sqlite3 *pDB = m_pDB->GetSqLiteDB();
-
-    const char *pTail   = nullptr;
-    sqlite3_stmt *pStmt = nullptr;
-    int rc = ::sqlite3_prepare_v2(pDB, sDelete.c_str(), -1, &pStmt, &pTail);
-    if (rc == SQLITE_OK) {
-        rc = ::sqlite3_step(pStmt);            
+    const std::string sRowId = sqlite_conv::to_string(nRowId);
+    
+    std::string sDelete  = "DELETE FROM ";
+                sDelete += m_sTable;
+                sDelete += " WHERE ROWID = ";
+                sDelete += sRowId;
+	//sDelete.Format("DELETE FROM %s WHERE ROWID = %d", m_sTable.c_str(), nRowId);
+    const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
+    if ( nRetVal == -1 ) {
+        OnErrorCode(nRetVal, _T("CSqLiteRecordsetImpl::Delete()"));
+        return false;
     }
-    else {
-        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::Delete()"));
-    }
-    ::sqlite3_finalize(pStmt);
-
-    return rc == SQLITE_ROW || rc == SQLITE_DONE;
+    return true;
 }
 /*
  To avoid problems, the current thread should use sqlite3_mutex_enter() to acquire exclusive access to the database 
@@ -773,11 +767,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByLongValue(LPCTSTR sField, long nValue)
     ASSERT(!m_sTable.empty());
 
     const std::string sFieldUTF8 = sqlite_conv::ConvertToUTF8(sField);
-    std::string sValueUTF8;
-   
-    std::stringstream strstream;
-    strstream << nValue;
-    strstream >> sValueUTF8;
+    const std::string sValueUTF8 = sqlite_conv::to_string(nValue);
 
     std::string strSQL  = "DELETE FROM ";
                 strSQL += m_sTable;

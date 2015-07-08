@@ -1,9 +1,11 @@
 #include "StdAfx.h"
 #include "SqLiteUtil.h"
 
-#include "sqlite3.h"
+#include "sqlite/sqlite3.h"
 
 #include "SqLiteRecordsetImpl.h"
+
+#include "sstream"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,6 +50,15 @@ namespace sqlite_conv
         MultiByteToWideChar(CP_UTF8, 0, &str[0], nLen, &wstrTo[0], size_needed);
 
         return wstrTo;
+    }
+
+    std::string to_string(long nValue)
+    {
+        std::string sValue;
+        std::stringstream strstream;
+        strstream << nValue;
+        strstream >> sValue;
+        return sValue;
     }
 };
 

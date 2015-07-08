@@ -10,6 +10,7 @@ namespace sqlite_conv
 {
     std::string ConvertToUTF8(const wchar_t *wstr);
     CStdString ConvertFromUTF8(const char *str);
+    std::string to_string(long nValue);
 };
 
 
