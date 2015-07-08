@@ -70,7 +70,7 @@ public:
     }
 
     // returns true if any record was been deleted
-    bool DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue)
+    virtual bool DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue)
     {
         if ( !SeekByString(sField, sValue) ) {
             return false;
@@ -86,7 +86,7 @@ public:
 	    return bRetVal;
     }
 
-    bool DeleteAllByLongValue(LPCTSTR sField, long nValue)
+    virtual bool DeleteAllByLongValue(LPCTSTR sField, long nValue)
     {
         if ( !SeekByLong(sField, nValue) ) {
             return false;
@@ -102,7 +102,7 @@ public:
 	    return bRetVal;
     }
 
-    bool DeleteByLongValue(LPCTSTR sField, long nValue)
+    virtual bool DeleteByLongValue(LPCTSTR sField, long nValue)
     {
         if ( !SeekByLong(sField, nValue) ) {
             return false; 
@@ -115,7 +115,7 @@ public:
         return true;
     }
 
-    bool DeleteByStringValue(LPCTSTR sField, LPCTSTR sValue)
+    virtual bool DeleteByStringValue(LPCTSTR sField, LPCTSTR sValue)
     {
         if ( !SeekByString(sField, sValue) ) {
             return false; 
