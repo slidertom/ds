@@ -23,6 +23,20 @@ enum dsFieldType
 };
 
 class dsTableFieldInfo : public std::unordered_map<CStdString, dsFieldType, std::hash<std::basic_string<TCHAR> > > { };
+namespace ds_table_field_info_util
+{
+    inline void fields_union(dsTableFieldInfo &union_info,  dsTableFieldInfo &src_info, dsTableFieldInfo &dst_info)
+    {
+        auto end_it = src_info.end();
+        for (auto it = src_info.begin(); it != end_it; ++it) 
+        {
+            if ( dst_info.find(it->first.c_str()) == dst_info.end() ) {
+                continue;
+            }
+            union_info[it->first] = it->second;
+        }
+    }    
+};
 
 class CAbsRecordset;
 

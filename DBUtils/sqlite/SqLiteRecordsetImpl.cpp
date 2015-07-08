@@ -5,7 +5,7 @@
 #include "SqLiteErrorHandler.h"
 #include "SqLiteUtil.h"
 
-#include "sqlite/sqlite3.h"
+#include "sqlite3.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

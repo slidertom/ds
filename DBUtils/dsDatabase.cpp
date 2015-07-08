@@ -168,31 +168,16 @@ bool dsDatabase::CopyTableData(dsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTST
     dsTableFieldInfo union_info;
     {
         dsTableFieldInfo dst_info;
-        if ( !pDstDB->m_pDatabase->GetTableFieldInfo(sTableNameDst, dst_info) )
-        {
-            CStdString sError;
-            sError.Format(_T("pDstDB->m_pDatabase->GetTableFieldInfo failed. Table %s."), sTableNameDst);
-            m_pErrorHandler(sError.c_str());
+        if ( !pDstDB->m_pDatabase->GetTableFieldInfo(sTableNameDst, dst_info) ) {
             return false;
         }
 
         dsTableFieldInfo src_info;
-        if ( !m_pDatabase->GetTableFieldInfo(sTableNameSrc, src_info) )
-        {
-            CStdString sError;
-            sError.Format(_T("m_pDatabase->GetTableFieldInfo failed. Table %s."), sTableNameSrc);
-            m_pErrorHandler(sError.c_str());
+        if ( !m_pDatabase->GetTableFieldInfo(sTableNameSrc, src_info) ) {
             return false;
         }
 
-        auto end_it = src_info.end();
-        for (auto it = src_info.begin(); it != end_it; ++it) 
-        {
-            if ( dst_info.find(it->first.c_str()) == dst_info.end() ) {
-                continue;
-            }
-            union_info[it->first] = it->second;
-        }
+        ds_table_field_info_util::fields_union(union_info, src_info, dst_info);
     }
 
     dsTable src_table(this, sTableNameSrc);

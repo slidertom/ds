@@ -236,6 +236,9 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
     sqlite_util::CFieldInfoMap field_info_map;
     if ( !sqlite_util::GetTableFieldsdInfo(this, sTableNameUTF8.c_str(), m_pErrorHandler, field_info_map) )
     {
+        CStdString sError;
+        sError.Format(_T("GetTableFieldInfo failed. Table %s."), sTable);
+        m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteDatabaseImpl::GetTableFieldInfo"));
         return false;
     }
 
@@ -269,6 +272,34 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
 
 bool CSqLiteDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
 {
-    ASSERT(FALSE);
-    return false;
+    
+    ASSERT(FALSE); // UNTESTED
+    // You'll have to attach Database X with Database Y using the Attach command, then run the appropriate Insert Into commands for the tables you want to transfer.
+    //INSERT INTO X.TABLE(Id, Value) SELECT * FROM Y.TABLE;
+    
+    //ATTACH DATABASE "myother.db" AS aDB;
+    // INSERT INTO newtable 
+    //SELECT * FROM aDB.oldTableInMyOtherDB;
+    // sqlite3_exec(db, "ATTACH 'C:/tmp/tmp.sqlite' as mytmp");
+    ASSERT(pDstDB->GetType() == dsType_SqLite);
+    const CStdString sPath = pDstDB->GetName();
+    const std::string localFileName = sqlite_conv::ConvertToUTF8(sPath);
+    std::string sSQL = "ATTACH '";
+    sSQL += localFileName;
+    sSQL += "' as DestDB";
+    if ( ExecuteUTF8(sSQL.c_str()) == -1 ) {
+        return false;
+    }
+    std::string sTableNameSrcUTF8 = sqlite_conv::ConvertToUTF8(sTableNameSrc);
+    std::string sTableNameDstUTF8 = sqlite_conv::ConvertToUTF8(sTableNameDst);
+    //INSERT INTO newtable SELECT * FROM aDB.oldTableInMyOtherDB;
+    sSQL = "INSERT INTO DestDB.";
+    sSQL += sTableNameDstUTF8;
+    sSQL += "SELECT * FROM ";
+    sSQL += sTableNameSrcUTF8;
+    if ( ExecuteUTF8(sSQL.c_str()) == -1 ) {
+        return false;
+    }   
+   
+    return true;
 }

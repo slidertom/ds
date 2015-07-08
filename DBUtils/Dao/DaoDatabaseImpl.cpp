@@ -362,7 +362,11 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
     CDaoTableDef tableInfo(m_pDatabase);
     tableInfo.Open(sTable);
 
-    if ( !tableInfo.IsOpen() ) {
+    if ( !tableInfo.IsOpen() ) 
+    {
+        CStdString sError;
+        sError.Format(_T("GetTableFieldInfo failed. Table %s."), sTable);
+        m_pErrorHandler->OnError(sError.c_str(), _T("CDaoDatabaseImpl::GetTableFieldInfo"));
         return false;
     }
 
