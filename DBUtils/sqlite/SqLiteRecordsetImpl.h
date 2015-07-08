@@ -70,6 +70,8 @@ public:
 	virtual bool DoesFieldExist(LPCTSTR sFieldName);
 
     virtual void Flush();
+    virtual bool DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue);
+    virtual bool DeleteAllByLongValue(LPCTSTR sField, long nValue);
 
 private:
     int FindColumnIndex(LPCTSTR sFieldName);

@@ -5,7 +5,9 @@
 #include "SqLiteErrorHandler.h"
 #include "SqLiteUtil.h"
 
-#include "sqlite3.h"
+#include "sqlite/sqlite3.h"
+
+#include "sstream"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -744,8 +746,58 @@ bool CSqLiteRecordsetImpl::OpenImpl(const char *sql)
     return true;
 }
 
+bool CSqLiteRecordsetImpl::DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue)
+{
+    ASSERT(!m_sTable.empty());
+
+    const std::string sFieldUTF8 = sqlite_conv::ConvertToUTF8(sField);
+    const std::string sValueUTF8 = sqlite_conv::ConvertToUTF8(sValue);
+
+    std::string strSQL  = "DELETE FROM ";
+                strSQL += m_sTable;
+                strSQL += " WHERE ";
+                strSQL += sFieldUTF8;
+                strSQL += " = ";
+                strSQL += sValueUTF8;
+
+    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool CSqLiteRecordsetImpl::DeleteAllByLongValue(LPCTSTR sField, long nValue)
+{
+    ASSERT(!m_sTable.empty());
+
+    const std::string sFieldUTF8 = sqlite_conv::ConvertToUTF8(sField);
+    std::string sValueUTF8;
+   
+    std::stringstream strstream;
+    strstream << nValue;
+    strstream >> sValueUTF8;
+
+    std::string strSQL  = "DELETE FROM ";
+                strSQL += m_sTable;
+                strSQL += " WHERE ";
+                strSQL += sFieldUTF8;
+                strSQL += " = ";
+                strSQL += sValueUTF8;
+
+    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 )
+    {
+        return true;
+    }
+
+    return false;
+}
+
 void CSqLiteRecordsetImpl::Flush()
 {
+    ASSERT(!m_sTable.empty());
+
     std::string strSQL  = "DELETE FROM ";
                 strSQL += m_sTable;
     m_pDB->ExecuteUTF8(strSQL.c_str());
