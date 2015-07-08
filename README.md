@@ -2,11 +2,17 @@
 #####Sqlite (read-write), Ms DAO mbd (read-write), Ms SQL (read-only),
 databases access system. 
 
-Recordset (MFC: CDaoRecordSet, CRecordset), data table based interface.
+DS is an easy to use C++ SQLite3, DAO, Ms SQL wrapper.
 
+Provides a Recordset (MFC: CDaoRecordSet, CRecordset) like  interface for a SQLite3, MsSQL, DAO databases.
+ 
+Text, Long/Integer, Blob, Double/Real field types are supported.
+
+Samples:
 ```C++
 dsDatabase db;
-db.OpenDB(_T("database.sqlite"));
+db.OpenDB(_T("database.sqlite")); // sqlite database 
+//db.OpenDB(_T("database.mdb")); // MS mdb database 
 
 dsTable loader(&db, _T("Table_Name");
 loader.AddNew();
@@ -25,15 +31,13 @@ loader.Update();
 ```C++
 class CCodeDescrLoader : public dsTable
 {
-// Contruction/Destruction
 public:
 	CCodeDescrLoader(dsDatabase *pDatabase, LPCTSTR sTableName)
 	: dsTable(pDatabase, sTableName) { }
-	virtual ~CIdLoader() { }
+	virtual ~CCodeDescrLoader() { }
 
-// Attributes
 public:
-	KEY_LONG(Id,   _T("ID"));
+    KEY_LONG(Id,   _T("ID"));
     KEY_TEXT(Code, _T("CODE"));
     FIELD_TEXT(Descr, _T("DESCRIPTION"));
 };
@@ -47,7 +51,8 @@ loader.AddNew();
 loader.Update();
 
 loader.DeleteById(nNewId); // do delete one record ID=nNewId
-loader.DeleteAllByCode(_T("New")); // do delete all records from the Table1 with the code value: New
+// do delete all records from the Table1 with the code value: New
+loader.DeleteAllByCode(_T("New")); 
 
 // do iterate all Table1 records and do retrieve code values
 if ( loader.MoveFirst() )
