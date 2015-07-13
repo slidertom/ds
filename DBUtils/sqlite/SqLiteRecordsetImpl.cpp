@@ -20,7 +20,6 @@ static char THIS_FILE[] = __FILE__;
    /** increase the values.                        **/
    //#define SQLTM_COUNT       200  /** -> SQLTM_COUNT*SQLTM_TIME ms timeout **/
    //#define SQLTM_TIME        50
-//PRAGMA table_info(LocksHingesCombi);
 /*
   int    PrepareSql(sqlite3 *db, sqlite3_stmt  **hs, char *SqlStr, int handle)
    {
@@ -237,14 +236,19 @@ QString DBBrowserDB::emptyInsertStmt(const sqlb::Table& t, const QString& pk_val
     return stmt;
 }
 */
-void CSqLiteRecordsetImpl::AddNew()
+void CSqLiteRecordsetImpl::PrepareInsert()
 {
     ASSERT(!m_pSaveData);
+    m_pSaveData = new sqlite_util::CFieldDataMap;
+}
+
+void CSqLiteRecordsetImpl::AddNew()
+{
     //ASSERT(m_stmt); // open should be called
     ASSERT(m_nEditRowId == -1);
-    m_pSaveData = new sqlite_util::CFieldDataMap;
+    PrepareInsert();
   
-    DoInsert(); // do insert default record if possible
+    DoInsertDefault(); // do insert default record if possible
                 // required to support logic like this:
                 //  AddNew()
                 //      GetFieldLong("ID"); // primary key
@@ -274,7 +278,7 @@ namespace internal
     }
 };
 
-void CSqLiteRecordsetImpl::DoInsert()
+void CSqLiteRecordsetImpl::DoInsertDefault()
 {
     ASSERT(m_sTable.length() > 0);
 
@@ -378,12 +382,13 @@ void CSqLiteRecordsetImpl::DoInsert()
     m_nEditRowId = ::sqlite3_last_insert_rowid(pDB);
 }
 
-void CSqLiteRecordsetImpl::DoUpdate()
+static inline std::string save_data_to_update_values_string(sqlite_util::CFieldDataMap *pSaveData)
 {
-    ASSERT(m_pSaveData);
+    ASSERT(pSaveData);
+
     std::string sValues;
-    auto end_it = m_pSaveData->end();
-    auto beg_it = m_pSaveData->begin();
+    auto end_it = pSaveData->end();
+    auto beg_it = pSaveData->begin();
     for (auto it = beg_it; it != end_it; ++it) {
         if ( sValues.empty() ) {
             sValues += it->first;
@@ -395,7 +400,13 @@ void CSqLiteRecordsetImpl::DoUpdate()
             sValues += "=?";
         }
     }
+    return sValues;
+}
 
+void CSqLiteRecordsetImpl::DoUpdate()
+{
+    const std::string sValues = save_data_to_update_values_string(m_pSaveData);
+    
     ASSERT(m_nEditRowId > 0);
     CStdStringA sSql;
     sSql.Format("UPDATE %s SET %s WHERE ROWID = %d", m_sTable.c_str(), sValues.c_str(), m_nEditRowId); 
@@ -434,6 +445,90 @@ bool CSqLiteRecordsetImpl::Update()
     m_nEditRowId = -1;
 
 	return true;
+}
+
+static inline std::string save_data_to_insert_columns_string(sqlite_util::CFieldDataMap *pSaveData)
+{
+    ASSERT(pSaveData);
+
+    std::string sValues;
+    auto end_it = pSaveData->end();
+    auto beg_it = pSaveData->begin();
+    for (auto it = beg_it; it != end_it; ++it) {
+        if ( sValues.empty() ) {
+            sValues += it->first;
+        }
+        else {
+            sValues += ",";
+            sValues += it->first;
+        }
+    }
+    return sValues;
+}
+
+static inline std::string save_data_to_insert_values_string(sqlite_util::CFieldDataMap *pSaveData)
+{
+    ASSERT(pSaveData);
+
+    std::string sValues;
+    auto end_it = pSaveData->end();
+    auto beg_it = pSaveData->begin();
+    for (auto it = beg_it; it != end_it; ++it) {
+        if ( sValues.empty() ) {
+            sValues += "?";
+        }
+        else {
+            sValues += ",";
+            sValues += "?";
+        }
+    }
+    return sValues;
+}
+
+void CSqLiteRecordsetImpl::CommitInsert()
+{
+    ASSERT(m_pSaveData);
+    // TODO: save/update/insert/add_new operations should be extracted from CSqLiteRecordsetImpl
+    // CSqLiteRecordsetImpl should delegate only calls for the extracted operations
+
+    const std::string sColumns = save_data_to_insert_columns_string(m_pSaveData);
+    const std::string sValues  = save_data_to_insert_values_string(m_pSaveData);
+
+    std::string sSql  = "INSERT INTO ";
+                sSql += m_sTable.c_str();
+                sSql += " (";
+                sSql += sColumns.c_str();
+                sSql += ")";
+                sSql += " VALUES (";
+                sSql += sValues.c_str();
+                sSql += ")";
+
+    sqlite3 *pDB = m_pDB->GetSqLiteDB();
+
+    const char* pTail = nullptr;
+    sqlite3_stmt *pStmt = nullptr;
+    int rc = ::sqlite3_prepare_v2(pDB, sSql.c_str(), -1, &pStmt, &pTail);
+    if (rc == SQLITE_OK) {
+        sqlite_util::BindStatements(*m_pSaveData, pStmt);
+        rc = ::sqlite3_step(pStmt);
+    }
+    else {
+        if ( rc != SQLITE_DONE ) {
+            CStdString sSQL = sqlite_conv::ConvertFromUTF8(sSql.c_str());
+            m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteRecordsetImpl::CommitInsert()(1)"));
+            OnErrorCode(rc, _T("CSqLiteRecordsetImpl::CommitInsert()(1)"));
+        }
+    }
+    ::sqlite3_finalize(pStmt);
+
+    if ( rc != SQLITE_DONE ) {
+        CStdString sSQL = sqlite_conv::ConvertFromUTF8(sSql.c_str());
+        m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteRecordsetImpl::CommitInsert()(1)"));
+        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::CommitInsert()(2)"));
+    }
+
+    delete m_pSaveData;
+    m_pSaveData = nullptr;
 }
 
 void CSqLiteRecordsetImpl::OnErrorCode(int rc, LPCTSTR sFunctionName)

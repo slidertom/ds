@@ -60,6 +60,7 @@ public:
 
 public:
     sqlite3 *GetSqLiteDB() { return m_pDB; }
+    CSqLiteErrorHandler *GetErrorHandler() { return m_pErrorHandler; }
 
 // Attributes
 private:

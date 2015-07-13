@@ -272,7 +272,6 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
 
 bool CSqLiteDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
 {
-    
     ASSERT(FALSE); // UNTESTED
     // You'll have to attach Database X with Database Y using the Attach command, then run the appropriate Insert Into commands for the tables you want to transfer.
     //INSERT INTO X.TABLE(Id, Value) SELECT * FROM Y.TABLE;

@@ -20,6 +20,9 @@ struct sqlite3_stmt;
 class CSqLiteDatabaseImpl;
 class CSqLiteErrorHandler;
 
+class dsDatabase;
+class dsTableFieldInfo;
+
 namespace sqlite_util
 {
     class CFieldData {
@@ -161,6 +164,8 @@ namespace sqlite_util
 
     class CFieldInfoMap : public std::unordered_map<std::string, CFieldInfo> { };
     bool GetTableFieldsdInfo(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, CFieldInfoMap &map);
+
+    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, dsTableFieldInfo union_info);
 };
 
 #endif 

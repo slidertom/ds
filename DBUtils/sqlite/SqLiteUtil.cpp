@@ -61,7 +61,10 @@ namespace sqlite_conv
         return sValue;
     }
 };
-
+ #include "../dsDatabase.h"
+    #include "../AbsDatabase.h"
+    #include "../dsTable.h"
+    #include "SqLiteDatabaseImpl.h" 
 namespace sqlite_util
 {
     class CDeletor  {
@@ -269,6 +272,76 @@ namespace sqlite_util
             map[sColumn] = field_info;
 
             loader.MoveNext();
+        }
+
+        return true;
+    }
+    
+    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, dsTableFieldInfo union_info)
+    {
+        dsTable src_table(pSrcDB, sTableNameSrc);
+        if ( !src_table.MoveFirst() ) {
+            return true; // empty table
+        }
+   
+        sqlite_util::CFieldDataMap save_data;
+        CSqLiteRecordsetImpl dst_table(pDstDB, pDstDB->GetErrorHandler());
+        dst_table.Open(sTableNameDst);
+        while ( !src_table.IsEOF() )
+        {
+            // TODO: statement can be cached 
+            // only do bind different values
+            dst_table.PrepareInsert();
+                auto end_it = union_info.end();
+                for (auto it = union_info.begin(); it != end_it; ++it) 
+                {
+                    const TCHAR *sFieldName = it->first.c_str();
+
+                    if ( src_table.IsFieldValueNull(sFieldName) )
+                    {
+                        dst_table.SetFieldValueNull(sFieldName);
+                        continue;
+                    }
+
+                    switch (it->second) 
+                    {
+                    case dsFieldType_Text:
+                        {
+                            const CStdString sValue = src_table.GetFieldString(sFieldName);
+                            dst_table.SetFieldString(sFieldName, sValue.c_str());
+                        }
+                        break;
+                    case dsFieldType_Long:
+                        {
+                            const int nValue = src_table.GetFieldLong(sFieldName);
+                            dst_table.SetFieldLong(sFieldName, nValue);
+                        }
+                        break;
+                    case dsFieldType_Double:
+                        {
+                            const double dValue = src_table.GetFieldDouble(sFieldName);
+                            dst_table.SetFieldDouble(sFieldName, dValue);
+                        }
+                        break;
+                    case dsFieldType_DateTime:
+                        {
+                            const time_t nTime = src_table.GetFieldDateTime(sFieldName);
+                            dst_table.SetFieldDateTime(sFieldName, nTime);
+                        }
+                        break;
+                    case dsFieldType_Binary:
+                        {
+                            unsigned char *pData = nullptr;
+                            unsigned long nSize = 0;
+                            src_table.GetFieldBinary(sFieldName, &pData, nSize);        
+                            dst_table.SetFieldBinary(sFieldName, pData, nSize);
+                        }
+                        break;
+                    }
+                }
+            dst_table.CommitInsert();
+
+            src_table.MoveNext();
         }
 
         return true;

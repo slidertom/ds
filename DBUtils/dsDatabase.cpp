@@ -6,6 +6,8 @@
 #include "SqLite/SqLiteDatabaseImpl.h"
 #include "LogImpl/LogImpl.h"
 
+#include "dsTable.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -155,7 +157,9 @@ bool dsDatabase::CopyTableData(dsDatabase *pDstDB, LPCTSTR sTableName)
 	return CopyTableData(pDstDB, sTableName, sTableName);
 }
 
-#include "dsTable.h"
+#include "SqLite/SqLiteUtil.h"
+#include "SqLite/SqLiteDatabaseImpl.h"
+
 bool dsDatabase::CopyTableData(dsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
 {
 	ASSERT(m_pDatabase);
@@ -166,18 +170,14 @@ bool dsDatabase::CopyTableData(dsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTST
     }
 
     dsTableFieldInfo union_info;
-    {
-        dsTableFieldInfo dst_info;
-        if ( !pDstDB->m_pDatabase->GetTableFieldInfo(sTableNameDst, dst_info) ) {
-            return false;
-        }
+    if ( !ds_table_field_info_util::fields_union(union_info, m_pDatabase, sTableNameSrc, pDstDB->m_pDatabase, sTableNameDst) ) {
+        return false;
+    }
 
-        dsTableFieldInfo src_info;
-        if ( !m_pDatabase->GetTableFieldInfo(sTableNameSrc, src_info) ) {
-            return false;
-        }
-
-        ds_table_field_info_util::fields_union(union_info, src_info, dst_info);
+    if ( pDstDB->GetType() == dsType_SqLite )
+    {  // special case for the sqlite database 
+       CSqLiteDatabaseImpl *pDstDBImpl = dynamic_cast<CSqLiteDatabaseImpl *>(pDstDB->m_pDatabase);
+       return sqlite_util::ImportTableData(this, pDstDBImpl, sTableNameSrc, sTableNameDst, union_info);
     }
 
     dsTable src_table(this, sTableNameSrc);

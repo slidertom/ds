@@ -73,13 +73,16 @@ public:
     virtual bool DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue);
     virtual bool DeleteAllByLongValue(LPCTSTR sField, long nValue);
 
+    void PrepareInsert();
+    void CommitInsert();
+
 private:
     int FindColumnIndex(LPCTSTR sFieldName);
     bool OpenImpl(const char *sql);
     void OpenImpl();
     void CloseStatement();
 
-    void DoInsert();
+    void DoInsertDefault();
     void DoUpdate();
     void OnErrorCode(int rc, LPCTSTR sFunctionName);
 
