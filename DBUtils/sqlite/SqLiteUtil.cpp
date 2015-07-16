@@ -248,8 +248,33 @@ namespace sqlite_util
     {
         ASSERT(strlen(sTableName) > 0);
 
-        CStdStringA sPragma;
-        sPragma.Format("PRAGMA table_info(%s)", sTableName);
+        // http://stackoverflow.com/questions/20979239/how-to-tell-if-a-sqlite-column-is-autoincrement
+        // Interpretation:
+            // If the count came out as non-zero, the table has an autoincrement primary key column.
+            // If the count came out as zero, the table is either empty and has never contained data, or does not have an autoincrement primary key column.
+
+        // The autoincrement keyword can only be applied to an
+        // integer primary key column, and when it is, sqlite creates a entry in
+        // its internal sqlite_sequence table with the name set to the name of the
+        // table. 
+        bool bAutoIncrement = false;
+        {
+            CSqLiteRecordsetImpl auto_increment_loader(pDB, pErrorHandler);
+            std::string sSQL;
+            sSQL = "SELECT COUNT(*) FROM sqlite_sequence WHERE name='";
+            sSQL += sTableName;
+            sSQL += "'";
+            if ( auto_increment_loader.OpenSQLUTF8(sSQL.c_str()) ) {
+                if ( auto_increment_loader.MoveFirst() ) {
+                    bAutoIncrement = auto_increment_loader.GetFieldLong(_T("COUNT(*)")) > 0;
+                }
+            }
+        }
+     
+        std::string sPragma; 
+        sPragma = "PRAGMA table_info ("; 
+        sPragma += sTableName;
+        sPragma += ")";
 
         CSqLiteRecordsetImpl loader(pDB, pErrorHandler);
 
@@ -269,6 +294,11 @@ namespace sqlite_util
             field_info.m_bNotNull = loader.GetFieldLong(_T("notnull")) == 1;
             field_info.m_sDefault = loader.GetFieldStringUTF8(_T("dflt_value"));
             field_info.m_bPrimary = loader.GetFieldLong(_T("pk")) == 1;
+            if ( field_info.m_bPrimary ) {
+                field_info.m_bAutoIncrement = bAutoIncrement;
+            } else {
+                field_info.m_bAutoIncrement = false;
+            }
             map[sColumn] = field_info;
 
             loader.MoveNext();

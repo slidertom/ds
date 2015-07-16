@@ -157,6 +157,7 @@ namespace sqlite_util
         eFieldType GetFieldType() const;
 
         bool m_bPrimary;
+        bool m_bAutoIncrement;
         bool m_bNotNull;
         std::string m_sDefault;
         std::string m_sType;

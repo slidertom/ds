@@ -307,7 +307,7 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
                 //if ( !pk_value.isNull() ) {
                 //    vals << pk_value;
                 //} else {
-                if ( it->second.m_bNotNull )
+                if ( it->second.m_bNotNull || it->second.m_bAutoIncrement )
                 {
                     // unsupported situation, auto increment expected
                     //QString maxval = this->max(t, f);
