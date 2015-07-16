@@ -82,7 +82,7 @@ void CDaoRecordsetImpl::SetIndex(LPCTSTR sIndex)
     }
     catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetIndex(index='%s')"), sIndex);
+        sMsg.Format(_T("CDaoRecordsetImpl::SetIndex(index='%s') Table='%s'"), sIndex, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -98,7 +98,9 @@ bool CDaoRecordsetImpl::MoveNext()
 	    m_pSet->MoveNext();
 	}
 	catch (CDaoException *e) {
-        DoOnDaoException(e, _T("CDaoRecordsetImpl::MoveNext"));
+		CStdString sMsg;
+        sMsg.Format(_T("CDaoRecordsetImpl::MoveNext Table='%s'"), m_sCurTable);
+		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
 		return false;
@@ -136,12 +138,14 @@ bool CDaoRecordsetImpl::Open(LPCTSTR sTableName)
 	catch (CDaoException *e) {
         CStdString sDBName = m_pDatabase->GetName();
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::Open(table='%s'). Database: %s."), sTableName, sDBName.c_str());
+        sMsg.Format(_T("CDaoRecordsetImpl::Open(table='%s'). Database: %s. Table='%s'"), sDBName.c_str(), sTableName);
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();
 		return false;
     }
+
+	m_sCurTable = sTableName;
 
 	return true;
 }
@@ -206,7 +210,9 @@ bool CDaoRecordsetImpl::IsEOF()
 		return m_pSet->IsEOF() != FALSE;
 	}
 	catch (CDaoException *e) {
-        DoOnDaoException(e, _T("CDaoRecordsetImpl::IsEOF"));
+        CStdString sMsg;
+        sMsg.Format(_T("CDaoRecordsetImpl::IsEOF Table='%s'"), m_sCurTable);
+        DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
 	}
@@ -233,7 +239,7 @@ void CDaoRecordsetImpl::SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData,
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldBinary(field='%s', data=0x%X, size=%d)"), sFieldName, pData, nSize);
+        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldBinary(field='%s', data=0x%X, size=%d) Table='%s'"), sFieldName, pData, nSize, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
@@ -256,7 +262,7 @@ void CDaoRecordsetImpl::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldBinary(field='%s', ...)"), sFieldName);
+        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldBinary(field='%s', ...) Table='%s'"), sFieldName, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -269,7 +275,9 @@ bool CDaoRecordsetImpl::Delete()
 		m_pSet->Delete();
 	}
 	catch(CDaoException *e) {
-        DoOnDaoException(e, _T("CDaoRecordsetImpl::Delete"));
+        CStdString sMsg;
+        sMsg.Format(_T("CDaoRecordsetImpl::Delete Table='%s'"), m_sCurTable);
+		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
 		return false;
@@ -283,7 +291,9 @@ void CDaoRecordsetImpl::AddNew()
 	    m_pSet->AddNew();
     }
     catch (CDaoException *e) {
-        DoOnDaoException(e, _T("CDaoRecordsetImpl::AddNew"));
+        CStdString sMsg;
+        sMsg.Format(_T("CDaoRecordsetImpl::AddNew Table='%s'"), m_sCurTable);
+		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
         e->Delete();
     }
@@ -295,7 +305,9 @@ void CDaoRecordsetImpl::Edit()
 	    m_pSet->Edit();
     }
     catch (CDaoException *e) {
-        DoOnDaoException(e, _T("CDaoRecordsetImpl::Edit"));
+        CStdString sMsg;
+        sMsg.Format(_T("CDaoRecordsetImpl::Edit Table='%s'"), m_sCurTable);
+		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
         e->Delete();
     }
@@ -307,7 +319,9 @@ bool CDaoRecordsetImpl::Update()
 		m_pSet->Update();
 	}
     catch (CDaoException *e) {
-        DoOnDaoException(e, _T("CDaoRecordsetImpl::Update"));
+        CStdString sMsg;
+        sMsg.Format(_T("CDaoRecordsetImpl::Update Table='%s'"), m_sCurTable);
+		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
         e->Delete();
 		return false;
@@ -322,7 +336,9 @@ long CDaoRecordsetImpl::GetRecordCount()
 	    return m_pSet->GetRecordCount();
     }
     catch (CDaoException *e) {
-        DoOnDaoException(e, _T("CDaoRecordsetImpl::GetRecordCount"));
+        CStdString sMsg;
+        sMsg.Format(_T("CDaoRecordsetImpl::GetRecordCount Table='%s'"), m_sCurTable);
+		DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();
     }
@@ -337,7 +353,7 @@ void CDaoRecordsetImpl::SetFieldValueNull(LPCTSTR sFieldName)
 	catch (CDaoException *e)
 	{
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldValueNull(field='%s')"), sFieldName);
+        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldValueNull(field='%s') Table='%s'"), sFieldName, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -379,7 +395,7 @@ bool CDaoRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SeekByString(index='%s', value='%s')"), sIndex, sValue);
+        sMsg.Format(_T("CDaoRecordsetImpl::SeekByString(index='%s', value='%s') Table='%s'"), sIndex, sValue, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -397,7 +413,7 @@ bool CDaoRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SeekByLong(index='%s', value=%d)"), sIndex, nValue);
+        sMsg.Format(_T("CDaoRecordsetImpl::SeekByLong(index='%s', value=%d) Table='%s'"), sIndex, nValue, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -415,7 +431,7 @@ CStdString CDaoRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldString(field='%s')"), sFieldName);
+        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldString(field='%s') Table='%s'"), sFieldName, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -431,7 +447,7 @@ void CDaoRecordsetImpl::SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldString(field='%s', value='%s')"), sFieldName, sValue);
+        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldString(field='%s', value='%s') Table='%s'"), sFieldName, sValue, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
@@ -447,7 +463,7 @@ long CDaoRecordsetImpl::GetFieldLong(LPCTSTR sFieldName)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldLong(field='%s')"), sFieldName);
+        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldLong(field='%s') Table='%s'"), sFieldName, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
@@ -463,7 +479,7 @@ void CDaoRecordsetImpl::SetFieldLong(LPCTSTR sFieldName, long lValue)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldLong(field='%s', value=%d)"), sFieldName, lValue);
+        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldLong(field='%s', value=%d) Table='%s'"), sFieldName, lValue, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -479,7 +495,7 @@ double CDaoRecordsetImpl::GetFieldDouble(LPCTSTR sFieldName)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldDouble(field='%s')"), sFieldName);
+        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldDouble(field='%s') Table='%s'"), sFieldName, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -495,7 +511,7 @@ void CDaoRecordsetImpl::SetFieldDouble(LPCTSTR sFieldName, double dValue)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldDouble(field='%s', value=%f)"), sFieldName, dValue);
+        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldDouble(field='%s', value=%f) Table='%s'"), sFieldName, dValue, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -525,7 +541,7 @@ time_t CDaoRecordsetImpl::GetFieldDateTime(LPCTSTR sFieldName)
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldDateTime(field='%s')"), sFieldName);
+        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldDateTime(field='%s') Table='%s'"), sFieldName, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -544,7 +560,7 @@ void CDaoRecordsetImpl::SetFieldDateTime(LPCTSTR sFieldName, const time_t &time)
 		}
 		catch (CDaoException *e) {
             CStdString sMsg;
-            sMsg.Format(_T("CDaoRecordsetImpl::SetFieldDateTime(field='%s', time=%d)"), sFieldName, time);
+            sMsg.Format(_T("CDaoRecordsetImpl::SetFieldDateTime(field='%s', time=%d) Table='%s'"), sFieldName, time, m_sCurTable);
             DoOnDaoException(e, sMsg.c_str());
 			ASSERT(FALSE);
 			e->Delete();
@@ -565,7 +581,7 @@ bool CDaoRecordsetImpl::IsFieldValueNull(LPCTSTR sFieldName)
     }
     catch (CDaoException *e) {
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::IsFieldValueNull(field='%s')"), sFieldName);
+        sMsg.Format(_T("CDaoRecordsetImpl::IsFieldValueNull(field='%s') Table='%s'"), sFieldName, m_sCurTable);
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();

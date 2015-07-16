@@ -74,6 +74,7 @@ private:
 // Attributes
 private:
 	CString m_sCurIndex;
+	CString m_sCurTable;
 	CDaoQueryDef *m_pTableDef;
 	CDaoRecordset *m_pSet;
     CDaoErrorHandler *m_pErrorHandler;
