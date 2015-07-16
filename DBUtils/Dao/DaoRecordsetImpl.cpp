@@ -138,7 +138,7 @@ bool CDaoRecordsetImpl::Open(LPCTSTR sTableName)
 	catch (CDaoException *e) {
         CStdString sDBName = m_pDatabase->GetName();
         CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::Open(table='%s'). Database: %s. Table='%s'"), sDBName.c_str(), sTableName);
+        sMsg.Format(_T("CDaoRecordsetImpl::Open. Database: %s. Table='%s'"), sDBName.c_str(), sTableName);
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();
