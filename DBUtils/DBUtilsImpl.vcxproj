@@ -221,6 +221,7 @@
     <ClInclude Include="sqlite\SqLiteErrorHandler.h" />
     <ClInclude Include="sqlite\SqLiteRecordsetImpl.h" />
     <ClInclude Include="sqlite\SqLiteUtil.h" />
+    <ClInclude Include="sqlite\sqlite_include.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,9 +1,9 @@
 #include "StdAfx.h"
 #include "SqLiteUtil.h"
 
-#include "sqlite3.h"
-
 #include "SqLiteRecordsetImpl.h"
+
+#include "sqlite_include.h"
 
 #include "sstream"
 

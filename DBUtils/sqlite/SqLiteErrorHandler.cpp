@@ -5,7 +5,7 @@
 
 #include "Collections/StdString.h"
 
-#include "sqlite3.h"
+#include "sqlite_include.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
