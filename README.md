@@ -10,7 +10,7 @@ You can access sqlite database in the same way as mdb file with the minimal code
  
 Text, Long/Integer, Blob, Double/Real field types are supported.
 
-If you're a NoSQL type of person and SQL based database usage can be avoided, then this might fit the bill perfectly.
+If you're a NoSQL type of person and SQL based database usage can not be avoided, then this might fit the bill perfectly.
 
 Samples:
 ```C++
