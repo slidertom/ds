@@ -689,6 +689,22 @@ public:
 		return false;
 	}
 
+	virtual bool DoesFieldExist(LPCTSTR sFieldName)
+	{
+		String ^sFieldName_ = gcnew String(sFieldName);
+		
+		const int nCount = m_pReader->FieldCount;
+		for ( int i = 0; i < nCount; i++ )
+		{
+			if ( m_pReader->GetName(i)->Equals(sFieldName_, StringComparison::InvariantCultureIgnoreCase) )
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 private:
 	gcroot<SqlCommand^> m_pCommand;
 	gcroot<SqlDataReader^> m_pReader;

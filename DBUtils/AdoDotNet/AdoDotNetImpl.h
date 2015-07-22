@@ -53,6 +53,8 @@ public:
 	virtual void SetFieldDateTime(LPCTSTR sFieldName, const time_t &time) = 0;
 
 	virtual bool IsFieldValueNull(LPCTSTR sFieldName) = 0;
+
+	virtual bool DoesFieldExist(LPCTSTR sFieldName) = 0;
 };
 
 class CAdoDotNetUtils

@@ -125,8 +125,7 @@ void CAdoDotNetRecordsetImpl::SetFieldValueNull(LPCTSTR lpszName)
 
 bool CAdoDotNetRecordsetImpl::DoesFieldExist(LPCTSTR sFieldName) 
 {
-	ASSERT(FALSE);
-	return false;
+	return m_pSet->DoesFieldExist(sFieldName);
 }
 
 bool CAdoDotNetRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
