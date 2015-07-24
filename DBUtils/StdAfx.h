@@ -4,8 +4,6 @@
 
 #include "Collections/PragmaSet.h"
 
-#include "new"
-
 #include "afx.h"
 
 #include "Collections/StdString.h" // LPCTSTR define
