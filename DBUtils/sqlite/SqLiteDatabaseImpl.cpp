@@ -138,6 +138,12 @@ bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw)
         return false;
     }
 
+    // http://www.sqlite.org/foreignkeys.html#fk_enable
+    // Foreign key constraints are disabled by default (for backwards compatibility), 
+    // so must be enabled separately for each database connection. (Note, however, that future releases of SQLite might change so that foreign key 
+    // constraints enabled by default. 
+    ExecuteUTF8("PRAGMA foreign_keys = ON");
+
     return true;
 }
 
