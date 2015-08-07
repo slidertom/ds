@@ -594,3 +594,16 @@ void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, LPCTSTR sFunction)
     ASSERT(m_pErrorHandler);
     m_pErrorHandler->OnDaoException(e, sFunction);
 }
+
+#include "../sqlite/SqLiteUtil.h"
+
+std::string CDaoRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
+{
+    const CStdString sValue = GetFieldString(sqlite_conv::ConvertFromUTF8(sFieldName).c_str());
+    return sqlite_conv::ConvertToUTF8(sValue.c_str());
+}
+
+void CDaoRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
+{
+    SetFieldString(sqlite_conv::ConvertFromUTF8(sFieldName).c_str(), sqlite_conv::ConvertFromUTF8(sValue).c_str());
+}

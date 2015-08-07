@@ -54,7 +54,9 @@ public:
 
 	virtual CStdString GetFieldString(LPCTSTR sFieldName);
 	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue);
-    std::string GetFieldStringUTF8(LPCTSTR sFieldName);
+
+    virtual std::string GetFieldStringUTF8(const char *sFieldName);
+	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue);
 
 	virtual long GetFieldLong(LPCTSTR sFieldName);
 	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue);

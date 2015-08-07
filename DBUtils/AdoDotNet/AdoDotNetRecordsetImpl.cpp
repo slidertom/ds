@@ -226,4 +226,15 @@ void CAdoDotNetRecordsetImpl::SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue)
 	m_pSet->SetFieldString(sFieldName, sValue);
 }
 
+#include "../sqlite/SqLiteUtil.h"
 
+std::string CAdoDotNetRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
+{
+    const CStdString sValue = GetFieldString(sqlite_conv::ConvertFromUTF8(sFieldName).c_str());
+    return sqlite_conv::ConvertToUTF8(sValue.c_str());
+}
+
+void CAdoDotNetRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
+{
+    SetFieldString(sqlite_conv::ConvertFromUTF8(sFieldName).c_str(), sqlite_conv::ConvertFromUTF8(sValue).c_str());
+}

@@ -359,10 +359,10 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
 
         if (rc != SQLITE_OK) 
         {
-           OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoInsert()(1)"));
+           OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_prepare_v2)"));
            CStdString sError = _T("SQL statement:");
            sError += sqlite_conv::ConvertFromUTF8(sSql.c_str()).c_str();
-           m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteRecordsetImpl::DoInsert()(1)"));
+           m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_prepare_v2)"));
            return;
         }
     }
@@ -371,13 +371,16 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
     
     sqlite_util::BindStatements(*m_pSaveData, m_insert_stmt);
     rc = ::sqlite3_step(m_insert_stmt);
+    if ( rc != SQLITE_DONE ) {
+        const char *sql = sqlite3_sql(m_insert_stmt);
+        CStdString sError = _T("SQL statement:");
+        sError += sqlite_conv::ConvertFromUTF8(sql).c_str();
+        m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_step)"));
+        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_step)"));
+    }
     ::sqlite3_clear_bindings(m_insert_stmt);
     ::sqlite3_reset(m_insert_stmt);
     
-    if ( rc != SQLITE_DONE ) {
-        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoInsert()(2)"));
-    }
-
     // multi-threading unsuported
     m_nEditRowId = ::sqlite3_last_insert_rowid(pDB);
 }
@@ -621,12 +624,19 @@ bool CSqLiteRecordsetImpl::SeekByLongUTF8(const char *sIndexUTF8, long nValue)
     return false;
 }
 
-std::string CSqLiteRecordsetImpl::GetFieldStringUTF8(LPCTSTR sFieldName)
+void CSqLiteRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
+{
+    ASSERT(m_pSaveData);
+    sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataText(sValue);
+    (*m_pSaveData)[sFieldName] = pFieldData;
+}
+
+std::string CSqLiteRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
 {
     ASSERT(m_stmt);
-    const int nColumnIndex = FindColumnIndex(sFieldName);
+    const int nColumnIndex = FindColumnIndex(sqlite_conv::ConvertFromUTF8(sFieldName).c_str());
     if ( nColumnIndex == -1 ) {
-        OnColumnIndexFailed(m_pErrorHandler, sFieldName, _T("CSqLiteRecordsetImpl::GetFieldStringUTF8"));
+        OnColumnIndexFailed(m_pErrorHandler, sqlite_conv::ConvertFromUTF8(sFieldName).c_str(), _T("CSqLiteRecordsetImpl::GetFieldStringUTF8"));
         return "";
     }
 	const char *sValue = (const char *)sqlite3_column_text(m_stmt, nColumnIndex);
