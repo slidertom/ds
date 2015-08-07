@@ -406,8 +406,10 @@ static inline std::string save_data_to_update_values_string(sqlite_util::CFieldD
     return sValues;
 }
 
-void CSqLiteRecordsetImpl::DoUpdate()
+bool CSqLiteRecordsetImpl::DoUpdate()
 {
+    bool bRetVal = true;
+
     const std::string sValues = save_data_to_update_values_string(m_pSaveData);
     
     ASSERT(m_nEditRowId > 0);
@@ -426,28 +428,35 @@ void CSqLiteRecordsetImpl::DoUpdate()
     }
     else {
         if ( rc != SQLITE_DONE ) {
-            OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoUpdate()(1)"));
+            OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_prepare_v2)"));
+            bRetVal = false;
         }
     }
     ::sqlite3_finalize(pStmt);
 
     if ( rc != SQLITE_DONE ) {
-        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoUpdate()(2)"));
+        CStdString sError = _T("SQL statement:");
+        sError += sqlite_conv::ConvertFromUTF8(sSql.c_str()).c_str();
+        m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_finalize)"));
+        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_finalize)"));
+        bRetVal = false;
     }
+
+    return bRetVal;
 }
 
 bool CSqLiteRecordsetImpl::Update()
 {
     ASSERT(m_pSaveData);
 
-    DoUpdate();
+    const bool bRetVal = DoUpdate();
 
     delete m_pSaveData;
     m_pSaveData = nullptr;
 
     m_nEditRowId = -1;
 
-	return true;
+	return bRetVal;
 }
 
 static inline std::string save_data_to_insert_columns_string(sqlite_util::CFieldDataMap *pSaveData)
@@ -627,8 +636,20 @@ bool CSqLiteRecordsetImpl::SeekByLongUTF8(const char *sIndexUTF8, long nValue)
 void CSqLiteRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
 {
     ASSERT(m_pSaveData);
-    sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataText(sValue);
-    (*m_pSaveData)[sFieldName] = pFieldData;
+    if ( strlen(sValue) <= 0 ) {
+        // This is default realization, if it's not required please do add compile define
+        // DAO: inline COleVariant MakeVariant(LPCTSTR strSrc) does the same
+        // It's quite usefull: 
+        // e.g. FOREIGN KEY and you can not write empty string.
+        // you should do something like:
+        // strlen(sValue) == 0 ) SetFieldValueNull(); else SetFieldValue(sValue);
+        sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataNull();
+       (*m_pSaveData)[sFieldName] = pFieldData;
+    }
+    else {
+        sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataText(sValue);
+        (*m_pSaveData)[sFieldName] = pFieldData;
+    }
 }
 
 std::string CSqLiteRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
@@ -661,9 +682,7 @@ CStdString CSqLiteRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 
 void CSqLiteRecordsetImpl::SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue)
 {
-    ASSERT(m_pSaveData);
-    sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataText(sqlite_conv::ConvertToUTF8(sValue).c_str());
-    (*m_pSaveData)[sqlite_conv::ConvertToUTF8(sFieldName)] = pFieldData;
+    SetFieldStringUTF8(sqlite_conv::ConvertToUTF8(sFieldName).c_str(), sqlite_conv::ConvertToUTF8(sValue).c_str());
 }
 
 long CSqLiteRecordsetImpl::GetFieldLong(LPCTSTR sFieldName)

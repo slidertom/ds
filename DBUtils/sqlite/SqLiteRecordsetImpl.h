@@ -85,7 +85,7 @@ private:
     void CloseStatement();
 
     void DoInsertDefault();
-    void DoUpdate();
+    bool DoUpdate();
     void OnErrorCode(int rc, LPCTSTR sFunctionName);
 
 // Attributes
