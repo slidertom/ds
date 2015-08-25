@@ -74,6 +74,7 @@ void OnDatabaseError(LPCTSTR sError)
 {
     TRACE(sError); TRACE(_T("\n"));
 }
+
 dsDatabase db;
 db.OpenDB(_T("database.mdb")); 
 // Exception free code, do handle all errors through the defined function
