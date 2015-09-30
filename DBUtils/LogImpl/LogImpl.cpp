@@ -58,6 +58,10 @@ void CLogImpl::Log(LPCTSTR sMsg)
     sMsgImpl.Format(_T("[%s] %s\n"), sTimeUnicode.c_str(), sMsg);
     TRACE(sMsgImpl.c_str());
     FILE *pFile = _tfopen(sFilePath.c_str(), _T("a"));    
-        _ftprintf(pFile, _T("%s"), sMsgImpl.c_str());
+    if ( !pFile ) {
+        ASSERT(FALSE);
+        return;
+    }
+    _ftprintf(pFile, _T("%s"), sMsgImpl.c_str());
     fclose(pFile);
 }
