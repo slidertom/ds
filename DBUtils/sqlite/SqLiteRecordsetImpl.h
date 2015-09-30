@@ -77,11 +77,11 @@ public:
 
     void PrepareInsert();
     void CommitInsert();
+    bool MoveFirstImpl(); // should be used for the inside implementations
 
 private:
     int FindColumnIndex(LPCTSTR sFieldName);
     bool OpenImpl(const char *sql);
-    void OpenImpl();
     void CloseStatement();
 
     void DoInsertDefault();

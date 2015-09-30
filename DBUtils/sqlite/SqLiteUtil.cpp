@@ -6,6 +6,8 @@
 #include "sqlite_include.h"
 
 #include "sstream"
+#include "iomanip"
+#include "limits"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -20,7 +22,7 @@ namespace sqlite_conv
     std::string ConvertToUTF8(const wchar_t *wstr)
     {
         const int nLen = wcslen(wstr);
-        if( nLen <= 0  ) {
+        if ( nLen <= 0  ) {
             return std::string();
         }
 
@@ -59,6 +61,38 @@ namespace sqlite_conv
         strstream << nValue;
         strstream >> sValue;
         return sValue;
+    }
+
+    long string_to_long(const char *sValue)
+    {
+        long nValue;
+        std::stringstream strstream;
+        strstream << sValue;
+        strstream >> nValue;
+        return nValue;
+    }
+
+    std::string double_to_string(double dValue)
+    {   
+        typedef std::numeric_limits<double> dbl;
+        
+        std::string sValue;
+        std::stringstream strstream;
+        // max_digits10
+        // http://www.cplusplus.com/reference/limits/numeric_limits/
+        strstream.precision(dbl::digits10+1); // double: 15 decimal places + point
+        strstream << dValue;
+        strstream >> sValue;
+        return sValue;
+    }
+
+    double string_to_double(const char *sValue)
+    {
+        double dValue;
+        std::stringstream strstream;
+        strstream << sValue;
+        strstream >> dValue;
+        return dValue;
     }
 };
  #include "../dsDatabase.h"
@@ -224,19 +258,19 @@ namespace sqlite_util
             return eFieldType_Long;
         }
         // If the declared type for a column contains any of the strings "REAL", "FLOA", or "DOUB" then the column has REAL affinity
-        if ( sType == "NUMERIC " ) {
+        if ( sType == "NUMERIC" ) {
             return eFieldType_Double;
         }
-        if ( sType == "DECIMAL " ) {
+        if ( sType == "DECIMAL" ) {
             return eFieldType_Double;
         }
-        if ( sType == "FLOAT " ) {
+        if ( sType == "FLOAT" ) {
             return eFieldType_Double;
         }
         if ( sType == "DOUBLE" ) {
             return eFieldType_Double;
         }
-        if ( sType == "DOUBLE PRECISION " ) {
+        if ( sType == "DOUBLE PRECISION" ) {
             return eFieldType_Double;
         }
 
@@ -265,7 +299,7 @@ namespace sqlite_util
             sSQL += sTableName;
             sSQL += "'";
             if ( auto_increment_loader.OpenSQLUTF8(sSQL.c_str()) ) {
-                if ( auto_increment_loader.MoveFirst() ) {
+                if ( auto_increment_loader.MoveFirstImpl() ) {
                     bAutoIncrement = auto_increment_loader.GetFieldLong(_T("COUNT(*)")) > 0;
                 }
             }
@@ -282,7 +316,7 @@ namespace sqlite_util
             return false;
         }
 
-        if ( !loader.MoveFirst() ) {
+        if ( !loader.MoveFirstImpl() ) {
             return false;
         }
 

@@ -170,16 +170,16 @@ CStdString CSqLiteDatabaseImpl::GetName()
 bool CSqLiteDatabaseImpl::DoesTableExist(LPCTSTR sTable)
 {
     std::string sTableUTF8 = sqlite_conv::ConvertToUTF8(sTable);
-    std::string sSQL = "PRAGMA table_info(";
-    sSQL += sTableUTF8;
-    sSQL += ")";
+    std::string sSQL  = "PRAGMA table_info(";
+                sSQL += sTableUTF8;
+                sSQL += ")";
     
     CSqLiteRecordsetImpl loader(this, m_pErrorHandler);
     if ( !loader.OpenSQLUTF8(sSQL.c_str()) ) {
         return false;
     }
 
-    if ( !loader.MoveFirst() ) {
+    if ( !loader.MoveFirstImpl() ) {
         return false;
     }
     

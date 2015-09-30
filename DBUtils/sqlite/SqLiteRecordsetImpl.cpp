@@ -31,14 +31,14 @@ static char THIS_FILE[] = __FILE__;
        {
            rc = sqlite3_prepare_v2(db, SqlStr, -1, hs, 0);
 
-           if( (rc == SQLITE_BUSY) || (rc == SQLITE_LOCKED) )
+           if ( (rc == SQLITE_BUSY) || (rc == SQLITE_LOCKED) )
            {
                n++;
                Sleep(SQLTM_TIME);
            }
        }while( (n < SQLTM_COUNT) && ((rc == SQLITE_BUSY) || (rc == SQLITE_LOCKED)));
 
-       if( rc != SQLITE_OK)
+       if ( rc != SQLITE_OK)
        {
            EnterCriticalSection(&stderr_lock);
            fprintf(stderr, "SqlPrepare-Error-H(%d): (%d) %s \n", handle, rc, sqlite3_errmsg(db));
@@ -183,15 +183,15 @@ QString DBBrowserDB::emptyInsertStmt(const sqlb::Table& t, const QString& pk_val
     QStringList fields;
     foreach(sqlb::FieldPtr f, t.fields()) 
     {
-        if(f->primaryKey()) 
+        if (f->primaryKey()) 
         {
             fields << f->name();
 
-            if(!pk_value.isNull())
+            if (!pk_value.isNull())
             {
                 vals << pk_value;
             } else {
-                if(f->notnull())
+                if (f->notnull())
                 {
                     QString maxval = this->max(t, f);
                     vals << QString::number(maxval.toLongLong() + 1);
@@ -206,7 +206,7 @@ QString DBBrowserDB::emptyInsertStmt(const sqlb::Table& t, const QString& pk_val
         {
             fields << f->name();
 
-            if(f->isInteger())
+            if (f->isInteger())
                 vals << "0";
             else
                 vals << "''";
@@ -215,7 +215,7 @@ QString DBBrowserDB::emptyInsertStmt(const sqlb::Table& t, const QString& pk_val
         {
             // don't insert into fields with a default value
             // or we will never see it.
-            if(f->defaultValue().length() == 0)
+            if (f->defaultValue().length() == 0)
             {
                 fields << f->name();
                 vals << "NULL";
@@ -223,7 +223,7 @@ QString DBBrowserDB::emptyInsertStmt(const sqlb::Table& t, const QString& pk_val
         }
     }
 
-    if(!fields.empty())
+    if (!fields.empty())
     {
         stmt.append("(`");
         stmt.append(fields.join("`,`"));
@@ -560,7 +560,7 @@ long CSqLiteRecordsetImpl::GetRecordCount()
         return -1;
     }
 
-    if ( !loader.MoveFirst() ) {
+    if ( !loader.MoveFirstImpl() ) {
         return false;
     }
     
@@ -599,7 +599,7 @@ bool CSqLiteRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
     //sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s' COLLATE NOCASE", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
 
     if ( OpenImpl(sFind.c_str()) ) {
-        if ( MoveFirst() ) {
+        if ( MoveFirstImpl() ) {
             return true;
         }
     }
@@ -625,7 +625,7 @@ bool CSqLiteRecordsetImpl::SeekByLongUTF8(const char *sIndexUTF8, long nValue)
 	sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%d'", m_sTable.c_str(), sIndexUTF8, nValue);
 
     if ( OpenImpl(sFind.c_str()) ) {
-        if ( MoveFirst() ) {
+        if ( MoveFirstImpl() ) {
             return true;
         }
     }
@@ -798,22 +798,21 @@ bool CSqLiteRecordsetImpl::MoveNext()
     return false;
 }
 
-void CSqLiteRecordsetImpl::OpenImpl()
+bool CSqLiteRecordsetImpl::MoveFirst() 
 {
-    if ( m_stmt ) {
-        return; // otherwise: ASSERT(!m_sTable.empty()); in case of the direct OpenSQLUTF8 call.
-    }
+    CloseStatement(); // sqlite3_reset would be enough if m_stmt and m_stmt.sql == sSQL
 
     ASSERT(!m_sTable.empty());
     std::string sSQL  = "SELECT ROWID,* FROM ";
                 sSQL += m_sTable.c_str();
-    OpenImpl(sSQL.c_str());
+    OpenImpl(sSQL.c_str());    
+    
+    return MoveFirstImpl();
 }
 
-bool CSqLiteRecordsetImpl::MoveFirst() 
+bool CSqLiteRecordsetImpl::MoveFirstImpl()
 {
-	OpenImpl(); // we do not open on Open function
-
+    ASSERT(m_stmt);
     const int rc = sqlite3_step(m_stmt);
     switch (rc)
     {
@@ -833,7 +832,7 @@ bool CSqLiteRecordsetImpl::MoveFirst()
 
     CloseStatement();
     const char *localError= sqlite3_errmsg(m_pDB->GetSqLiteDB());
-    m_pErrorHandler->OnError(rc, localError, _T("CSqLiteRecordsetImpl::MoveFirst()"));
+    m_pErrorHandler->OnError(rc, localError, _T("CSqLiteRecordsetImpl::MoveFirstImpl()"));
 
     return false;
 }
@@ -878,8 +877,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue
                 strSQL += " = ";
                 strSQL += sValueUTF8;
 
-    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 )
-    {
+    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 ) {
         return true;
     }
 
@@ -900,8 +898,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByLongValue(LPCTSTR sField, long nValue)
                 strSQL += " = ";
                 strSQL += sValueUTF8;
 
-    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 )
-    {
+    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 ) {
         return true;
     }
 
