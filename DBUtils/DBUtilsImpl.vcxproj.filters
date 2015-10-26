@@ -13,6 +13,15 @@
     <Filter Include="SqLite">
       <UniqueIdentifier>{e2801fdf-4b6e-46ca-b7f1-e8c18712218b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JsonUtils">
+      <UniqueIdentifier>{1cedfd22-db54-420b-b763-f783e3346adf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JsonUtils\PicoJson">
+      <UniqueIdentifier>{1050540b-eb25-4a2a-a06c-6d5ca348a9d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JsonUtils\RapidJson">
+      <UniqueIdentifier>{12b7c052-8561-4bf5-a74e-91561a35e057}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Dao\DaoDatabaseImpl.cpp">
@@ -55,6 +64,9 @@
     </ClCompile>
     <ClCompile Include="dsDatabase.cpp" />
     <ClCompile Include="dsTable.cpp" />
+    <ClCompile Include="JsonUtils\jsonparser.cpp">
+      <Filter>JsonUtils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dao\DaoDatabaseImpl.h">
@@ -110,6 +122,63 @@
     <ClInclude Include="dsConfig.h" />
     <ClInclude Include="sqlite\sqlite_include.h">
       <Filter>SqLite</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\jsonparser.h">
+      <Filter>JsonUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\PicoJson\picojson.h">
+      <Filter>JsonUtils\PicoJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\allocators.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\document.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\encodedstream.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\encodings.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\filereadstream.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\filewritestream.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\memorybuffer.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\memorystream.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\pointer.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\prettywriter.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\rapidjson.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\reader.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\stringbuffer.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\RapidJson\writer.h">
+      <Filter>JsonUtils\RapidJson</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\pico_impl.h">
+      <Filter>JsonUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\rapid_impl.h">
+      <Filter>JsonUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="JsonUtils\sa_impl.h">
+      <Filter>JsonUtils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

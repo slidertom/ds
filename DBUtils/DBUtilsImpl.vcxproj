@@ -176,6 +176,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeRelease|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="JsonUtils\jsonparser.cpp" />
     <ClCompile Include="LogImpl\LogImpl.cpp" />
     <ClCompile Include="dsTable.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
@@ -213,6 +214,25 @@
     <ClInclude Include="DatabaseType.h" />
     <ClInclude Include="DBUtilsImpl.h" />
     <ClInclude Include="dsConfig.h" />
+    <ClInclude Include="JsonUtils\jsonparser.h" />
+    <ClInclude Include="JsonUtils\PicoJson\picojson.h" />
+    <ClInclude Include="JsonUtils\pico_impl.h" />
+    <ClInclude Include="JsonUtils\RapidJson\allocators.h" />
+    <ClInclude Include="JsonUtils\RapidJson\document.h" />
+    <ClInclude Include="JsonUtils\RapidJson\encodedstream.h" />
+    <ClInclude Include="JsonUtils\RapidJson\encodings.h" />
+    <ClInclude Include="JsonUtils\RapidJson\filereadstream.h" />
+    <ClInclude Include="JsonUtils\RapidJson\filewritestream.h" />
+    <ClInclude Include="JsonUtils\RapidJson\memorybuffer.h" />
+    <ClInclude Include="JsonUtils\RapidJson\memorystream.h" />
+    <ClInclude Include="JsonUtils\RapidJson\pointer.h" />
+    <ClInclude Include="JsonUtils\RapidJson\prettywriter.h" />
+    <ClInclude Include="JsonUtils\RapidJson\rapidjson.h" />
+    <ClInclude Include="JsonUtils\RapidJson\reader.h" />
+    <ClInclude Include="JsonUtils\RapidJson\stringbuffer.h" />
+    <ClInclude Include="JsonUtils\RapidJson\writer.h" />
+    <ClInclude Include="JsonUtils\rapid_impl.h" />
+    <ClInclude Include="JsonUtils\sa_impl.h" />
     <ClInclude Include="LogImpl\LogImpl.h" />
     <ClInclude Include="dsTable.h" />
     <ClInclude Include="dsDatabase.h" />
