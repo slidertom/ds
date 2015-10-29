@@ -93,8 +93,7 @@ CStdString CAdoDotNetDatabaseImpl::GetName()
 
 bool CAdoDotNetDatabaseImpl::DoesTableExist(LPCTSTR sTable)
 {
-	ASSERT(FALSE);
-	return false;
+	return m_pDatabase->DoesTableExists(sTable);
 }
 
 CAbsRecordset *CAdoDotNetDatabaseImpl::CreateRecordset()

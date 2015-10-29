@@ -307,6 +307,42 @@ public:
         return true;
 	}
 
+	virtual bool DoesTableExists(LPCTSTR sTable)
+	{
+		SqlConnection ^pConnection = gcnew SqlConnection;
+		SqlCommand ^pCommand = gcnew SqlCommand();
+		try
+		{
+			pConnection->ConnectionString = gcnew String(m_sConn);
+			pConnection->Open();
+
+			pCommand->Connection = pConnection;
+			CString sSqlEx;
+			sSqlEx.Format(_T("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '%s'"), sTable);
+			pCommand->CommandText = gcnew String(sSqlEx);
+			SqlDataReader ^reader = pCommand->ExecuteReader();
+			
+			reader->Read();
+
+			const bool bExists = reader->HasRows;
+
+			return bExists;
+		}
+		catch (ArgumentException ^aex)
+		{
+			m_pErrorHandler->OnDotNetArgException(aex, _T("CDotNetDatabaseImpl::GetTableFieldInfo"));
+			delete aex;
+			return false;
+		}
+		catch (SqlException ^sql_ex)
+		{
+			m_pErrorHandler->OnDotNetSQLException(sql_ex, _T("CDotNetDatabaseImpl::GetTableFieldInfo"));
+			delete sql_ex;
+			return false;
+		}
+		return false;
+	}
+
 	virtual CDotNetErrorHandler::dbErrorHandler SetErrorHandler(CDotNetErrorHandler::dbErrorHandler newHandler)
 	{
 	    ASSERT(m_pErrorHandler);
@@ -352,10 +388,10 @@ public:
 
 	~CDotNetRecordSetImpl()
 	{
-		//if(m_pReader != NULL && m_pReader->)
+		//if (m_pReader != NULL && m_pReader->)
 		/*try
 		{
-			if(!m_pReader->IsClosed)
+			if (!m_pReader->IsClosed)
 			{
 				m_pReader->Close();
 				delete m_pReader;
@@ -536,7 +572,7 @@ public:
 			if (field_type == bool().GetType())
 			{
 				const bool bValue = m_pReader->GetBoolean(nColID);
-				if(bValue)
+				if (bValue)
 				{
 					return 1;
 				}

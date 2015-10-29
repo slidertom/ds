@@ -26,6 +26,8 @@ public:
 	virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) = 0;
 
 	virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) = 0;
+
+	virtual bool DoesTableExists(LPCTSTR sTable) = 0;
 };
 
 class CDotNetRecordSetAbs

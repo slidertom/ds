@@ -21,38 +21,38 @@ public:
 
 // Overrides
 public:
-	virtual bool BeginTrans();  
-	virtual bool CommitTrans(); 
-	virtual bool Rollback();    
+	virtual bool BeginTrans() override;  
+	virtual bool CommitTrans() override; 
+	virtual bool Rollback() override;    
 
-	virtual bool Execute(LPCTSTR lpszSQL); 
-	virtual void Close(); 
-	virtual bool OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw);
+	virtual bool Execute(LPCTSTR lpszSQL) override; 
+	virtual void Close() override; 
+	virtual bool OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) override;
 
-	virtual dsDBType GetType();
+	virtual dsDBType GetType() override;
 
-	virtual bool IsReadOnly() const;
-	virtual bool IsOpen() const;
+	virtual bool IsReadOnly() const override;
+	virtual bool IsOpen() const override;
 
-	virtual CStdString GetName();
+	virtual CStdString GetName() override;
 	
-	virtual bool DoesTableExist(LPCTSTR sTable);
+	virtual bool DoesTableExist(LPCTSTR sTable) override;
 	
-	virtual CAbsRecordset *CreateRecordset();
+	virtual CAbsRecordset *CreateRecordset() override;
 
-    virtual void CommitDatabase() { }
+    virtual void CommitDatabase() override { }
 
-    virtual bool CompactDatabase() { return true; }
+    virtual bool CompactDatabase() override { return true; }
 
-	virtual bool CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst) { return false; };
+	virtual bool CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst) override { return false; };
 
-	virtual void DeleteRelation(LPCTSTR sRelation);
+	virtual void DeleteRelation(LPCTSTR sRelation) override;
 	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-								LPCTSTR sField, LPCTSTR sForeignField);
+								LPCTSTR sField, LPCTSTR sForeignField) override;
 
-    virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info);
+    virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) override;
 
-    virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler);
+    virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
 // Attributes
 private:
