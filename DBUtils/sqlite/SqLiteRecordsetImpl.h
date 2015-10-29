@@ -26,54 +26,57 @@ public:
 
 // Overrides/Operations
 public:
-	virtual bool Open(LPCTSTR sTableName);
-	virtual bool OpenSQL(LPCTSTR sSQL);
+	virtual bool Open(LPCTSTR sTableName) override;
+	virtual bool OpenSQL(LPCTSTR sSQL) override;
     bool OpenSQLUTF8(const char *sSQL);
-	virtual bool OpenView(LPCTSTR sViewName);
+	virtual bool OpenView(LPCTSTR sViewName) override;
 
-    virtual bool SeekByString(LPCTSTR sIndex, LPCTSTR sValue);
-	virtual bool SeekByLong(LPCTSTR sIndex, long nValue);
+    virtual bool SeekByString(LPCTSTR sIndex, LPCTSTR sValue) override;
+	virtual bool SeekByLong(LPCTSTR sIndex, long nValue) override;
     bool SeekByLongUTF8(const char *sIndexUTF8, long nValue);
 
-	virtual bool MoveNext();
-	virtual bool MoveFirst();
+	virtual bool MoveNext() override;
+	virtual bool MoveFirst() override;
 
-	virtual long GetRecordCount();
+	virtual long GetRecordCount() override;
 
-	virtual bool Delete();
-	virtual void AddNew();
-	virtual void Edit();
-	virtual bool Update();
+	virtual bool Delete() override;
+	virtual void AddNew() override;
+	virtual void Edit() override;
+	virtual bool Update() override;
 
-	virtual bool IsEOF();
+	virtual bool IsEOF() override;
 
-	virtual void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize);
-	virtual void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize);
+	virtual void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize) override;
+	virtual void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) override;
+	virtual void FreeBinary(unsigned char *pData);
 
-	virtual void SetFieldValueNull(LPCTSTR lpszName);
+	virtual void SetFieldValueNull(LPCTSTR lpszName) override;
 
-	virtual CStdString GetFieldString(LPCTSTR sFieldName);
-	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue);
+	virtual CStdString GetFieldString(LPCTSTR sFieldName) override;
+	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) override;
 
-    virtual std::string GetFieldStringUTF8(const char *sFieldName);
-	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue);
+    virtual std::string GetFieldStringUTF8(const char *sFieldName) override;
+	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) override;
 
-	virtual long GetFieldLong(LPCTSTR sFieldName);
-	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue);
+	virtual long GetFieldLong(LPCTSTR sFieldName) override;
+	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue) override;
 
-	virtual double GetFieldDouble(LPCTSTR sFieldName);
-	virtual void SetFieldDouble(LPCTSTR sFieldName, double dValue);
+	virtual double GetFieldDouble(LPCTSTR sFieldName) override;
+	virtual void SetFieldDouble(LPCTSTR sFieldName, double dValue) override;
 
-	virtual time_t GetFieldDateTime(LPCTSTR sFieldName);
-	virtual void SetFieldDateTime(LPCTSTR sFieldName, const time_t &time);
+	virtual time_t GetFieldDateTime(LPCTSTR sFieldName) override;
+	virtual void SetFieldDateTime(LPCTSTR sFieldName, const time_t &time) override;
 
-	virtual bool IsFieldValueNull(LPCTSTR sFieldName);
+	virtual bool IsFieldValueNull(LPCTSTR sFieldName) override;
 
-	virtual bool DoesFieldExist(LPCTSTR sFieldName);
+	virtual bool DoesFieldExist(LPCTSTR sFieldName) override;
 
-    virtual void Flush();
-    virtual bool DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue);
-    virtual bool DeleteAllByLongValue(LPCTSTR sField, long nValue);
+    virtual void Flush() override;
+    virtual bool DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue) override;
+    virtual bool DeleteAllByLongValue(LPCTSTR sField, long nValue) override;
+    virtual bool DeleteByLongValue(LPCTSTR sField, long nValue) override;
+    virtual bool DeleteByStringValue(LPCTSTR sField, LPCTSTR sValue) override;
 
     void PrepareInsert();
     void CommitInsert();
@@ -96,6 +99,7 @@ private:
     sqlite3_stmt *m_stmt;    
     sqlite3_stmt *m_insert_stmt;
     bool m_bEOF;
+	bool m_bSQLOpened;
     
     __int64 m_nEditRowId;
     std::unordered_map<CStdString, int, std::hash<std::basic_string<TCHAR>>> m_name_to_index;

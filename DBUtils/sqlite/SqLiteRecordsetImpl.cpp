@@ -63,7 +63,7 @@ static void OnColumnIndexFailed(CSqLiteErrorHandler *pErrorHandler, LPCTSTR sFie
 
 CSqLiteRecordsetImpl::CSqLiteRecordsetImpl(CSqLiteDatabaseImpl *pDatabase, CSqLiteErrorHandler *pErrorHandler)
 : m_pDB(pDatabase), m_pErrorHandler(pErrorHandler), m_bEOF(true), m_stmt(nullptr), m_nEditRowId(-1), 
-  m_pSaveData(nullptr), m_pInfoData(nullptr), m_insert_stmt(nullptr)
+  m_pSaveData(nullptr), m_pInfoData(nullptr), m_insert_stmt(nullptr), m_bSQLOpened(false)
 {
     
 }
@@ -87,14 +87,16 @@ void CSqLiteRecordsetImpl::CloseStatement()
 
 bool CSqLiteRecordsetImpl::Open(LPCTSTR sTableName)
 {
-    m_sTable = sqlite_conv::ConvertToUTF8(sTableName);
+	m_sTable = sqlite_conv::ConvertToUTF8(sTableName);
     return true;
 }
 
 bool CSqLiteRecordsetImpl::OpenSQL(LPCTSTR sSQL)
 {
     const std::string sSQLUTF8 = sqlite_conv::ConvertToUTF8(sSQL);
-    return OpenSQLUTF8(sSQLUTF8.c_str());
+	const bool bRet = OpenSQLUTF8(sSQLUTF8.c_str());
+	m_bSQLOpened = true;
+	return bRet;
 }
 
 bool CSqLiteRecordsetImpl::OpenSQLUTF8(const char *sSQL)
@@ -131,6 +133,18 @@ void CSqLiteRecordsetImpl::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pD
     }
 	nSize = ::sqlite3_column_bytes(m_stmt, nColumnIndex);
     *pData = (unsigned char *)::sqlite3_column_blob(m_stmt, nColumnIndex);
+}
+
+void CSqLiteRecordsetImpl::FreeBinary(unsigned char *pData)
+{
+    //#24398
+    //http://stackoverflow.com/questions/325158/does-the-pointer-get-from-sqlite3-column-blob-method-need-to-be-delete
+    // > From the sqllite documentation:
+    // > The pointers returned are valid until a type conversion occurs or until sqlite3_step() or sqlite3_reset() or
+    // > sqlite3_finalize() is called. The memory space used to hold strings and BLOBs is freed automatically.
+    // > Do not pass the pointers returned by sqlite3_column_blob() into sqlite3_free().
+    //
+    //free(pData); //original delete from old DAO implementation
 }
 
 static sqlite3_stmt *Prepare(sqlite3 *pDB, const char *sql, CSqLiteErrorHandler *pErrorHandler)
@@ -800,12 +814,15 @@ bool CSqLiteRecordsetImpl::MoveNext()
 
 bool CSqLiteRecordsetImpl::MoveFirst() 
 {
-    CloseStatement(); // sqlite3_reset would be enough if m_stmt and m_stmt.sql == sSQL
+	if ( !m_bSQLOpened )//already opened by OpenSQL
+	{
+		CloseStatement(); // sqlite3_reset would be enough if m_stmt and m_stmt.sql == sSQL
 
-    ASSERT(!m_sTable.empty());
-    std::string sSQL  = "SELECT ROWID,* FROM ";
-                sSQL += m_sTable.c_str();
-    OpenImpl(sSQL.c_str());    
+		ASSERT(!m_sTable.empty());
+		std::string sSQL  = "SELECT ROWID,* FROM ";
+					sSQL += m_sTable.c_str();
+		OpenImpl(sSQL.c_str());
+	}
     
     return MoveFirstImpl();
 }
@@ -874,8 +891,9 @@ bool CSqLiteRecordsetImpl::DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue
                 strSQL += m_sTable;
                 strSQL += " WHERE ";
                 strSQL += sFieldUTF8;
-                strSQL += " = ";
+                strSQL += " = '";
                 strSQL += sValueUTF8;
+                strSQL += "'";
 
     if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 ) {
         return true;
@@ -912,4 +930,60 @@ void CSqLiteRecordsetImpl::Flush()
     std::string strSQL  = "DELETE FROM ";
                 strSQL += m_sTable;
     m_pDB->ExecuteUTF8(strSQL.c_str());
+}
+
+bool CSqLiteRecordsetImpl::DeleteByLongValue(LPCTSTR sField, long nValue)
+{   
+    const std::string sFieldUTF8 = sqlite_conv::ConvertToUTF8(sField);
+    const std::string sValueUTF8 = sqlite_conv::to_string(nValue);
+
+    // https://groups.google.com/forum/#!topic/android-developers/rrmbsKyKRCE
+    // Unfortunately SQLite does not support the LIMIT clause in DELETE statements. But I think you could get around with something else:
+    // DELETE FROM MyTable WHERE _id IN (SELECT _id FROM MyTable WHERE XYZ ORDER BY Col LIMIT 5);
+
+    std::string sDelete;
+    sDelete  = "DELETE FROM ";
+    sDelete += m_sTable;
+    sDelete += " WHERE RowId IN (SELECT RowId FROM ";
+    sDelete += m_sTable;
+    sDelete += " WHERE ";
+    sDelete += sFieldUTF8;
+    sDelete += " = ";
+    sDelete += sValueUTF8;
+    sDelete += " LIMIT 1)";
+
+    const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
+    if ( nRetVal == -1 ) {
+        OnErrorCode(nRetVal, _T("CSqLiteRecordsetImpl::DeleteByLongValue()"));
+        return false;
+    }
+    return true;
+}
+
+bool CSqLiteRecordsetImpl::DeleteByStringValue(LPCTSTR sField, LPCTSTR sValue)
+{
+    const std::string sFieldUTF8 = sqlite_conv::ConvertToUTF8(sField);
+    const std::string sValueUTF8 = sqlite_conv::ConvertToUTF8(sValue);
+
+    // https://groups.google.com/forum/#!topic/android-developers/rrmbsKyKRCE
+    // Unfortunately SQLite does not support the LIMIT clause in DELETE statements. But I think you could get around with something else:
+    // DELETE FROM MyTable WHERE _id IN (SELECT _id FROM MyTable WHERE XYZ ORDER BY Col LIMIT 5);
+
+    std::string sDelete;
+    sDelete  = "DELETE FROM ";
+    sDelete += m_sTable;
+    sDelete += " WHERE RowId IN (SELECT RowId FROM ";
+    sDelete += m_sTable;
+    sDelete += " WHERE ";
+    sDelete += sFieldUTF8;
+    sDelete += " = '";
+    sDelete += sValueUTF8;
+    sDelete += "' LIMIT 1)";
+
+    const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
+    if ( nRetVal == -1 ) {
+        OnErrorCode(nRetVal, _T("CSqLiteRecordsetImpl::DeleteByStringValue()"));
+        return false;
+    }
+    return true;
 }
