@@ -269,6 +269,11 @@ void CDaoRecordsetImpl::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData
 	}
 }
 
+void CDaoRecordsetImpl::FreeBinary(unsigned char *pData)
+{
+    delete [] pData; //#24398 - originaly was free(pData), but it is created with new[]
+}
+
 bool CDaoRecordsetImpl::Delete()
 {
 	try {

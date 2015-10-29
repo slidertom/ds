@@ -46,8 +46,7 @@ bool dsTable::OpenView(LPCTSTR sViewName)
 
 void dsTable::Flush()
 {
-    if(!Open())
-	{
+    if ( !Open() ) {
 		return;
 	}
 
@@ -62,6 +61,11 @@ void dsTable::SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned 
 void dsTable::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) const
 {
 	m_pSet->GetFieldBinary(sFieldName, pData, nSize);
+}
+
+void dsTable::FreeBinary(unsigned char *pData)
+{
+	m_pSet->FreeBinary(pData);
 }
 
 bool dsTable::IsEOF() const	
@@ -254,4 +258,14 @@ bool dsTable::DeleteByIndex(LPCTSTR sField, long nValue)
 LPCTSTR dsTable::GetTableName() const
 {
     return m_sTableName.c_str();
+}
+
+std::string dsTable::GetFieldStringUTF8(const char *sFieldName) const
+{
+    return m_pSet->GetFieldStringUTF8(sFieldName);
+}
+
+void dsTable::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
+{
+    return m_pSet->SetFieldStringUTF8(sFieldName, sValue);
 }

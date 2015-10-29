@@ -3,10 +3,11 @@
 #pragma once
 
 class CDaoDatabase;
+class CDaoErrorHandler;
 
 namespace dao_extensions
 {
-	void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
+	void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, CDaoErrorHandler *pErrorHandler);
 };
 
 #endif

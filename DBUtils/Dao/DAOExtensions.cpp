@@ -2,6 +2,7 @@
 #include "DAOExtensions.h"
 
 #include "AfxDao.h"
+#include "DaoErrorHandler.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -13,15 +14,26 @@ namespace dao_extensions
 {
 	namespace internal
 	{
-		static void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR pszTableNameSrc, LPCTSTR pszTableNameDst, LPCTSTR pszColumnName)
+		static void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR pszTableNameSrc, LPCTSTR pszTableNameDst, LPCTSTR pszColumnName, CDaoErrorHandler *pErrorHandler)
 		{
             CString strFormat;
 			strFormat.Format(_T("INSERT INTO %s IN '%s' SELECT %s FROM %s;"), pszTableNameDst, pDbDst->GetName(), pszColumnName, pszTableNameSrc);
-			pDbSrc->Execute(strFormat);
+            try {
+			    pDbSrc->Execute(strFormat);
+            }
+            catch (CDaoException *e) {
+                ASSERT(FALSE);
+		        pErrorHandler->OnDaoException(e, _T("CDaoDatabaseImpl::CopyTableData"));
+                CStdString sMsg;
+                sMsg.Format(_T("CopyTableData From: %s To %s."), pszTableNameSrc, pszTableNameDst);
+                pErrorHandler->OnError(sMsg.c_str(), _T("CDaoDatabaseImpl::CopyTableData"));
+                pErrorHandler->OnError(strFormat, _T("CDaoDatabaseImpl::CopyTableData"));
+		        e->Delete();
+            }
 		}
 	}
 
-    void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
+    void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, CDaoErrorHandler *pErrorHandler)
     {
         ASSERT(sTableNameSrc);
 		ASSERT(sTableNameDst);
@@ -105,7 +117,7 @@ namespace dao_extensions
                 strColumns += CString(sTableNameSrc) + _T(".[") + str + _T("]");
             }
 
-            internal::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, strColumns);
+            internal::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, strColumns, pErrorHandler);
         }
     }
 };

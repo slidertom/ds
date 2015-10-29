@@ -83,6 +83,11 @@ void CAdoDotNetRecordsetImpl::GetFieldBinary(LPCTSTR sFieldName, unsigned char *
 	ASSERT(FALSE);
 }
 
+void CAdoDotNetRecordsetImpl::FreeBinary(unsigned char *pData)
+{
+	ASSERT(FALSE);
+}
+
 bool CAdoDotNetRecordsetImpl::Delete()
 {
 	ASSERT(FALSE);

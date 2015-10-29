@@ -24,7 +24,7 @@ namespace dao_binary_field_util
 		 //Create an OLE SAFEARRAY
 		 var.parray = SafeArrayCreate(VT_UI1,1,rgsabound);
 	 
-		 if(var.parray != NULL)
+		 if (var.parray != NULL)
 		 {
 			void *pArrayData = NULL;
 		
@@ -51,13 +51,13 @@ namespace dao_binary_field_util
 		 bool fRetVal = false;
 
 	   //Binary data is stored in the variant as an array of unsigned char
-		 if(ovData.vt == (VT_ARRAY|VT_UI1))  // (OLE SAFEARRAY)
+		 if (ovData.vt == (VT_ARRAY|VT_UI1))  // (OLE SAFEARRAY)
 		 {
 		   //Retrieve size of array
 		   *pcBufLen = ovData.parray->rgsabound[0].cElements;
 
 		   *ppBuf = new BYTE[*pcBufLen]; //Allocate a buffer to store the data
-		   if(*ppBuf != NULL)
+		   if (*ppBuf != NULL)
 		   {
 			 void * pArrayData;
 

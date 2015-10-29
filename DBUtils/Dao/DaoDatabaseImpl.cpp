@@ -305,7 +305,7 @@ bool CDaoDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc
 	ASSERT(pDstDBDao);
 
 	try {
-		dao_extensions::CopyTableData(m_pDatabase, pDstDBDao, sTableNameSrc, sTableNameDst);
+		dao_extensions::CopyTableData(m_pDatabase, pDstDBDao, sTableNameSrc, sTableNameDst, m_pErrorHandler);
 	}
     catch (CDaoException *e) {
         ASSERT(FALSE);

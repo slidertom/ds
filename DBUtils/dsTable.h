@@ -48,6 +48,8 @@ public:
 
 	CStdString GetFieldString(LPCTSTR sFieldName) const;     
     void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue); 
+    std::string GetFieldStringUTF8(const char *sFieldName) const;     
+    void SetFieldStringUTF8(const char *sFieldName, const char *sValue); 
 
 	long GetFieldLong(LPCTSTR sFieldName) const;             
     void SetFieldLong(LPCTSTR sFieldName, long nValue);      
@@ -69,7 +71,8 @@ public:
 	void SetFieldNull(LPCTSTR sFieldName);           
 
 	void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) const; 
-	void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize);         
+	void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize);
+    void FreeBinary(unsigned char *pData);
 	
 	// Deletes all records with given value 
 	// Returns true if any record was deleted

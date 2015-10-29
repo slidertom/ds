@@ -37,12 +37,16 @@ public:
 
 	virtual void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize)   = 0;
 	virtual void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) = 0;
+    virtual void FreeBinary(unsigned char *pData) = 0;
 
 	virtual void SetFieldValueNull(LPCTSTR lpszName)  = 0;
     virtual bool IsFieldValueNull(LPCTSTR sFieldName) = 0;
 
 	virtual CStdString GetFieldString(LPCTSTR sFieldName) = 0;
 	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) = 0;
+
+    virtual std::string GetFieldStringUTF8(const char *sFieldName) = 0;
+	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) = 0;
 
 	virtual long GetFieldLong(LPCTSTR sFieldName) = 0;
 	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue) = 0;

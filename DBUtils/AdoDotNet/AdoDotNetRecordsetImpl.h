@@ -36,6 +36,7 @@ public:
 
 	virtual void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize);
 	virtual void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize);
+    virtual void FreeBinary(unsigned char *pData);
 
 	virtual void SetFieldValueNull(LPCTSTR lpszName);
 
