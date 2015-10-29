@@ -2,9 +2,9 @@
 #####Sqlite (read-write), Ms DAO mbd (read-write), Ms SQL (read-only),
 databases access system. 
 
-DS is an easy to use C++ SQLite3, DAO, Ms SQL C++ based wrapper.
+DS is an easy to use C++ **SQLite3**, **DAO**, **Ms SQL** C++ based wrapper.
 
-Provides a Recordset (MFC: CDaoRecordSet, CRecordset) like  interface for a SQLite3, MsSQL, DAO databases.
+Provides a **Recordset** (MFC: CDaoRecordSet, CRecordset) like  interface for a SQLite3, MsSQL, DAO databases.
 
 You can access sqlite database in the same way as mdb file with the minimal code changes inside your project.
  
@@ -15,7 +15,7 @@ Text field type addition: **Json** format support. RapidJson (https://github.com
 
 If you're a NoSQL type of person and SQL based database usage can not be avoided, then this might fit the bill perfectly.
 
-####Samples:
+#####Samples:
 ```C++
 dsDatabase db;
 db.OpenDB(_T("database.sqlite")); // sqlite database 
