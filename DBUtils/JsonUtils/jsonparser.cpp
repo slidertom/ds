@@ -133,6 +133,10 @@ namespace ds_jsonparser
         std::string sValue = _impl::get_value(m_impl, i);
         return sqlite_conv::ConvertFromUTF8(sValue.c_str());
     }
+    void json_array::GetObject(int i, object &obj) const {
+        const std::string sValue = GetStringUTF8(i);
+        str2obj(sValue.c_str(), obj);
+    }
 
     void str2obj(const char* sJson, json_array &obj) {
         _impl::str2obj(sJson, obj.m_impl);

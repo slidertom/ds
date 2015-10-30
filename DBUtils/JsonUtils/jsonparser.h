@@ -52,6 +52,7 @@ namespace ds_jsonparser
         int GetSize() const;
         std::string GetStringUTF8(int i) const;
         CStdString GetString(int i) const;
+        void GetObject(int i, object &obj) const;
 
     public:
         void *m_impl;
