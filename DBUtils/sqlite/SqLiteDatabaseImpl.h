@@ -27,8 +27,8 @@ public:
 	virtual bool Rollback() override;    
 
 	virtual bool Execute(LPCTSTR lpszSQL) override; 
-    // return the number of database rows that were changed (or inserted or deleted)
-    int ExecuteUTF8(const char *sqlUTF8);
+
+    bool ExecuteUTF8(const char *sqlUTF8);
 
 	virtual void Close() override; 
 	virtual bool OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) override;

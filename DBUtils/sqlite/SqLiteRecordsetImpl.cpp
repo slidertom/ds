@@ -895,7 +895,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue
                 strSQL += sValueUTF8;
                 strSQL += "'";
 
-    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 ) {
+    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) ) {
         return true;
     }
 
@@ -916,7 +916,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByLongValue(LPCTSTR sField, long nValue)
                 strSQL += " = ";
                 strSQL += sValueUTF8;
 
-    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) != -1 ) {
+    if ( m_pDB->ExecuteUTF8(strSQL.c_str()) ) {
         return true;
     }
 

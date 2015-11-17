@@ -214,15 +214,13 @@ bool CSqLiteDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR 
 	return true;
 }
 
-// return the number of database rows that were changed (or inserted or deleted)
-int CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
+bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
 {
     char *localError = 0;
     const int rc = sqlite3_exec(m_pDB, sqlUTF8, 0, 0, &localError);
 
-    if (rc == SQLITE_OK)
-    {
-        return sqlite3_changes(m_pDB);
+    if (rc == SQLITE_OK) {
+        return true;
     }
     else
     {
@@ -231,7 +229,8 @@ int CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
         m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteDatabaseImpl::ExecuteUTF8"));
         sqlite3_free(localError);
     }
-    return -1;
+
+    return false;
 }
 
 bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
@@ -290,7 +289,7 @@ bool CSqLiteDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableName
     std::string sSQL = "ATTACH '";
     sSQL += localFileName;
     sSQL += "' as DestDB";
-    if ( ExecuteUTF8(sSQL.c_str()) == -1 ) {
+    if ( !ExecuteUTF8(sSQL.c_str()) ) {
         return false;
     }
     std::string sTableNameSrcUTF8 = sqlite_conv::ConvertToUTF8(sTableNameSrc);
@@ -300,7 +299,7 @@ bool CSqLiteDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableName
     sSQL += sTableNameDstUTF8;
     sSQL += "SELECT * FROM ";
     sSQL += sTableNameSrcUTF8;
-    if ( ExecuteUTF8(sSQL.c_str()) == -1 ) {
+    if ( !ExecuteUTF8(sSQL.c_str()) ) {
         return false;
     }   
    
