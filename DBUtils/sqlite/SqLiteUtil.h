@@ -52,7 +52,7 @@ namespace sqlite_util
     public:
         void clear();
     };
-    void BindStatements(CFieldDataMap &data_map, sqlite3_stmt *pStmt);
+    int BindStatements(CFieldDataMap &data_map, sqlite3_stmt *pStmt);
 
     class CFieldDataBinary : public CFieldData 
     {

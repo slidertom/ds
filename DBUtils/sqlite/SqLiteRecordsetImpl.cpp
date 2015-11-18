@@ -63,7 +63,7 @@ static void OnColumnIndexFailed(CSqLiteErrorHandler *pErrorHandler, LPCTSTR sFie
 
 CSqLiteRecordsetImpl::CSqLiteRecordsetImpl(CSqLiteDatabaseImpl *pDatabase, CSqLiteErrorHandler *pErrorHandler)
 : m_pDB(pDatabase), m_pErrorHandler(pErrorHandler), m_bEOF(true), m_stmt(nullptr), m_nEditRowId(-1), 
-  m_pSaveData(nullptr), m_pInfoData(nullptr), m_insert_stmt(nullptr), m_bSQLOpened(false)
+  m_pSaveData(nullptr), m_pInfoData(nullptr), m_insert_stmt(nullptr), m_bSQLOpened(false), m_update_stmt(nullptr)
 {
     
 }
@@ -72,6 +72,7 @@ CSqLiteRecordsetImpl::~CSqLiteRecordsetImpl()
 { 
     delete m_pSaveData;
     delete m_pInfoData;
+    sqlite3_finalize(m_update_stmt);
     sqlite3_finalize(m_insert_stmt);
 	sqlite3_finalize(m_stmt);
 }
@@ -422,41 +423,59 @@ static inline std::string save_data_to_update_values_string(sqlite_util::CFieldD
 
 bool CSqLiteRecordsetImpl::DoUpdate()
 {
-    bool bRetVal = true;
+    //sqlite3_finalize(m_update_stmt);
+    //m_update_stmt = nullptr;
 
     const std::string sValues = save_data_to_update_values_string(m_pSaveData);
+    if ( m_sUpdateValues != sValues ) 
+    {
+        m_sUpdateValues = sValues;
+        sqlite3_finalize(m_update_stmt);
+        m_update_stmt = nullptr;
+    }
     
     ASSERT(m_nEditRowId > 0);
-    CStdStringA sSql;
-    sSql.Format("UPDATE %s SET %s WHERE ROWID = %d", m_sTable.c_str(), sValues.c_str(), m_nEditRowId); 
-
+   
     sqlite3 *pDB = m_pDB->GetSqLiteDB();
 
-    const char* pTail = nullptr;
-    sqlite3_stmt *pStmt = nullptr;
-    int rc = ::sqlite3_prepare_v2(pDB, sSql.c_str(), -1, &pStmt, &pTail);
-    if (rc == SQLITE_OK) 
+    int rc = 0;
+
+    if ( !m_update_stmt )
     {
-        sqlite_util::BindStatements(*m_pSaveData, pStmt);
-        rc = ::sqlite3_step(pStmt);
-    }
-    else {
-        if ( rc != SQLITE_DONE ) {
+        const char* pTail = nullptr;
+        CStdStringA sSql;
+        sSql.Format("UPDATE %s SET %s WHERE ROWID = ?", m_sTable.c_str(), sValues.c_str());     
+        rc = ::sqlite3_prepare_v2(pDB, sSql.c_str(), -1, &m_update_stmt, &pTail);
+        if (rc != SQLITE_OK) 
+        {
             OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_prepare_v2)"));
-            bRetVal = false;
+            sqlite3_finalize(m_update_stmt);
+            m_update_stmt = nullptr;
         }
     }
-    ::sqlite3_finalize(pStmt);
 
-    if ( rc != SQLITE_DONE ) {
+    if (m_update_stmt) 
+    {
+        const int nIndex = sqlite_util::BindStatements(*m_pSaveData, m_update_stmt);
+        ::sqlite3_bind_int64(m_update_stmt, nIndex, m_nEditRowId);                            
+        rc = ::sqlite3_step(m_update_stmt);
+
+        ::sqlite3_clear_bindings(m_update_stmt);
+        ::sqlite3_reset(m_update_stmt);
+    }
+   
+    if ( rc != SQLITE_DONE ) 
+    {
+        CStdStringA sSql;
+        sSql.Format("UPDATE %s SET %s WHERE ROWID = %d", m_sTable.c_str(), sValues.c_str(), m_nEditRowId);     
         CStdString sError = _T("SQL statement:");
         sError += sqlite_conv::ConvertFromUTF8(sSql.c_str()).c_str();
         m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_finalize)"));
         OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_finalize)"));
-        bRetVal = false;
+        return false;
     }
 
-    return bRetVal;
+    return true;
 }
 
 bool CSqLiteRecordsetImpl::Update()

@@ -114,7 +114,7 @@ namespace sqlite_util
         std::unordered_map<std::string, CFieldData *>::clear();
     }
 
-    void BindStatements(CFieldDataMap &data_map, sqlite3_stmt *pStmt)
+    int BindStatements(CFieldDataMap &data_map, sqlite3_stmt *pStmt)
     {
         auto end_it = data_map.end();
         auto beg_it = data_map.begin();
@@ -127,6 +127,7 @@ namespace sqlite_util
             }
             ++nIndex;
         }
+        return nIndex;
     }
 
     CFieldDataBinary::CFieldDataBinary(unsigned char *pData, unsigned long nSize) 

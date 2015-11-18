@@ -96,8 +96,11 @@ private:
     CSqLiteDatabaseImpl *m_pDB;
     CSqLiteErrorHandler *m_pErrorHandler;
     std::string m_sTable;
+   
     sqlite3_stmt *m_stmt;    
     sqlite3_stmt *m_insert_stmt;
+    sqlite3_stmt *m_update_stmt;
+    std::string m_sUpdateValues;
     bool m_bEOF;
 	bool m_bSQLOpened;
     
