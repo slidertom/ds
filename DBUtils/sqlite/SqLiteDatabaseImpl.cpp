@@ -16,6 +16,9 @@ static char THIS_FILE[] = __FILE__;
 CSqLiteDatabaseImpl::CSqLiteDatabaseImpl() 
 : m_bReadOnly(false), m_pDB(nullptr)
 {
+#ifdef _DEBUG
+    m_bTransMode = false;
+#endif
     m_pErrorHandler = new CSqLiteErrorHandler;
 }
 
@@ -59,6 +62,10 @@ bool CSqLiteDatabaseImpl::CompactDatabase()
 
 bool CSqLiteDatabaseImpl::BeginTrans() 
 {
+#ifdef _DEBUG
+    ASSERT(!m_bTransMode); // nested transactions are not supported 
+    m_bTransMode = true;
+#endif
     // "begin deferred transaction"
     // "begin immediate transaction"
     // "begin exclusive transaction"
@@ -68,12 +75,20 @@ bool CSqLiteDatabaseImpl::BeginTrans()
 
 bool CSqLiteDatabaseImpl::CommitTrans() 
 {
+#ifdef _DEBUG
+    ASSERT(m_bTransMode); // transaction should be started
+    m_bTransMode = false;
+#endif
     ExecuteUTF8("commit transaction");
 	return true;
 }
 
 bool CSqLiteDatabaseImpl::Rollback()   
 {
+#ifdef _DEBUG
+    ASSERT(m_bTransMode); // transaction should be started
+    m_bTransMode = false;
+#endif
     ExecuteUTF8("rollback transaction");
 	return true;
 }

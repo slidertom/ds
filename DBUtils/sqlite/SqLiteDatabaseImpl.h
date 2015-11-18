@@ -68,6 +68,9 @@ private:
 	bool m_bReadOnly;
     sqlite3 *m_pDB;
     CSqLiteErrorHandler *m_pErrorHandler;
+#ifdef _DEBUG
+    bool m_bTransMode; // invariant
+#endif
 };
 
 #endif 
