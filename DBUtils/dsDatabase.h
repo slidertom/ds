@@ -57,7 +57,7 @@ public:
 public:
 	void BeginTrans();  
 	void CommitTrans(); 
-	void Rollback();    
+	void RollbackTrans();    
 
 	bool Execute(LPCTSTR lpszSQL); 
 	

@@ -110,7 +110,7 @@ void dsDatabase::CommitTrans()
 	m_pDatabase->CommitTrans();
 }
 
-void dsDatabase::Rollback()
+void dsDatabase::RollbackTrans()
 {
 	ASSERT(m_pDatabase);
 	m_pDatabase->Rollback();
