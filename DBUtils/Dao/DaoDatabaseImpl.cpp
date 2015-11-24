@@ -397,7 +397,7 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
             field_type = dsFieldType_Double;
             break;
         case dbSingle:
-            field_type = dsFieldType_Long;
+            field_type = dsFieldType_Double; // Single-precision floating-point data
             break;
         case dbDouble:
             field_type = dsFieldType_Double;
