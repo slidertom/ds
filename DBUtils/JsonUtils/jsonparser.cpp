@@ -1,10 +1,11 @@
 #include "StdAfx.h"
 #include "jsonparser.h"
-#include "DBUtils/sqlite/SqLiteUtil.h"
 
 #include "pico_impl.h"
 #include "rapid_impl.h"
 #include "sa_impl.h"
+
+#include "../dsStrConv.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -50,18 +51,18 @@ namespace ds_jsonparser
     }
 
     void object::SetText(const char* sField, LPCTSTR value) {
-        const std::string value_str = sqlite_conv::ConvertToUTF8(value);
+        const std::string value_str = ds_str_conv::ConvertToUTF8(value);
         _impl::set_field(m_impl, sField, value_str);
     }
     void object::SetTextUTF8(const char* sField, const char *sVal) {
         _impl::set_field(m_impl, sField, sVal);
     }
     void object::SetDouble(const char* sField, double value) {
-        const std::string value_str = sqlite_conv::double_to_string(value);
+        const std::string value_str = ds_str_conv::double_to_string(value);
         _impl::set_field(m_impl, sField, value_str);
     }
     void object::SetInteger(const char* sField, int value) {
-        const std::string value_str = sqlite_conv::to_string(value);
+        const std::string value_str = ds_str_conv::long_to_string(value);
         _impl::set_field(m_impl, sField, value_str);
     }
 
@@ -70,7 +71,7 @@ namespace ds_jsonparser
         if (!_impl::get_field(m_impl, sField, value_str)) {
             return _T("");
         }
-        const CStdString value = sqlite_conv::ConvertFromUTF8(value_str.c_str());
+        const CStdString value = ds_str_conv::ConvertFromUTF8(value_str.c_str());
         return value;
     }
     std::string object::GetTextUTF8(const char* sField) const
@@ -85,7 +86,7 @@ namespace ds_jsonparser
         if (!_impl::get_field(m_impl, sField, value_str)) {
             return 0.0;
         }
-        const double value = sqlite_conv::string_to_double(value_str.c_str()); // != pico_value->get(sField).get<double>();
+        const double value = ds_str_conv::string_to_double(value_str.c_str()); // != pico_value->get(sField).get<double>();
         return value;
     }
     int object::GetInteger(const char* sField) const {
@@ -93,7 +94,7 @@ namespace ds_jsonparser
         if (!_impl::get_field(m_impl, sField, value_str)) {
             return 0;
         }
-        const int value = sqlite_conv::string_to_long(value_str.c_str()); // ~= atoi(value_str.c_str());
+        const int value = ds_str_conv::string_to_long(value_str.c_str()); // ~= atoi(value_str.c_str());
         return value;
     }
 
@@ -119,7 +120,7 @@ namespace ds_jsonparser
         _impl::add_array_string(m_impl, str);
     }
     void json_array::AddString(const wchar_t *str) {
-        std::string sValue = sqlite_conv::ConvertToUTF8(str);
+        std::string sValue = ds_str_conv::ConvertToUTF8(str);
         _impl::add_array_string(m_impl, sValue.c_str());
     }
 
@@ -131,7 +132,7 @@ namespace ds_jsonparser
     }
     CStdString json_array::GetString(int i) const {
         std::string sValue = _impl::get_value(m_impl, i);
-        return sqlite_conv::ConvertFromUTF8(sValue.c_str());
+        return ds_str_conv::ConvertFromUTF8(sValue.c_str());
     }
     void json_array::GetObject(int i, object &obj) const {
         const std::string sValue = GetStringUTF8(i);

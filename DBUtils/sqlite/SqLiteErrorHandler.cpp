@@ -7,6 +7,8 @@
 
 #include "sqlite_include.h"
 
+#include "../dsStrConv.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -32,8 +34,8 @@ void CSqLiteErrorHandler::OnError(int errorCode, const char *sErrorUTF8, LPCTSTR
     CStdStringW sCode;
     sCode.Format(_T("%d"), errorCode);
 
-    CStdStringW sErrorW  = sqlite_conv::ConvertFromUTF8(sErrorUTF8);               
-    CStdStringW sErrMsgW = sqlite_conv::ConvertFromUTF8(sErrMsg);               
+    CStdStringW sErrorW  = ds_str_conv::ConvertFromUTF8(sErrorUTF8);               
+    CStdStringW sErrMsgW = ds_str_conv::ConvertFromUTF8(sErrMsg);               
 
     CStdStringW sError = sErrMsgW.c_str();
                 sError += _T("[");

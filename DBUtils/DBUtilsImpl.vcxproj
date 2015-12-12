@@ -176,6 +176,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeRelease|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="dsStrConv.cpp" />
     <ClCompile Include="JsonUtils\jsonparser.cpp" />
     <ClCompile Include="JsonUtils\jsonparser_rgb.cpp" />
     <ClCompile Include="LogImpl\LogImpl.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="DatabaseType.h" />
     <ClInclude Include="DBUtilsImpl.h" />
     <ClInclude Include="dsConfig.h" />
+    <ClInclude Include="dsStrConv.h" />
     <ClInclude Include="JsonUtils\jsonparser.h" />
     <ClInclude Include="JsonUtils\jsonparser_rgb.h" />
     <ClInclude Include="JsonUtils\PicoJson\picojson.h" />

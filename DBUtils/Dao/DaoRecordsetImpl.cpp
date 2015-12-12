@@ -8,6 +8,8 @@
 
 #include "Collections/OleDateTimeUtil.h"
 
+#include "../dsStrConv.h"
+
 #include "afxdao.h"
 
 #ifdef _DEBUG
@@ -600,15 +602,13 @@ void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, LPCTSTR sFunction)
     m_pErrorHandler->OnDaoException(e, sFunction);
 }
 
-#include "../sqlite/SqLiteUtil.h"
-
 std::string CDaoRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
 {
-    const CStdString sValue = GetFieldString(sqlite_conv::ConvertFromUTF8(sFieldName).c_str());
-    return sqlite_conv::ConvertToUTF8(sValue.c_str());
+    const CStdString sValue = GetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+    return ds_str_conv::ConvertToUTF8(sValue.c_str());
 }
 
 void CDaoRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
 {
-    SetFieldString(sqlite_conv::ConvertFromUTF8(sFieldName).c_str(), sqlite_conv::ConvertFromUTF8(sValue).c_str());
+    SetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), ds_str_conv::ConvertFromUTF8(sValue).c_str());
 }

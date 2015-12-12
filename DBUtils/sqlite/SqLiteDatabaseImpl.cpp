@@ -7,6 +7,8 @@
 
 #include "sqlite_include.h"
 
+#include "../dsStrConv.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -95,7 +97,7 @@ bool CSqLiteDatabaseImpl::Rollback()
 
 bool CSqLiteDatabaseImpl::Execute(LPCTSTR lpszSQL) 
 {
-    std::string sql = sqlite_conv::ConvertToUTF8(lpszSQL);
+    std::string sql = ds_str_conv::ConvertToUTF8(lpszSQL);
     ExecuteUTF8(sql.c_str());
     return true;
 }
@@ -127,7 +129,7 @@ bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw)
     // http://utf8everywhere.org/
     m_sFilePath = sPath;
     // UTF8 path required
-    std::string localFileName = sqlite_conv::ConvertToUTF8(sPath);
+    std::string localFileName = ds_str_conv::ConvertToUTF8(sPath);
     int rc = sqlite3_open_v2(localFileName.c_str(), &m_pDB, bReadOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE, NULL);
     // sqlite3_open16 - UTF-16 does not allow to open in the read only mode
     //int rc = sqlite3_open16(sPath, &m_pDB);
@@ -184,7 +186,7 @@ CStdString CSqLiteDatabaseImpl::GetName()
 
 bool CSqLiteDatabaseImpl::DoesTableExist(LPCTSTR sTable)
 {
-    std::string sTableUTF8 = sqlite_conv::ConvertToUTF8(sTable);
+    std::string sTableUTF8 = ds_str_conv::ConvertToUTF8(sTable);
     std::string sSQL  = "PRAGMA table_info(";
                 sSQL += sTableUTF8;
                 sSQL += ")";
@@ -240,7 +242,7 @@ bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
     else
     {
         m_pErrorHandler->OnError(rc, localError, _T("CSqLiteDatabaseImpl::ExecuteUTF8"));
-        const CStdString sSQL = sqlite_conv::ConvertFromUTF8(sqlUTF8);
+        const CStdString sSQL = ds_str_conv::ConvertFromUTF8(sqlUTF8);
         m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteDatabaseImpl::ExecuteUTF8"));
         sqlite3_free(localError);
     }
@@ -250,7 +252,7 @@ bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
 
 bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
 {
-    std::string sTableNameUTF8 = sqlite_conv::ConvertToUTF8(sTable);
+    std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTable);
     sqlite_util::CFieldInfoMap field_info_map;
     if ( !sqlite_util::GetTableFieldsdInfo(this, sTableNameUTF8.c_str(), m_pErrorHandler, field_info_map) )
     {
@@ -281,7 +283,7 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
             break;
         }
     
-        const CStdString sColName = sqlite_conv::ConvertFromUTF8(it->first.c_str());
+        const CStdString sColName = ds_str_conv::ConvertFromUTF8(it->first.c_str());
         info[sColName] = field_type;
     }
 
@@ -300,15 +302,15 @@ bool CSqLiteDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableName
     // sqlite3_exec(db, "ATTACH 'C:/tmp/tmp.sqlite' as mytmp");
     ASSERT(pDstDB->GetType() == dsType_SqLite);
     const CStdString sPath = pDstDB->GetName();
-    const std::string localFileName = sqlite_conv::ConvertToUTF8(sPath);
+    const std::string localFileName = ds_str_conv::ConvertToUTF8(sPath);
     std::string sSQL = "ATTACH '";
     sSQL += localFileName;
     sSQL += "' as DestDB";
     if ( !ExecuteUTF8(sSQL.c_str()) ) {
         return false;
     }
-    std::string sTableNameSrcUTF8 = sqlite_conv::ConvertToUTF8(sTableNameSrc);
-    std::string sTableNameDstUTF8 = sqlite_conv::ConvertToUTF8(sTableNameDst);
+    std::string sTableNameSrcUTF8 = ds_str_conv::ConvertToUTF8(sTableNameSrc);
+    std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
     //INSERT INTO newtable SELECT * FROM aDB.oldTableInMyOtherDB;
     sSQL = "INSERT INTO DestDB.";
     sSQL += sTableNameDstUTF8;

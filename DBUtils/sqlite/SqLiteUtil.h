@@ -2,23 +2,6 @@
 #define __SQ_LITE_UTIL_H__
 #pragma once
 
-#ifndef STDSTRING_H
-    #include "Collections/StdString.h"
-#endif
-
-namespace sqlite_conv
-{
-    std::string ConvertToUTF8(const wchar_t *wstr);
-    CStdString ConvertFromUTF8(const char *str);
-
-    std::string to_string(long nValue);
-    long string_to_long(const char *sValue);
-
-    std::string double_to_string(double dValue);
-    double string_to_double(const char *sValue);
-};
-
-
 #include "unordered_map"
 
 struct sqlite3_stmt;

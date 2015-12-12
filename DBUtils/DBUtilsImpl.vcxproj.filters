@@ -70,6 +70,7 @@
     <ClCompile Include="JsonUtils\jsonparser_rgb.cpp">
       <Filter>JsonUtils</Filter>
     </ClCompile>
+    <ClCompile Include="dsStrConv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dao\DaoDatabaseImpl.h">
@@ -186,5 +187,6 @@
     <ClInclude Include="JsonUtils\jsonparser_rgb.h">
       <Filter>JsonUtils</Filter>
     </ClInclude>
+    <ClInclude Include="dsStrConv.h" />
   </ItemGroup>
 </Project>
