@@ -333,8 +333,10 @@ void CDaoDatabaseImpl::DeleteRelation(LPCTSTR sRelation)
 		m_pDatabase->DeleteRelation(sRelation);
 	}
 	catch (CDaoException *e) {
-		e->Delete();// No info for user
-	}
+        ASSERT(FALSE);
+		m_pErrorHandler->OnDaoException(e, _T("CDaoDatabaseImpl::DeleteRelation")); //#24884
+		e->Delete();
+    }
 }
 
 bool CDaoDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
