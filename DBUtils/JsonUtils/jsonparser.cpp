@@ -66,7 +66,7 @@ namespace ds_jsonparser
         _impl::set_field(m_impl, sField, value_str);
     }
 
-    CStdString object::GetText(const char* sField) const {
+    CStdString object::GetText(const char *sField) const {
         std::string value_str;
         if (!_impl::get_field(m_impl, sField, value_str)) {
             return _T("");
@@ -74,14 +74,14 @@ namespace ds_jsonparser
         const CStdString value = ds_str_conv::ConvertFromUTF8(value_str.c_str());
         return value;
     }
-    std::string object::GetTextUTF8(const char* sField) const
+    std::string object::GetTextUTF8(const char *sField) const
     {
         std::string value_str;
         _impl::get_field(m_impl, sField, value_str);
         return value_str;
     }
 
-    double object::GetDouble(const char* sField) const {
+    double object::GetDouble(const char *sField) const {
         std::string value_str;
         if (!_impl::get_field(m_impl, sField, value_str)) {
             return 0.0;
@@ -89,12 +89,11 @@ namespace ds_jsonparser
         const double value = ds_str_conv::string_to_double(value_str.c_str()); // != pico_value->get(sField).get<double>();
         return value;
     }
-    int object::GetInteger(const char* sField) const {
-        std::string value_str;
-        if (!_impl::get_field(m_impl, sField, value_str)) {
+    int object::GetInteger(const char *sField) const {
+        int value = 0;
+        if (!_impl::get_field_int(m_impl, sField, value)) {
             return 0;
         }
-        const int value = ds_str_conv::string_to_long(value_str.c_str()); // ~= atoi(value_str.c_str());
         return value;
     }
 

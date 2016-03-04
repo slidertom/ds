@@ -2,6 +2,10 @@
 #define __RAPID_IMPL_H__
 #pragma once
 
+#ifndef __DS_STR_CONV_H__
+    #include "dsStrConv.h"
+#endif
+
 #ifndef RAPIDJSON_DOCUMENT_H_
     #include "Rapidjson/document.h"
     #include "Rapidjson/stringbuffer.h"
@@ -36,6 +40,32 @@ namespace ds_jsonparser
                 value.SetString(value_str.c_str(), value_str.size(), doc->GetAllocator());
             }
         }
+
+        static inline bool get_field_int(void *impl, const char *sField, int &nValue)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            if ( !doc->HasMember(sField) ) {
+                return false;
+            }
+            rapidjson::Value &value = (*doc)[sField];
+
+            if ( value.IsString() ) {
+                nValue = ds_str_conv::string_to_long(value.GetString()); // ~= atoi(value_str.c_str());
+                return true;
+            }
+            else if ( value.IsInt() ) {
+                nValue = value.GetInt();
+                return true;
+            }
+            else if ( value.IsInt64() ) {
+                nValue = value.GetInt64();
+                return true;
+            }
+
+            ASSERT(FALSE);
+            return false;
+        }
+
         static inline bool get_field(void *impl, const char *sField, std::string &value_str) {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             if ( !doc->HasMember(sField) ) {
