@@ -58,8 +58,8 @@ bool CSqLiteDatabaseImpl::IsSqLiteDB(LPCTSTR sPath)
 
 bool CSqLiteDatabaseImpl::CompactDatabase()
 {
-    ExecuteUTF8("vacuum");
-    return true;
+    const bool bRetVal = ExecuteUTF8("vacuum");
+    return bRetVal;
 }
 
 bool CSqLiteDatabaseImpl::BeginTrans() 
@@ -98,8 +98,8 @@ bool CSqLiteDatabaseImpl::Rollback()
 bool CSqLiteDatabaseImpl::Execute(LPCTSTR lpszSQL) 
 {
     std::string sql = ds_str_conv::ConvertToUTF8(lpszSQL);
-    ExecuteUTF8(sql.c_str());
-    return true;
+    const bool bRetVal = ExecuteUTF8(sql.c_str());
+    return bRetVal;
 }
 
 void CSqLiteDatabaseImpl::Close() 

@@ -3,7 +3,7 @@
 #pragma once
 
 #ifndef __DS_STR_CONV_H__
-    #include "dsStrConv.h"
+    #include "../dsStrConv.h"
 #endif
 
 #ifndef RAPIDJSON_DOCUMENT_H_
