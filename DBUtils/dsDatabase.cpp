@@ -263,6 +263,9 @@ dsDatabase::dbErrorHandler dsDatabase::SetErrorHandler(dsDatabase::dbErrorHandle
 {
     dbErrorHandler prevHandler = m_pErrorHandler;
     m_pErrorHandler = newHandler;
+    if ( m_pDatabase ) {
+        m_pDatabase->SetErrorHandler(m_pErrorHandler);
+    }
     return prevHandler;
 }
 
