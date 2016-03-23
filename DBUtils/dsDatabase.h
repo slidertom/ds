@@ -93,16 +93,13 @@ public:
 	bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 						LPCTSTR sField, LPCTSTR sForeignField);
 
-public:
-	bool CopyTableData(dsDatabase *pDstDB, LPCTSTR sTableName);
-	bool CopyTableData(dsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
-
     typedef void (*dbErrorHandler)(LPCTSTR msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler);
 
 // Attributes
 private:
 	friend class dsTable;
+    friend class dsCopyTableData;
 	CAbsDatabase *m_pDatabase;
     std::vector<dsDatabaseListener *> m_listners;
     dbErrorHandler m_pErrorHandler;

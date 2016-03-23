@@ -5,11 +5,7 @@
 #include "unordered_map"
 
 struct sqlite3_stmt;
-class CSqLiteDatabaseImpl;
 class CSqLiteErrorHandler;
-
-class dsDatabase;
-class dsTableFieldInfo;
 
 namespace sqlite_util
 {
@@ -35,7 +31,7 @@ namespace sqlite_util
     public:
         void clear();
     };
-    int BindStatements(CFieldDataMap &data_map, sqlite3_stmt *pStmt);
+    int sqlite_bind_statements(CFieldDataMap &data_map, sqlite3_stmt *pStmt);
 
     class CFieldDataBinary : public CFieldData 
     {
@@ -129,32 +125,6 @@ namespace sqlite_util
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex);
     };
-
-    enum eFieldType {
-        eFieldType_Undefined = -1,
-        eFieldType_Text = 0,
-        eFieldType_Long,
-        eFieldType_Double,
-        eFieldType_Binary
-    };
-    
-    class CFieldInfo
-    {
-    // Attributes
-    public:
-        eFieldType GetFieldType() const;
-
-        bool m_bPrimary;
-        bool m_bAutoIncrement;
-        bool m_bNotNull;
-        std::string m_sDefault;
-        std::string m_sType;
-    };
-
-    class CFieldInfoMap : public std::unordered_map<std::string, CFieldInfo> { };
-    bool GetTableFieldsdInfo(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, CFieldInfoMap &map);
-
-    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, dsTableFieldInfo union_info);
 };
 
 #endif 

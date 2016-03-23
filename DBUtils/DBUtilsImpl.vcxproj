@@ -176,6 +176,7 @@
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeRelease|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="dsCopyTableData.cpp" />
     <ClCompile Include="dsStrConv.cpp" />
     <ClCompile Include="JsonUtils\jsonparser.cpp" />
     <ClCompile Include="JsonUtils\jsonparser_rgb.cpp" />
@@ -191,7 +192,9 @@
     <ClCompile Include="sqlite\SqLiteDatabaseImpl.cpp" />
     <ClCompile Include="sqlite\SqLiteErrorHandler.cpp" />
     <ClCompile Include="sqlite\SqLiteRecordsetImpl.cpp" />
-    <ClCompile Include="sqlite\SqLiteUtil.cpp" />
+    <ClCompile Include="sqlite\sqlite_bind_util.cpp" />
+    <ClCompile Include="sqlite\sqlite_copy_table.cpp" />
+    <ClCompile Include="sqlite\sqlite_table_info.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'">stdafx.h</PrecompiledHeaderFile>
@@ -216,6 +219,7 @@
     <ClInclude Include="DatabaseType.h" />
     <ClInclude Include="DBUtilsImpl.h" />
     <ClInclude Include="dsConfig.h" />
+    <ClInclude Include="dsCopyTableData.h" />
     <ClInclude Include="dsStrConv.h" />
     <ClInclude Include="JsonUtils\jsonparser.h" />
     <ClInclude Include="JsonUtils\jsonparser_rgb.h" />
@@ -244,8 +248,10 @@
     <ClInclude Include="sqlite\SqLiteDatabaseImpl.h" />
     <ClInclude Include="sqlite\SqLiteErrorHandler.h" />
     <ClInclude Include="sqlite\SqLiteRecordsetImpl.h" />
-    <ClInclude Include="sqlite\SqLiteUtil.h" />
+    <ClInclude Include="sqlite\sqlite_bind_util.h" />
+    <ClInclude Include="sqlite\sqlite_copy_table.h" />
     <ClInclude Include="sqlite\sqlite_include.h" />
+    <ClInclude Include="sqlite\sqlite_table_info.h" />
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

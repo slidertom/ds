@@ -8,6 +8,7 @@
 
 struct sqlite3;
 class CSqLiteErrorHandler;
+namespace sqlite_util { class CFieldInfoMap; };
 
 class CSqLiteDatabaseImpl : public CAbsDatabase
 {
@@ -48,8 +49,6 @@ public:
 
     virtual bool CompactDatabase() override;
 
-	virtual bool CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst) override;
-
 	virtual void DeleteRelation(LPCTSTR sRelation) override;
 	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 								LPCTSTR sField, LPCTSTR sForeignField) override;
@@ -62,12 +61,16 @@ public:
     sqlite3 *GetSqLiteDB() { return m_pDB; }
     CSqLiteErrorHandler *GetErrorHandler() { return m_pErrorHandler; }
 
+    const sqlite_util::CFieldInfoMap *GetTableFieldInfoImpl(const char *sTableNameUTF8);
+
 // Attributes
 private:
     CStdString m_sFilePath;
 	bool m_bReadOnly;
     sqlite3 *m_pDB;
     CSqLiteErrorHandler *m_pErrorHandler;
+    std::unordered_map<std::string, sqlite_util::CFieldInfoMap *>  m_table_field_info_map;
+
 #ifdef _DEBUG
     bool m_bTransMode; // invariant
 #endif

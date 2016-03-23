@@ -45,8 +45,6 @@ public:
 
     virtual bool CompactDatabase() override;
 
-	virtual bool CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst) override;
-
 	virtual void DeleteRelation(LPCTSTR sRelation) override;
 	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 								LPCTSTR sField, LPCTSTR sForeignField) override;
@@ -54,6 +52,10 @@ public:
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
     virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) override;
+
+// Static operations
+public:
+    static bool CopyTableData(CDaoDatabaseImpl *pSrcDB, CDaoDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
 
 public:
     CDaoDatabase *GetDaoDB() { return m_pDatabase; }

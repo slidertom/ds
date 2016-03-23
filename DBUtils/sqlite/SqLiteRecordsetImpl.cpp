@@ -1,11 +1,13 @@
 #include "StdAfx.h"
 #include "SqLiteRecordsetImpl.h"
 
+#include "sqlite_copy_table.h"
+#include "sqlite_bind_util.h"
+#include "sqlite_table_info.h"
+#include "sqlite_include.h"
+
 #include "SqLiteDatabaseImpl.h"
 #include "SqLiteErrorHandler.h"
-#include "SqLiteUtil.h"
-
-#include "sqlite_include.h"
 
 #include "../dsStrConv.h"
 
@@ -65,7 +67,7 @@ static void OnColumnIndexFailed(CSqLiteErrorHandler *pErrorHandler, LPCTSTR sFie
 
 CSqLiteRecordsetImpl::CSqLiteRecordsetImpl(CSqLiteDatabaseImpl *pDatabase, CSqLiteErrorHandler *pErrorHandler)
 : m_pDB(pDatabase), m_pErrorHandler(pErrorHandler), m_bEOF(true), m_stmt(nullptr), m_nEditRowId(-1), 
-  m_pSaveData(nullptr), m_pInfoData(nullptr), m_insert_stmt(nullptr), m_bSQLOpened(false), m_update_stmt(nullptr)
+  m_pSaveData(nullptr), m_pFieldInfoData(nullptr), m_insert_stmt(nullptr), m_bSQLOpened(false), m_update_stmt(nullptr)
 {
     
 }
@@ -73,7 +75,6 @@ CSqLiteRecordsetImpl::CSqLiteRecordsetImpl(CSqLiteDatabaseImpl *pDatabase, CSqLi
 CSqLiteRecordsetImpl::~CSqLiteRecordsetImpl() 
 { 
     delete m_pSaveData;
-    delete m_pInfoData;
     sqlite3_finalize(m_update_stmt);
     sqlite3_finalize(m_insert_stmt);
 	sqlite3_finalize(m_stmt);
@@ -299,22 +300,24 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
 {
     ASSERT(m_sTable.length() > 0);
 
-    if ( !m_pInfoData ) {
-        m_pInfoData = new sqlite_util::CFieldInfoMap; // could be a cache on the database level
-        sqlite_util::GetTableFieldsdInfo(m_pDB, m_sTable.c_str(), m_pErrorHandler, *m_pInfoData);
-    }
-
     sqlite3 *pDB = m_pDB->GetSqLiteDB();
 
     int rc = SQLITE_OK;
     if ( !m_insert_stmt )
     {
+        if ( !m_pFieldInfoData ) {
+            m_pFieldInfoData = m_pDB->GetTableFieldInfoImpl(m_sTable.c_str()); // could be a cache on the database level
+            if ( !m_pFieldInfoData ) {
+                return;
+            }
+        }
+
         std::string sColumns;
         std::string sValues;
 
         // do generate empty statement like: DBBrowserDB::emptyInsertStmt
-        auto beg_it = m_pInfoData->begin();
-        auto end_it = m_pInfoData->end();
+        auto beg_it = m_pFieldInfoData->begin();
+        auto end_it = m_pFieldInfoData->end();
         for (auto it = beg_it; it != end_it; ++it) 
         {
             if ( it->second.m_bPrimary ) 
@@ -386,7 +389,7 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
 
     ASSERT(rc == SQLITE_OK);
     
-    sqlite_util::BindStatements(*m_pSaveData, m_insert_stmt);
+    sqlite_util::sqlite_bind_statements(*m_pSaveData, m_insert_stmt);
     rc = ::sqlite3_step(m_insert_stmt);
     if ( rc != SQLITE_DONE ) {
         const char *sql = sqlite3_sql(m_insert_stmt);
@@ -458,7 +461,7 @@ bool CSqLiteRecordsetImpl::DoUpdate()
 
     if (m_update_stmt) 
     {
-        const int nIndex = sqlite_util::BindStatements(*m_pSaveData, m_update_stmt);
+        const int nIndex = sqlite_util::sqlite_bind_statements(*m_pSaveData, m_update_stmt);
         ::sqlite3_bind_int64(m_update_stmt, nIndex, m_nEditRowId);                            
         rc = ::sqlite3_step(m_update_stmt);
 
@@ -556,7 +559,7 @@ void CSqLiteRecordsetImpl::CommitInsert()
     sqlite3_stmt *pStmt = nullptr;
     int rc = ::sqlite3_prepare_v2(pDB, sSql.c_str(), -1, &pStmt, &pTail);
     if (rc == SQLITE_OK) {
-        sqlite_util::BindStatements(*m_pSaveData, pStmt);
+        sqlite_util::sqlite_bind_statements(*m_pSaveData, pStmt);
         rc = ::sqlite3_step(pStmt);
     }
     else {
@@ -605,14 +608,13 @@ long CSqLiteRecordsetImpl::GetRecordCount()
 
 bool CSqLiteRecordsetImpl::DoesFieldExist(LPCTSTR sFieldName) 
 {
-    sqlite_util::CFieldInfoMap field_info_map;
-    if ( !sqlite_util::GetTableFieldsdInfo(m_pDB, m_sTable.c_str(), m_pErrorHandler, field_info_map) )
-    {
+    m_pFieldInfoData = m_pDB->GetTableFieldInfoImpl(m_sTable.c_str());
+    if ( !m_pFieldInfoData ) {
         return false;
     }
 
     std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
-    if ( field_info_map.find(sFieldNameUTF8.c_str()) != field_info_map.end() ) {
+    if ( m_pFieldInfoData->find(sFieldNameUTF8.c_str()) != m_pFieldInfoData->end() ) {
         return true;
     }
 	return false;

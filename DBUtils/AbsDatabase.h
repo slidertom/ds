@@ -59,8 +59,6 @@ public:
 
     virtual bool CompactDatabase() = 0;
 
-	virtual bool CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst) = 0;
-
 	virtual void DeleteRelation(LPCTSTR sRelation) = 0;
 	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 								LPCTSTR sField, LPCTSTR sForeignField) = 0;
@@ -73,7 +71,7 @@ public:
 
 namespace ds_table_field_info_util
 {
-    inline void fields_union(dsTableFieldInfo &union_info,  dsTableFieldInfo &src_info, dsTableFieldInfo &dst_info)
+    inline void fields_union(dsTableFieldInfo &union_info, const dsTableFieldInfo &src_info, const dsTableFieldInfo &dst_info)
     {
         auto end_it = src_info.end();
         for (auto it = src_info.begin(); it != end_it; ++it) 

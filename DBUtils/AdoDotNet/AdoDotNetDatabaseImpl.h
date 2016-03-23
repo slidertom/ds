@@ -44,8 +44,6 @@ public:
 
     virtual bool CompactDatabase() override { return true; }
 
-	virtual bool CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst) override { return false; };
-
 	virtual void DeleteRelation(LPCTSTR sRelation) override;
 	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 								LPCTSTR sField, LPCTSTR sForeignField) override;

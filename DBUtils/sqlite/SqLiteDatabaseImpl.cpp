@@ -1,7 +1,10 @@
 #include "StdAfx.h"
 #include "SqLiteDatabaseImpl.h"
 
-#include "SqLiteUtil.h"
+#include "sqlite_bind_util.h"
+#include "sqlite_copy_table.h"
+#include "sqlite_table_info.h"
+
 #include "SqLiteErrorHandler.h"
 #include "SqLiteRecordsetImpl.h"
 
@@ -58,8 +61,8 @@ bool CSqLiteDatabaseImpl::IsSqLiteDB(LPCTSTR sPath)
 
 bool CSqLiteDatabaseImpl::CompactDatabase()
 {
-    const bool bRetVal = ExecuteUTF8("vacuum");
-    return bRetVal;
+    ExecuteUTF8("vacuum");
+    return true;
 }
 
 bool CSqLiteDatabaseImpl::BeginTrans() 
@@ -68,10 +71,9 @@ bool CSqLiteDatabaseImpl::BeginTrans()
     ASSERT(!m_bTransMode); // nested transactions are not supported 
     m_bTransMode = true;
 #endif
-    // "begin deferred transaction"
-    // "begin immediate transaction"
-    // "begin exclusive transaction"
-    ExecuteUTF8("begin transaction");
+    VERIFY(ExecuteUTF8("begin transaction"));
+    //VERIFY(ExecuteUTF8("begin exclusive transaction"));
+    //ExecuteUTF8("begin immediate transaction");
 	return true;
 }
 
@@ -81,7 +83,7 @@ bool CSqLiteDatabaseImpl::CommitTrans()
     ASSERT(m_bTransMode); // transaction should be started
     m_bTransMode = false;
 #endif
-    ExecuteUTF8("commit transaction");
+    VERIFY(ExecuteUTF8("commit transaction"));
 	return true;
 }
 
@@ -98,8 +100,7 @@ bool CSqLiteDatabaseImpl::Rollback()
 bool CSqLiteDatabaseImpl::Execute(LPCTSTR lpszSQL) 
 {
     std::string sql = ds_str_conv::ConvertToUTF8(lpszSQL);
-    const bool bRetVal = ExecuteUTF8(sql.c_str());
-    return bRetVal;
+    return ExecuteUTF8(sql.c_str());
 }
 
 void CSqLiteDatabaseImpl::Close() 
@@ -109,10 +110,20 @@ void CSqLiteDatabaseImpl::Close()
     }
     m_pDB = nullptr;
     m_sFilePath = _T("");
+
+    auto end_it = m_table_field_info_map.end();
+    for (auto it = m_table_field_info_map.begin(); it != end_it; ++it) {
+        delete it->second;
+    }
+    m_table_field_info_map.clear();
 }
 
 bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) 
 {
+    //int nRetVal = sqlite3_config(SQLITE_CONFIG_SERIALIZED); // SQLITE_CONFIG_SERIALIZED SQLITE_CONFIG_MULTITHREAD open -> SQLITE_OPEN_FULLMUTEX
+    //VERIFY(nRetVal == SQLITE_OK);
+    //nRetVal;
+
     ASSERT(!m_pDB);
     // SQLite support three different threading modes:
     //      Single-thread. In this mode, all mutexes are disabled and SQLite is unsafe to use in more than a single thread at once.
@@ -125,6 +136,18 @@ bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw)
 
     // http://www.mimec.org/node/297
     //database.exec( "PRAGMA encoding = \"UTF-16\"" );
+
+    // http://manski.net/2012/10/sqlite-performance/
+    // Read:
+    // * using a read-only connection doesn’t provide any performance benefit
+    // * using a shared cache is never faster (but sometimes slower) than using a private cache
+    // * using WAL is always faster than using the default journal mode (DELETE) 
+    // Write:
+    // * Using a shared cache doesn’t affect the performance.
+    // * Using WAL improves write performance significantly.
+    // * Using a shared connection is always faster than using multiple connections. 
+    // WAL - http://www.sqlite.org/draft/wal.html
+    // All processes using a database must be on the same host computer; WAL does not work over a network filesystem. 
 
     // http://utf8everywhere.org/
     m_sFilePath = sPath;
@@ -160,7 +183,8 @@ bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw)
     // so must be enabled separately for each database connection. (Note, however, that future releases of SQLite might change so that foreign key 
     // constraints enabled by default. 
     ExecuteUTF8("PRAGMA foreign_keys = ON");
-
+    //ExecuteUTF8("PRAGMA main.journal_mode = OFF");
+    //ExecuteUTF8("PRAGMA busy_timeout=1000");
     return true;
 }
 
@@ -250,20 +274,37 @@ bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
     return false;
 }
 
+const sqlite_util::CFieldInfoMap *CSqLiteDatabaseImpl::GetTableFieldInfoImpl(const char *sTableNameUTF8)
+{
+    auto found = m_table_field_info_map.find(sTableNameUTF8);
+    if ( found == m_table_field_info_map.end() )
+    {
+        sqlite_util::CFieldInfoMap *pFieldInfoMap = new sqlite_util::CFieldInfoMap;
+        if ( !sqlite_util::sqlite_get_table_fields_info(this, sTableNameUTF8, m_pErrorHandler, *pFieldInfoMap) ) {
+            delete pFieldInfoMap;
+            return nullptr;
+        }
+
+        m_table_field_info_map[sTableNameUTF8] = pFieldInfoMap;
+        return pFieldInfoMap;
+    }
+    
+    return found->second;
+}
+
 bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
 {
     std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTable);
-    sqlite_util::CFieldInfoMap field_info_map;
-    if ( !sqlite_util::GetTableFieldsdInfo(this, sTableNameUTF8.c_str(), m_pErrorHandler, field_info_map) )
-    {
+    const sqlite_util::CFieldInfoMap *pFieldInfoMap = GetTableFieldInfoImpl(sTableNameUTF8.c_str());
+    if ( !pFieldInfoMap ) {
         CStdString sError;
         sError.Format(_T("GetTableFieldInfo failed. Table %s."), sTable);
         m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteDatabaseImpl::GetTableFieldInfo"));
         return false;
     }
 
-    auto end_it = field_info_map.end();
-    for (auto it = field_info_map.begin(); it != end_it; ++it) 
+    auto end_it = pFieldInfoMap->end();
+    for (auto it = pFieldInfoMap->begin(); it != end_it; ++it) 
     {
         dsFieldType field_type = dsFieldType_Undefined;
         const sqlite_util::eFieldType type = it->second.GetFieldType();   
@@ -287,38 +328,5 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
         info[sColName] = field_type;
     }
 
-    return true;
-}
-
-bool CSqLiteDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
-{
-    ASSERT(FALSE); // UNTESTED
-    // You'll have to attach Database X with Database Y using the Attach command, then run the appropriate Insert Into commands for the tables you want to transfer.
-    //INSERT INTO X.TABLE(Id, Value) SELECT * FROM Y.TABLE;
-    
-    //ATTACH DATABASE "myother.db" AS aDB;
-    // INSERT INTO newtable 
-    //SELECT * FROM aDB.oldTableInMyOtherDB;
-    // sqlite3_exec(db, "ATTACH 'C:/tmp/tmp.sqlite' as mytmp");
-    ASSERT(pDstDB->GetType() == dsType_SqLite);
-    const CStdString sPath = pDstDB->GetName();
-    const std::string localFileName = ds_str_conv::ConvertToUTF8(sPath);
-    std::string sSQL = "ATTACH '";
-    sSQL += localFileName;
-    sSQL += "' as DestDB";
-    if ( !ExecuteUTF8(sSQL.c_str()) ) {
-        return false;
-    }
-    std::string sTableNameSrcUTF8 = ds_str_conv::ConvertToUTF8(sTableNameSrc);
-    std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
-    //INSERT INTO newtable SELECT * FROM aDB.oldTableInMyOtherDB;
-    sSQL = "INSERT INTO DestDB.";
-    sSQL += sTableNameDstUTF8;
-    sSQL += "SELECT * FROM ";
-    sSQL += sTableNameSrcUTF8;
-    if ( !ExecuteUTF8(sSQL.c_str()) ) {
-        return false;
-    }   
-   
     return true;
 }

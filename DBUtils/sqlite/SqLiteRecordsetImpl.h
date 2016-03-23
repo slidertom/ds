@@ -108,7 +108,7 @@ private:
     std::unordered_map<CStdString, int, std::hash<std::basic_string<TCHAR>>> m_name_to_index;
 
     sqlite_util::CFieldDataMap *m_pSaveData;
-    sqlite_util::CFieldInfoMap *m_pInfoData;
+    const sqlite_util::CFieldInfoMap *m_pFieldInfoData;
 };
 
 #endif 

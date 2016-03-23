@@ -120,4 +120,22 @@ namespace dao_extensions
             internal::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, strColumns, pErrorHandler);
         }
     }
+
+    bool CopyTableDataImpl(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, CDaoErrorHandler *pErrorHandler)
+    {
+        try {
+		    dao_extensions::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, pErrorHandler);
+	    }
+        catch (CDaoException *e) {
+            ASSERT(FALSE);
+		    pErrorHandler->OnDaoException(e, _T("CopyTableDataImpl"));
+            CStdString sMsg;
+            sMsg.Format(_T("CopyTableData From: %s To %s."), sTableNameSrc, sTableNameDst);
+            pErrorHandler->OnError(sMsg.c_str(), _T("CopyTableDataImpl"));
+		    e->Delete();
+		    return false;
+        }
+
+	    return true;
+    }
 };

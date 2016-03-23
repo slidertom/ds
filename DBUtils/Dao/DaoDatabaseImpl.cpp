@@ -293,31 +293,11 @@ bool CDaoDatabaseImpl::CompactDatabase()
     return true;
 }
 
-bool CDaoDatabaseImpl::CopyTableData(CAbsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
+bool CDaoDatabaseImpl::CopyTableData(CDaoDatabaseImpl *pSrcDB, CDaoDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
 {
-	ASSERT(pDstDB);
-    CDaoDatabaseImpl *pDBDestImpl = dynamic_cast<CDaoDatabaseImpl *>(pDstDB);
-    ASSERT(pDBDestImpl);
-
-	CDaoDatabase *pDstDBDao = pDBDestImpl->m_pDatabase;
-
-	ASSERT(m_pDatabase);
-	ASSERT(pDstDBDao);
-
-	try {
-		dao_extensions::CopyTableData(m_pDatabase, pDstDBDao, sTableNameSrc, sTableNameDst, m_pErrorHandler);
-	}
-    catch (CDaoException *e) {
-        ASSERT(FALSE);
-		m_pErrorHandler->OnDaoException(e, _T("CDaoDatabaseImpl::CopyTableData"));
-        CStdString sMsg;
-        sMsg.Format(_T("CopyTableData From: %s To %s."), sTableNameSrc, sTableNameDst);
-        m_pErrorHandler->OnError(sMsg.c_str(), _T("CDaoDatabaseImpl::CopyTableData"));
-		e->Delete();
-		return false;
-    }
-
-	return true;
+    ASSERT(pSrcDB);
+    ASSERT(pDstDB);
+    return dao_extensions::CopyTableDataImpl(pSrcDB->m_pDatabase, pDstDB->m_pDatabase, sTableNameSrc, sTableNameDst, pDstDB->m_pErrorHandler);
 }
 
 CDaoDatabaseImpl::dbErrorHandler CDaoDatabaseImpl::SetErrorHandler(CDaoDatabaseImpl::dbErrorHandler newHandler)

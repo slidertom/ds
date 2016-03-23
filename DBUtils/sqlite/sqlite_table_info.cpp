@@ -1,8 +1,8 @@
 #include "StdAfx.h"
-#include "SqLiteUtil.h"
+#include "sqlite_table_info.h"
 
 #include "SqLiteRecordsetImpl.h"
-
+#include "sqlite_bind_util.h"
 #include "sqlite_include.h"
 
 #ifdef _DEBUG
@@ -11,85 +11,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#include "../dsDatabase.h"
-#include "../AbsDatabase.h"
-#include "../dsTable.h"
-#include "SqLiteDatabaseImpl.h" 
-
 namespace sqlite_util
 {
-    class CDeletor  {
-    public:
-        template <class TPair>
-        void operator()(TPair &pair) {
-            delete pair.second;
-        }
-    };
-
-    void CFieldDataMap::clear() {
-        std::for_each(begin(), end(), CDeletor());
-        std::unordered_map<std::string, CFieldData *>::clear();
-    }
-
-    int BindStatements(CFieldDataMap &data_map, sqlite3_stmt *pStmt)
-    {
-        auto end_it = data_map.end();
-        auto beg_it = data_map.begin();
-
-        int nIndex = 1;
-        for (auto it = beg_it; it != end_it; ++it) {
-            if ( it->second->Bind(pStmt, nIndex) != SQLITE_OK )
-            {
-                ASSERT(FALSE);
-            }
-            ++nIndex;
-        }
-        return nIndex;
-    }
-
-    CFieldDataBinary::CFieldDataBinary(unsigned char *pData, unsigned long nSize) 
-    {
-        m_pData = new unsigned char[nSize];
-        memcpy(m_pData, pData, nSize);
-        m_nSize = nSize;
-    }
-
-    CFieldDataBinary::~CFieldDataBinary() 
-    {
-        delete [] m_pData;
-    }
-
-    int CFieldDataBinary::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
-        return ::sqlite3_bind_blob(pStmt, nIndex, m_pData, m_nSize, SQLITE_STATIC);   
-    }
-
-    int CFieldDataText::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
-        // if text length is negative, then the length of the string is the number of bytes up to the first zero terminator.
-        return ::sqlite3_bind_text(pStmt, nIndex, m_sText.c_str(), -1, SQLITE_STATIC);                            
-    }
-
-    int CFieldDataLong::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
-        return ::sqlite3_bind_int(pStmt, nIndex, m_nValue);                            
-    }
-
-    int CFieldDataDouble::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
-        return ::sqlite3_bind_double(pStmt, nIndex, m_dValue);                            
-    }
-
-    int CFieldDataDateTime::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
-        return ::sqlite3_bind_int64(pStmt, nIndex, m_time);
-    }
-
-    int CFieldDataNull::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
-        return sqlite3_bind_null(pStmt, nIndex);
-    }
-
     eFieldType CFieldInfo::GetFieldType() const
     {
         CStdStringA sType = m_sType;
@@ -196,7 +119,7 @@ namespace sqlite_util
         return eFieldType_Undefined;
     }
 
-    bool GetTableFieldsdInfo(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, CFieldInfoMap &map)
+    bool sqlite_get_table_fields_info(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, CFieldInfoMap &map)
     {
         ASSERT(strlen(sTableName) > 0);
 
@@ -254,76 +177,6 @@ namespace sqlite_util
             map[sColumn] = field_info;
 
             loader.MoveNext();
-        }
-
-        return true;
-    }
-    
-    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, dsTableFieldInfo union_info)
-    {
-        dsTable src_table(pSrcDB, sTableNameSrc);
-        if ( !src_table.MoveFirst() ) {
-            return true; // empty table
-        }
-   
-        sqlite_util::CFieldDataMap save_data;
-        CSqLiteRecordsetImpl dst_table(pDstDB, pDstDB->GetErrorHandler());
-        dst_table.Open(sTableNameDst);
-        while ( !src_table.IsEOF() )
-        {
-            // TODO: statement can be cached 
-            // only do bind different values
-            dst_table.PrepareInsert();
-                auto end_it = union_info.end();
-                for (auto it = union_info.begin(); it != end_it; ++it) 
-                {
-                    const TCHAR *sFieldName = it->first.c_str();
-
-                    if ( src_table.IsFieldValueNull(sFieldName) )
-                    {
-                        dst_table.SetFieldValueNull(sFieldName);
-                        continue;
-                    }
-
-                    switch (it->second) 
-                    {
-                    case dsFieldType_Text:
-                        {
-                            const CStdString sValue = src_table.GetFieldString(sFieldName);
-                            dst_table.SetFieldString(sFieldName, sValue.c_str());
-                        }
-                        break;
-                    case dsFieldType_Long:
-                        {
-                            const int nValue = src_table.GetFieldLong(sFieldName);
-                            dst_table.SetFieldLong(sFieldName, nValue);
-                        }
-                        break;
-                    case dsFieldType_Double:
-                        {
-                            const double dValue = src_table.GetFieldDouble(sFieldName);
-                            dst_table.SetFieldDouble(sFieldName, dValue);
-                        }
-                        break;
-                    case dsFieldType_DateTime:
-                        {
-                            const time_t nTime = src_table.GetFieldDateTime(sFieldName);
-                            dst_table.SetFieldDateTime(sFieldName, nTime);
-                        }
-                        break;
-                    case dsFieldType_Binary:
-                        {
-                            unsigned char *pData = nullptr;
-                            unsigned long nSize = 0;
-                            src_table.GetFieldBinary(sFieldName, &pData, nSize);        
-                            dst_table.SetFieldBinary(sFieldName, pData, nSize);
-                        }
-                        break;
-                    }
-                }
-            dst_table.CommitInsert();
-
-            src_table.MoveNext();
         }
 
         return true;

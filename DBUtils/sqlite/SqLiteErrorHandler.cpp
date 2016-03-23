@@ -1,13 +1,12 @@
 #include "StdAfx.h"
 #include "SqLiteErrorHandler.h"
 
-#include "SqLiteUtil.h"
-
-#include "Collections/StdString.h"
-
+#include "sqlite_bind_util.h"
 #include "sqlite_include.h"
 
 #include "../dsStrConv.h"
+
+#include "Collections/StdString.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
