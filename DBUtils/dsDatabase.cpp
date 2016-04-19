@@ -96,7 +96,12 @@ bool dsDatabase::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR sKey)
 
     m_pDatabase->SetErrorHandler(m_pErrorHandler);
 
-	return m_pDatabase->OpenDB(sPath, bReadOnly, sKey);
+	if ( !m_pDatabase->OpenDB(sPath, bReadOnly, sKey) ) {
+        Close();
+        return false;
+    }
+
+    return true;
 }
 
 void dsDatabase::BeginTrans()
@@ -189,4 +194,9 @@ bool dsDatabase::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignT
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->CreateRelation(sName, sTable, sForeignTable, lAttr, sField, sForeignField);
+}
+
+void dsDatabase::CreateIndex(LPCTSTR sTable, LPCTSTR sIndex)
+{
+	m_pDatabase->CreateIndex(sTable, sIndex);
 }
