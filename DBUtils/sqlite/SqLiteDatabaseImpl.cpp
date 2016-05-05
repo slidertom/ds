@@ -330,3 +330,8 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
 
     return true;
 }
+
+void CSqLiteDatabaseImpl::CreateIndex(LPCTSTR sTable, LPCTSTR sIndex)
+{
+	ASSERT(FALSE);
+}

@@ -417,3 +417,11 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
 
     return true;
 }
+
+void CDaoDatabaseImpl::CreateIndex(LPCTSTR sTable, LPCTSTR sIndex)
+{
+	CStdString sSQL;
+	sSQL.Format(_T("CREATE INDEX %s ON %s (%s)"), sIndex, sTable, sIndex);
+
+	Execute(sSQL);
+}

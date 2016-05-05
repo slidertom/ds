@@ -126,3 +126,8 @@ bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo 
 {
 	return m_pDatabase->GetTableFieldInfo(sTable, info);
 }
+
+void CAdoDotNetDatabaseImpl::CreateIndex(LPCTSTR sTable, LPCTSTR sIndex)
+{
+	ASSERT(FALSE);
+}

@@ -844,7 +844,9 @@ bool CSqLiteRecordsetImpl::MoveFirst()
 		ASSERT(!m_sTable.empty());
 		std::string sSQL  = "SELECT ROWID,* FROM ";
 					sSQL += m_sTable.c_str();
-		OpenImpl(sSQL.c_str());
+		if ( !OpenImpl(sSQL.c_str()) ) {
+            return false;
+        }
 	}
     
     return MoveFirstImpl();

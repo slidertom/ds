@@ -55,6 +55,8 @@ public:
 
     virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) override;
 
+	virtual void CreateIndex(LPCTSTR sTable, LPCTSTR sIndex) override;
+
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
 public:
