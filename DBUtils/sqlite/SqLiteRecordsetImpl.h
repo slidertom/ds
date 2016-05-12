@@ -89,7 +89,7 @@ private:
 
     void DoInsertDefault();
     bool DoUpdate();
-    void OnErrorCode(int rc, LPCTSTR sFunctionName);
+    void OnErrorCode(int rc, const char *sFunctionName);
 
 // Attributes
 private:

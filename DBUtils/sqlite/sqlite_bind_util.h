@@ -18,6 +18,7 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) = 0;
+        virtual std::string GetValueAsString() = 0;
     };
 
     class CFieldDataMap : public std::unordered_map<std::string, CFieldData *> 
@@ -42,7 +43,8 @@ namespace sqlite_util
 
     // Overrides
     public:
-        virtual int Bind(sqlite3_stmt *pStmt, int nIndex);
+        virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
+        virtual std::string GetValueAsString() override { return "?"; } // TODO: do update: Base64 should be returned?
 
     // Attributes
     private:
@@ -59,7 +61,8 @@ namespace sqlite_util
 
     // Overrides
     public:
-        virtual int Bind(sqlite3_stmt *pStmt, int nIndex);
+        virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
+        virtual std::string GetValueAsString() override { return m_sText; }
 
     // Attributes
     private:
@@ -75,7 +78,8 @@ namespace sqlite_util
 
     // Overrides
     public:
-        virtual int Bind(sqlite3_stmt *pStmt, int nIndex);
+        virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
+        virtual std::string GetValueAsString() override;
 
     // Attributes
     private:
@@ -91,7 +95,8 @@ namespace sqlite_util
 
     // Overrides
     public:
-        virtual int Bind(sqlite3_stmt *pStmt, int nIndex);
+        virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
+        virtual std::string GetValueAsString() override;
 
     // Attributes
     private:
@@ -107,7 +112,8 @@ namespace sqlite_util
 
     // Overrides
     public:
-        virtual int Bind(sqlite3_stmt *pStmt, int nIndex);
+        virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
+        virtual std::string GetValueAsString() override;
 
     // Attributes
     private:
@@ -123,7 +129,8 @@ namespace sqlite_util
 
     // Overrides
     public:
-        virtual int Bind(sqlite3_stmt *pStmt, int nIndex);
+        virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
+        virtual std::string GetValueAsString() override { return "null"; }
     };
 };
 

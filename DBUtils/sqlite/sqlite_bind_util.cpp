@@ -53,8 +53,7 @@ namespace sqlite_util
         delete [] m_pData;
     }
 
-    int CFieldDataBinary::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
+    int CFieldDataBinary::Bind(sqlite3_stmt *pStmt, int nIndex) {
         return ::sqlite3_bind_blob(pStmt, nIndex, m_pData, m_nSize, SQLITE_STATIC);   
     }
 
@@ -64,23 +63,29 @@ namespace sqlite_util
         return ::sqlite3_bind_text(pStmt, nIndex, m_sText.c_str(), -1, SQLITE_STATIC);                            
     }
 
-    int CFieldDataLong::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
+    int CFieldDataLong::Bind(sqlite3_stmt *pStmt, int nIndex) {
         return ::sqlite3_bind_int(pStmt, nIndex, m_nValue);                            
     }
 
-    int CFieldDataDouble::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
+    int CFieldDataDouble::Bind(sqlite3_stmt *pStmt, int nIndex) {
         return ::sqlite3_bind_double(pStmt, nIndex, m_dValue);                            
     }
 
-    int CFieldDataDateTime::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
+    int CFieldDataDateTime::Bind(sqlite3_stmt *pStmt, int nIndex) {
         return ::sqlite3_bind_int64(pStmt, nIndex, m_time);
     }
 
-    int CFieldDataNull::Bind(sqlite3_stmt *pStmt, int nIndex)
-    {
+    int CFieldDataNull::Bind(sqlite3_stmt *pStmt, int nIndex) {
         return sqlite3_bind_null(pStmt, nIndex);
+    }
+
+    std::string CFieldDataLong::GetValueAsString() {
+        return std::to_string(m_nValue);
+    }
+    std::string CFieldDataDouble::GetValueAsString() {
+        return std::to_string(m_dValue);
+    }
+    std::string CFieldDataDateTime::GetValueAsString() {
+        return std::to_string(m_time);
     }
 };

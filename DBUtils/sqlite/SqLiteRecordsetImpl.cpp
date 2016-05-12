@@ -165,9 +165,9 @@ static sqlite3_stmt *Prepare(sqlite3 *pDB, const char *sql, CSqLiteErrorHandler 
     if (rc != SQLITE_OK)  {
         const char* localError = sqlite3_errmsg(pDB);
         pErrorHandler->OnError(rc, localError, _T("Prepare(sqlite3 *pDB....)"));
-        CStdString sError = _T("SQL statement: ");
-        sError += ds_str_conv::ConvertFromUTF8(sql);
-        pErrorHandler->OnError(sError.c_str(), _T("Prepare(sqlite3 *pDB....)"));
+        std::string sError = "SQL statement: ";
+                    sError += sql;
+        pErrorHandler->OnError(sError.c_str(), "Prepare(sqlite3 *pDB....)");
         ::sqlite3_finalize(stmt);
         return nullptr;
     }
@@ -188,7 +188,7 @@ bool CSqLiteRecordsetImpl::Delete()
 	//sDelete.Format("DELETE FROM %s WHERE ROWID = %d", m_sTable.c_str(), nRowId);
     const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
     if ( nRetVal == -1 ) {
-        OnErrorCode(nRetVal, _T("CSqLiteRecordsetImpl::Delete()"));
+        OnErrorCode(nRetVal, "CSqLiteRecordsetImpl::Delete()");
         return false;
     }
     return true;
@@ -384,10 +384,10 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
 
         if (rc != SQLITE_OK) 
         {
-           OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_prepare_v2)"));
-           CStdString sError = _T("SQL statement:");
-           sError += ds_str_conv::ConvertFromUTF8(sSql.c_str()).c_str();
-           m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_prepare_v2)"));
+           OnErrorCode(rc, "CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_prepare_v2)");
+           std::string sError = "SQL statement:";
+                       sError += sSql.c_str();
+           m_pErrorHandler->OnError(sError.c_str(), "CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_prepare_v2)");
            return;
         }
     }
@@ -401,7 +401,7 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
         CStdString sError = _T("SQL statement:");
         sError += ds_str_conv::ConvertFromUTF8(sql).c_str();
         m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_step)"));
-        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_step)"));
+        OnErrorCode(rc, "CSqLiteRecordsetImpl::DoInsertDefault()(sqlite3_step)");
     }
     ::sqlite3_clear_bindings(m_insert_stmt);
     ::sqlite3_reset(m_insert_stmt);
@@ -431,6 +431,27 @@ static inline std::string save_data_to_update_values_string(sqlite_util::CFieldD
     return sValues;
 }
 
+static inline std::string save_data_to_error_values_string(sqlite_util::CFieldDataMap *pSaveData)
+{
+    ASSERT(pSaveData);
+
+    std::string sValues;
+    auto end_it = pSaveData->end();
+    auto beg_it = pSaveData->begin();
+    for (auto it = beg_it; it != end_it; ++it) {
+        if ( sValues.empty() ) {
+            sValues += it->first;
+            sValues += it->second->GetValueAsString();
+        }
+        else {
+            sValues += ",";
+            sValues += it->first;
+            sValues += it->second->GetValueAsString();
+        }
+    }
+    return sValues;
+}
+
 bool CSqLiteRecordsetImpl::DoUpdate()
 {
     //sqlite3_finalize(m_update_stmt);
@@ -453,12 +474,15 @@ bool CSqLiteRecordsetImpl::DoUpdate()
     if ( !m_update_stmt )
     {
         const char* pTail = nullptr;
-        CStdStringA sSql;
-        sSql.Format("UPDATE %s SET %s WHERE ROWID = ?", m_sTable.c_str(), sValues.c_str());     
+        std::string sSql  = "UPDATE ";
+                    sSql += m_sTable.c_str();
+                    sSql += " SET ";
+                    sSql += sValues.c_str();
+                    sSql += " WHERE ROWID = ?";
         rc = ::sqlite3_prepare_v2(pDB, sSql.c_str(), -1, &m_update_stmt, &pTail);
         if (rc != SQLITE_OK) 
         {
-            OnErrorCode(rc, _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_prepare_v2)"));
+            OnErrorCode(rc, "CSqLiteRecordsetImpl::DoUpdate()(sqlite3_prepare_v2)");
             sqlite3_finalize(m_update_stmt);
             m_update_stmt = nullptr;
         }
@@ -476,8 +500,9 @@ bool CSqLiteRecordsetImpl::DoUpdate()
    
     if ( rc != SQLITE_DONE ) 
     {
+        const std::string sErrorValues = save_data_to_error_values_string(m_pSaveData);
         CStdStringA sError;
-        sError.Format("SQL statement: UPDATE %s SET %s WHERE ROWID = %d", m_sTable.c_str(), sValues.c_str(), m_nEditRowId);     
+        sError.Format("SQL statement: UPDATE %s SET %s WHERE ROWID = %d", m_sTable.c_str(), sErrorValues.c_str(), m_nEditRowId);     
         m_pErrorHandler->OnError(rc, sError.c_str(), _T("CSqLiteRecordsetImpl::DoUpdate()(sqlite3_finalize)"));
         return false;
     }
@@ -568,7 +593,7 @@ void CSqLiteRecordsetImpl::CommitInsert()
         if ( rc != SQLITE_DONE ) {
             CStdString sSQL = ds_str_conv::ConvertFromUTF8(sSql.c_str());
             m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteRecordsetImpl::CommitInsert()(1)"));
-            OnErrorCode(rc, _T("CSqLiteRecordsetImpl::CommitInsert()(1)"));
+            OnErrorCode(rc, "CSqLiteRecordsetImpl::CommitInsert()(1)");
         }
     }
     ::sqlite3_finalize(pStmt);
@@ -576,18 +601,19 @@ void CSqLiteRecordsetImpl::CommitInsert()
     if ( rc != SQLITE_DONE ) {
         CStdString sSQL = ds_str_conv::ConvertFromUTF8(sSql.c_str());
         m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteRecordsetImpl::CommitInsert()(1)"));
-        OnErrorCode(rc, _T("CSqLiteRecordsetImpl::CommitInsert()(2)"));
+        OnErrorCode(rc, "CSqLiteRecordsetImpl::CommitInsert()(2)");
     }
 
     delete m_pSaveData;
     m_pSaveData = nullptr;
 }
 
-void CSqLiteRecordsetImpl::OnErrorCode(int rc, LPCTSTR sFunctionName)
+void CSqLiteRecordsetImpl::OnErrorCode(int rc, const char *sFunctionName)
 {
     sqlite3 *pDB = m_pDB->GetSqLiteDB();
     const char *localError = ::sqlite3_errmsg(pDB);
-    m_pErrorHandler->OnError(rc, localError, sFunctionName);
+    CStdString sFunctionNameW = ds_str_conv::ConvertFromUTF8(sFunctionName);
+    m_pErrorHandler->OnError(rc, localError, sFunctionNameW.c_str());
 }
 
 long CSqLiteRecordsetImpl::GetRecordCount()
@@ -986,7 +1012,7 @@ bool CSqLiteRecordsetImpl::DeleteByLongValue(LPCTSTR sField, long nValue)
 
     const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
     if ( nRetVal == -1 ) {
-        OnErrorCode(nRetVal, _T("CSqLiteRecordsetImpl::DeleteByLongValue()"));
+        OnErrorCode(nRetVal, "CSqLiteRecordsetImpl::DeleteByLongValue()");
         return false;
     }
     return true;
@@ -1014,7 +1040,7 @@ bool CSqLiteRecordsetImpl::DeleteByStringValue(LPCTSTR sField, LPCTSTR sValue)
 
     const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
     if ( nRetVal == -1 ) {
-        OnErrorCode(nRetVal, _T("CSqLiteRecordsetImpl::DeleteByStringValue()"));
+        OnErrorCode(nRetVal, "CSqLiteRecordsetImpl::DeleteByStringValue()");
         return false;
     }
     return true;
