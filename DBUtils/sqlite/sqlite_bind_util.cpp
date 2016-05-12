@@ -5,6 +5,8 @@
 #include "sqlite_include.h"
 #include "SqLiteDatabaseImpl.h" 
 
+#include "../dsStrConv.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -80,10 +82,10 @@ namespace sqlite_util
     }
 
     std::string CFieldDataLong::GetValueAsString() {
-        return std::to_string(m_nValue);
+        return ds_str_conv::int_to_string(m_nValue);
     }
     std::string CFieldDataDouble::GetValueAsString() {
-        return std::to_string(m_dValue);
+        return ds_str_conv::double_to_string(m_dValue);
     }
     std::string CFieldDataDateTime::GetValueAsString() {
         return std::to_string(m_time);

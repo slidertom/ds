@@ -50,6 +50,15 @@ namespace ds_str_conv
         return wstrTo;
     }
 
+    std::string int_to_string(int nValue)
+    {
+        std::string sValue;
+        std::stringstream strstream;
+        strstream << nValue;
+        strstream >> sValue;
+        return sValue;
+    }
+
     std::string long_to_string(long nValue)
     {
         std::string sValue;
