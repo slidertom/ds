@@ -14,6 +14,19 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+void CSqLiteErrorHandler::OnError(const char *sError, const char *sFunctionName)
+{
+    if ( !m_pErrorHandler ) {
+        return;
+    }
+
+    std::string sMsg  = sError;
+                sMsg += "-";
+                sMsg += sFunctionName;
+    CStdStringW sErrorMsg = ds_str_conv::ConvertFromUTF8(sMsg.c_str());  
+    (*m_pErrorHandler)(sErrorMsg.c_str());
+}
+
 void CSqLiteErrorHandler::OnError(LPCTSTR sError, LPCTSTR sFunctionName)
 {
     if ( !m_pErrorHandler ) {

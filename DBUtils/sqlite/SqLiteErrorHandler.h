@@ -12,6 +12,7 @@ public:
 // Operations
 public:
     void OnError(LPCTSTR sError, LPCTSTR sFunctionName);
+    void OnError(const char *sError, const char *sFunctionName);
     void OnError(int errorCode, const char *sErrorUTF8, LPCTSTR sFunctionName);
     
     typedef void (*dbErrorHandler)(LPCTSTR msg); 
