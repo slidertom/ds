@@ -55,14 +55,12 @@ public:
 
     virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) override;
 
-	virtual void CreateIndex(LPCTSTR sTable, LPCTSTR sIndex) override;
-
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
 public:
     sqlite3 *GetSqLiteDB() { return m_pDB; }
     CSqLiteErrorHandler *GetErrorHandler() { return m_pErrorHandler; }
-
+    void OnError(const char *sError, const char *sFunctionName);
     const sqlite_util::CFieldInfoMap *GetTableFieldInfoImpl(const char *sTableNameUTF8);
 
 // Attributes

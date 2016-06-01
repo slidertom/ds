@@ -9,7 +9,9 @@
 
 #include "../dsDatabase.h"
 #include "../AbsDatabase.h"
+#include "../dsStrConv.h"
 #include "../dsTable.h"
+
 #include "SqLiteDatabaseImpl.h" 
 #include "SqLiteErrorHandler.h"
 
@@ -24,7 +26,10 @@ namespace sqlite_util
     bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, const dsTableFieldInfo &union_info)
     {
         if ( union_info.size() == 0 ) {
-            pDstDB->GetErrorHandler()->OnError(_T("There are no fields to import."), _T("sqlite_util::ImportTableData"));
+            CStdStringA sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
+            CStdStringA sError;
+            sError.Format("There are no fields to import in the table: %s.", sTableNameDstUTF8.c_str());
+            pDstDB->GetErrorHandler()->OnError(sError.c_str(), "sqlite_util::ImportTableData");
             return false;
         }
 

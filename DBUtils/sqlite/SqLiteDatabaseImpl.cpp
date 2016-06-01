@@ -292,6 +292,11 @@ const sqlite_util::CFieldInfoMap *CSqLiteDatabaseImpl::GetTableFieldInfoImpl(con
     return found->second;
 }
 
+void CSqLiteDatabaseImpl::OnError(const char *sError, const char *sFunctionName)
+{
+    m_pErrorHandler->OnError(sError, sFunctionName);
+}
+
 bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
 {
     std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTable);
@@ -329,9 +334,4 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
     }
 
     return true;
-}
-
-void CSqLiteDatabaseImpl::CreateIndex(LPCTSTR sTable, LPCTSTR sIndex)
-{
-	ASSERT(FALSE);
 }
