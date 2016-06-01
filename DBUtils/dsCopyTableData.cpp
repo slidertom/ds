@@ -9,6 +9,8 @@
 #include "SqLite/sqlite_copy_table.h"
 #include "SqLite/SqLiteDatabaseImpl.h"
 
+#include "dsStrConv.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -143,19 +145,30 @@ bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst
 
     dsTableFieldInfo union_info;
 
+    dsTableFieldInfo dst_info;
+    VERIFY(m_pDstDB->m_pDatabase->GetTableFieldInfo(sTableNameDst, dst_info));
+  
+    dsTableFieldInfo src_info;
+    m_pSrcDB->m_pDatabase->GetTableFieldInfo(sTableNameSrc, src_info);
+    ds_table_field_info_util::fields_union(union_info, src_info, dst_info);
+
     if ( nDstType == dsType_SqLite )
     {  
-        dsTableFieldInfo dst_info;
-        VERIFY(m_pDstDB->m_pDatabase->GetTableFieldInfo(sTableNameDst, dst_info));
-        dsTableFieldInfo src_info;
-        m_pSrcDB->m_pDatabase->GetTableFieldInfo(sTableNameSrc, src_info);
-        ds_table_field_info_util::fields_union(union_info, src_info, dst_info);
+        CSqLiteDatabaseImpl *pDstDBImpl = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
+
+        if ( dst_info.size() == 0 ) {
+            CStdStringA sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
+            CStdStringA sError;
+            sError.Format("Destination table %s there are no fields defined. ", sTableNameDstUTF8.c_str()); 
+            pDstDBImpl->OnError(sError.c_str(), "sqlite_util::ImportTableData");
+            return false;
+        }
 
         // special case for the sqlite database 
         if (nSrcType == dsType_SqLite && m_bAttached ) 
         {
             // field count should match for the sqlite insert statement
-            if ( dst_info.size() == union_info.size() && dst_info.size() > 0 )
+            if ( dst_info.size() == union_info.size() )
             {
                 if ( sqlite_util::sqlite_insert_table_from_attached_db(m_pDstDB, sTableNameSrc, sTableNameDst) ) {
                     return true;
@@ -163,18 +176,32 @@ bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst
                 return false;
             }
         }
-        
-        CSqLiteDatabaseImpl *pDstDBImpl = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
+       
         return sqlite_util::ImportTableData(m_pSrcDB, pDstDBImpl, sTableNameSrc, sTableNameDst, union_info);
-    }
-
-    // default implementation
-    if ( !ds_table_field_info_util::fields_union(union_info, m_pSrcDB->m_pDatabase, sTableNameSrc, m_pDstDB->m_pDatabase, sTableNameDst) ) {
-        return false;
     }
 
     dsTable src_table(m_pSrcDB, sTableNameSrc);
     dsTable dst_table(m_pDstDB, sTableNameDst);
+    return dsCopyTableData::CopyTableData(src_table, dst_table, union_info);
+}
+
+bool dsCopyTableData::CopyTableDataEx(LPCTSTR sTableName)
+{
+    ASSERT(m_pSrcDB);
+	ASSERT(m_pDstDB);
+
+    dsTableFieldInfo union_info;
+
+    // default implementation
+    if ( !ds_table_field_info_util::fields_union(union_info, m_pSrcDB->m_pDatabase, sTableName, m_pDstDB->m_pDatabase, sTableName) ) {
+        return false;
+    }
+
+    dsTable src_table(m_pSrcDB, sTableName);
+    dsTable dst_table(m_pDstDB, sTableName);
+
+	dst_table.Flush();
+
     return dsCopyTableData::CopyTableData(src_table, dst_table, union_info);
 }
 

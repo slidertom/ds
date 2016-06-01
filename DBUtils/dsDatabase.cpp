@@ -196,7 +196,3 @@ bool dsDatabase::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignT
 	return m_pDatabase->CreateRelation(sName, sTable, sForeignTable, lAttr, sField, sForeignField);
 }
 
-void dsDatabase::CreateIndex(LPCTSTR sTable, LPCTSTR sIndex)
-{
-	m_pDatabase->CreateIndex(sTable, sIndex);
-}

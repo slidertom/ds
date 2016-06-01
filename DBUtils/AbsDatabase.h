@@ -63,8 +63,6 @@ public:
 	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 								LPCTSTR sField, LPCTSTR sForeignField) = 0;
 
-	virtual void CreateIndex(LPCTSTR sTable, LPCTSTR sIndex) = 0;
-
     virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) = 0;
 
     typedef void (*dbErrorHandler)(LPCTSTR msg); 

@@ -48,8 +48,6 @@ public:
 	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 								LPCTSTR sField, LPCTSTR sForeignField) override;
 
-	virtual void CreateIndex(LPCTSTR sTable, LPCTSTR sIndex) override;
-
     virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) override;
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;

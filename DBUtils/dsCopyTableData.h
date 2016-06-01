@@ -29,6 +29,7 @@ public:
 
 	bool CopyTableData(LPCTSTR sTableName);
 	bool CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
+	bool CopyTableDataEx(LPCTSTR sTableName);//Slow simple copy. Dst table flushed.
 
     dsDatabase *GetSrcDB();
     dsDatabase *GetDstDB();

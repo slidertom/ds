@@ -93,8 +93,6 @@ public:
 	bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
 						LPCTSTR sField, LPCTSTR sForeignField);
 
-    void CreateIndex(LPCTSTR sTable, LPCTSTR sIndex);
-
     typedef void (*dbErrorHandler)(LPCTSTR msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler);
 
