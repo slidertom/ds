@@ -22,3 +22,4 @@ DBUtilsImplD.lib
 DBUtilsImpl.lib
 DBUtilsImplD.dll
 DBUtilsImpl.dll
+/DBUtils/*.opendb
