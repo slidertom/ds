@@ -85,7 +85,7 @@ namespace ds_str_conv
         std::stringstream strstream;
         // max_digits10
         // http://www.cplusplus.com/reference/limits/numeric_limits/
-        strstream.precision(dbl::digits10+1); // double: 15 decimal places + point
+        strstream.precision(dbl::digits10+2); // double: 15 decimal places + point
         strstream << dValue;
         strstream >> sValue;
         return sValue;
