@@ -10,7 +10,7 @@ You can access sqlite database in the same way as mdb file with the minimal code
  
 Text, Long/Integer, Blob, Double/Real field types are supported.
 
-Text field type addition: **Json** format support. RapidJson (https://github.com/miloyip/rapidjson) used as backend.
+Text field type addition: [**Json**](https://en.wikipedia.org/wiki/JSON) format support. RapidJson (https://github.com/miloyip/rapidjson) used as backend.
 (PicoJson, sajson also can be used as backends. RapidJson used as the fastest one.)
 
 If you're a **NoSQL** type of person and SQL based database usage can not be avoided, then this might fit the bill perfectly.
