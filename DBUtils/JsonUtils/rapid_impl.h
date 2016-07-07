@@ -72,9 +72,20 @@ namespace ds_jsonparser
                 return false;
             }
             rapidjson::Value &value = (*doc)[sField];
-            ASSERT(value.IsString());
-            value_str = value.GetString();
-            return true;
+		
+            if ( value.IsString() ) {
+				value_str = value.GetString();
+				return true;
+			}
+			else if ( value.IsObject() ) {
+				rapidjson::StringBuffer buffer;
+				rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+				value.Accept(writer);
+				value_str = buffer.GetString();
+				return true;
+			}
+			ASSERT(FALSE);
+            return false;
         }
         static inline void str2obj(const char *sJson, void *pImpl) {
             if ( !::strlen(sJson) ) {
