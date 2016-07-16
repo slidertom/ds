@@ -18,6 +18,7 @@
 *.pch
 *.ilk
 *.cache
+*.db
 DBUtilsImplD.lib
 DBUtilsImpl.lib
 DBUtilsImplD.dll
