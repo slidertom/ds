@@ -69,13 +69,13 @@
     </ClCompile>
     <ClCompile Include="dsStrConv.cpp" />
     <ClCompile Include="dsCopyTableData.cpp" />
-    <ClCompile Include="sqlite\sqlite_bind_util.cpp">
-      <Filter>SqLite</Filter>
-    </ClCompile>
     <ClCompile Include="sqlite\sqlite_copy_table.cpp">
       <Filter>SqLite</Filter>
     </ClCompile>
     <ClCompile Include="sqlite\sqlite_table_info.cpp">
+      <Filter>SqLite</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite\sqlite_bind_util.cpp">
       <Filter>SqLite</Filter>
     </ClCompile>
   </ItemGroup>
@@ -193,13 +193,13 @@
     </ClInclude>
     <ClInclude Include="dsStrConv.h" />
     <ClInclude Include="dsCopyTableData.h" />
-    <ClInclude Include="sqlite\sqlite_bind_util.h">
-      <Filter>SqLite</Filter>
-    </ClInclude>
     <ClInclude Include="sqlite\sqlite_copy_table.h">
       <Filter>SqLite</Filter>
     </ClInclude>
     <ClInclude Include="sqlite\sqlite_table_info.h">
+      <Filter>SqLite</Filter>
+    </ClInclude>
+    <ClInclude Include="sqlite\sqlite_bind_util.h">
       <Filter>SqLite</Filter>
     </ClInclude>
   </ItemGroup>
