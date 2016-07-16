@@ -10,6 +10,8 @@
 
 namespace ds_jsonparser
 {
+    class json_array;
+
     class DB_UTILS_API object
     {
     public:
@@ -22,6 +24,8 @@ namespace ds_jsonparser
         void SetDouble(const char *sField, double value);
         void SetInteger(const char* sField, int value);
         void SetBool(const char *sField, bool bValue) { SetInteger(sField, bValue ? 1 : 0); }
+        void SetObject(const char *sField, const object &obj);
+        void SetArray(const char *sField, const json_array &array);
 
         CStdString GetText(const char *sField) const;
         std::string GetTextUTF8(const char *sField) const;

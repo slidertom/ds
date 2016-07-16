@@ -65,6 +65,16 @@ namespace ds_jsonparser
         const std::string value_str = ds_str_conv::long_to_string(value);
         _impl::set_field(m_impl, sField, value_str);
     }
+    void object::SetArray(const char *sField, const json_array &array) {
+        std::string value_str;
+        ds_jsonparser::obj2str(array, value_str);
+        _impl::set_field(m_impl, sField, value_str);
+    }
+    void object::SetObject(const char *sField, const object &obj) {
+        std::string value_str;
+        ds_jsonparser::obj2str(obj, value_str);
+        _impl::set_field(m_impl, sField, value_str);
+    }
 
     CStdString object::GetText(const char *sField) const {
         std::string value_str;
@@ -86,7 +96,7 @@ namespace ds_jsonparser
         if (!_impl::get_field(m_impl, sField, value_str)) {
             return 0.0;
         }
-        const double value = ds_str_conv::string_to_double(value_str.c_str()); // != pico_value->get(sField).get<double>();
+        const double value = ds_str_conv::string_to_double(value_str.c_str()); 
         return value;
     }
     int object::GetInteger(const char *sField) const {
