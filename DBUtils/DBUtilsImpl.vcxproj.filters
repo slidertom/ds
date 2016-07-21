@@ -16,9 +16,6 @@
     <Filter Include="JsonUtils">
       <UniqueIdentifier>{1cedfd22-db54-420b-b763-f783e3346adf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JsonUtils\PicoJson">
-      <UniqueIdentifier>{1050540b-eb25-4a2a-a06c-6d5ca348a9d3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="JsonUtils\RapidJson">
       <UniqueIdentifier>{12b7c052-8561-4bf5-a74e-91561a35e057}</UniqueIdentifier>
     </Filter>
@@ -78,6 +75,9 @@
     <ClCompile Include="sqlite\sqlite_bind_util.cpp">
       <Filter>SqLite</Filter>
     </ClCompile>
+    <ClCompile Include="JsonUtils\rapid_impl.cpp">
+      <Filter>JsonUtils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dao\DaoDatabaseImpl.h">
@@ -134,9 +134,6 @@
     <ClInclude Include="JsonUtils\jsonparser.h">
       <Filter>JsonUtils</Filter>
     </ClInclude>
-    <ClInclude Include="JsonUtils\PicoJson\picojson.h">
-      <Filter>JsonUtils\PicoJson</Filter>
-    </ClInclude>
     <ClInclude Include="JsonUtils\RapidJson\allocators.h">
       <Filter>JsonUtils\RapidJson</Filter>
     </ClInclude>
@@ -179,13 +176,7 @@
     <ClInclude Include="JsonUtils\RapidJson\writer.h">
       <Filter>JsonUtils\RapidJson</Filter>
     </ClInclude>
-    <ClInclude Include="JsonUtils\pico_impl.h">
-      <Filter>JsonUtils</Filter>
-    </ClInclude>
     <ClInclude Include="JsonUtils\rapid_impl.h">
-      <Filter>JsonUtils</Filter>
-    </ClInclude>
-    <ClInclude Include="JsonUtils\sa_impl.h">
       <Filter>JsonUtils</Filter>
     </ClInclude>
     <ClInclude Include="JsonUtils\jsonparser_rgb.h">

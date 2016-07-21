@@ -183,6 +183,7 @@
     <ClCompile Include="dsStrConv.cpp" />
     <ClCompile Include="JsonUtils\jsonparser.cpp" />
     <ClCompile Include="JsonUtils\jsonparser_rgb.cpp" />
+    <ClCompile Include="JsonUtils\rapid_impl.cpp" />
     <ClCompile Include="LogImpl\LogImpl.cpp" />
     <ClCompile Include="dsTable.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'"> /Zm800   /Zm800 </AdditionalOptions>
@@ -226,8 +227,6 @@
     <ClInclude Include="dsStrConv.h" />
     <ClInclude Include="JsonUtils\jsonparser.h" />
     <ClInclude Include="JsonUtils\jsonparser_rgb.h" />
-    <ClInclude Include="JsonUtils\PicoJson\picojson.h" />
-    <ClInclude Include="JsonUtils\pico_impl.h" />
     <ClInclude Include="JsonUtils\RapidJson\allocators.h" />
     <ClInclude Include="JsonUtils\RapidJson\document.h" />
     <ClInclude Include="JsonUtils\RapidJson\encodedstream.h" />
@@ -243,7 +242,6 @@
     <ClInclude Include="JsonUtils\RapidJson\stringbuffer.h" />
     <ClInclude Include="JsonUtils\RapidJson\writer.h" />
     <ClInclude Include="JsonUtils\rapid_impl.h" />
-    <ClInclude Include="JsonUtils\sa_impl.h" />
     <ClInclude Include="LogImpl\LogImpl.h" />
     <ClInclude Include="dsTable.h" />
     <ClInclude Include="dsDatabase.h" />

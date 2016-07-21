@@ -27,11 +27,12 @@ namespace ds_jsonparser
         void SetObject(const char *sField, const object &obj);
         void SetArray(const char *sField, const json_array &array);
 
-        CStdString GetText(const char *sField) const;
+        CStdString  GetText(const char *sField) const;
         std::string GetTextUTF8(const char *sField) const;
-        double     GetDouble(const char *sField) const;
-        int        GetInteger(const char *sField) const;
-        bool       GetBool(const char *sField) const { return GetInteger(sField) != 0; }
+        double      GetDouble(const char *sField) const;
+        int         GetInteger(const char *sField) const;
+        bool        GetBool(const char *sField) const { return GetInteger(sField) != 0; }
+        void        GetArray(const char *sField, json_array &array) const;
 
     public:
         void *m_impl;
@@ -56,41 +57,14 @@ namespace ds_jsonparser
         int GetSize() const;
         std::string GetStringUTF8(int i) const;
         CStdString GetString(int i) const;
-        void GetObject(int i, object &obj) const;
+        void GetJsonObject(int i, object &obj) const; // prefix json used as GetObject quite general function and can be defined
 
     public:
         void *m_impl;
     };
+
     void DB_UTILS_API str2obj(const char* sJson, json_array &obj);
     void DB_UTILS_API obj2str(const json_array &obj, std::string &sJson);
-
-    // json utils
-    template <class TString>
-    inline void str_array_to_json(const std::vector<TString> &arr, std::string &sJson) 
-    {
-        json_array obj;
-
-        auto end_it = arr.end();
-        for (auto it = arr.begin(); it != end_it; ++it) {
-            obj.AddString((*it).c_str());
-        }
-
-        obj2str(obj, sJson);
-    }
-
-    template <class TString> // TString -> wchar_t base expected
-    inline void json_to_str_array(const char *sJson, std::vector<TString> &arr) 
-    {
-        arr.clear();
-
-        json_array obj;
-        str2obj(sJson, obj);
-
-        const int nCnt = obj.GetSize();
-        for (int i1 = 0; i1 < nCnt; ++i1) {
-             arr.push_back(obj.GetString(i1));
-        }
-    }
 };
 
 #define FIELD_JSON(name, realname) \
@@ -116,5 +90,9 @@ namespace ds_jsonparser
 #define JSON_BOOL(name, realname) \
 	static bool Get##name(const ds_jsonparser::object &obj) { return obj.GetBool(realname); } \
 	static void Set##name(ds_jsonparser::object &obj, bool bValue) { obj.SetBool(realname, bValue); } \
+
+#define JSON_ARRAY(name, realname) \
+	static void Get##name(const ds_jsonparser::object &obj, ds_jsonparser::json_array &array) { obj.GetArray(realname, array); } \
+	static void Set##name(ds_jsonparser::object &obj, const ds_jsonparser::json_array &array) { obj.SetArray(realname, array); } \
 
 #endif
