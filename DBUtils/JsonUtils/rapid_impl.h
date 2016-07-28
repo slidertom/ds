@@ -20,10 +20,12 @@ namespace ds_jsonparser
         void set_field_int(void *impl, const char *sField, const int nValue);
         void set_field_double(void *impl, const char *sField, const double dValue);
         void set_field_object(void *impl, const char *sField, void *obj);
+        void set_field_date_time(void *impl, const char *sField, time_t nValue);
         void set_field_array(void *impl, const char *sField, void *obj);
         bool get_field_int(void *impl, const char *sField, int &nValue);
         bool get_field_double(void *impl, const char *sField, double &dValue);
         bool get_field_string(void *impl, const char *sField, std::string &value_str);
+        bool get_field_date_time(void *impl, const char *sField, time_t &nValue);
         bool get_field_array(void *impl, const char *sField, void *obj);
 
         //////////////////////////////////////////////////////////

@@ -62,7 +62,9 @@ namespace ds_jsonparser
     void object::SetObject(const char *sField, const object &obj) {
         _impl::set_field_object(m_impl, sField, obj.m_impl);
     }
-
+    void object::SetDateTime(const char* sField, time_t value) {
+        _impl::set_field_date_time(m_impl, sField, value);
+    }
     CStdString object::GetText(const char *sField) const {
         std::string value_str;
         if (!_impl::get_field_string(m_impl, sField, value_str)) {
@@ -91,6 +93,13 @@ namespace ds_jsonparser
     int object::GetInteger(const char *sField) const {
         int nValue = 0;
         if (!_impl::get_field_int(m_impl, sField, nValue)) {
+            return 0;
+        }
+        return nValue;
+    }
+    time_t object::GetDateTime(const char *sField) const {
+        time_t nValue = 0;
+        if (!_impl::get_field_date_time(m_impl, sField, nValue)) {
             return 0;
         }
         return nValue;

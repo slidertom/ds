@@ -23,6 +23,7 @@ namespace ds_jsonparser
         void SetTextUTF8(const char *sField, const char *sVal);
         void SetDouble(const char *sField, double value);
         void SetInteger(const char* sField, int value);
+        void SetDateTime(const char* sField, time_t value);
         void SetBool(const char *sField, bool bValue) { SetInteger(sField, bValue ? 1 : 0); }
         void SetObject(const char *sField, const object &obj);
         void SetArray(const char *sField, const json_array &array);
@@ -33,6 +34,7 @@ namespace ds_jsonparser
         int         GetInteger(const char *sField) const;
         bool        GetBool(const char *sField) const { return GetInteger(sField) != 0; }
         void        GetArray(const char *sField, json_array &array) const;
+        time_t      GetDateTime(const char *sField) const;
 
     public:
         void *m_impl;
@@ -94,5 +96,9 @@ namespace ds_jsonparser
 #define JSON_ARRAY(name, realname) \
 	static void Get##name(const ds_jsonparser::object &obj, ds_jsonparser::json_array &array) { obj.GetArray(realname, array); } \
 	static void Set##name(ds_jsonparser::object &obj, const ds_jsonparser::json_array &array) { obj.SetArray(realname, array); } \
+
+#define JSON_DATE(name, realname) \
+	static time_t Get##name(const ds_jsonparser::object &obj) { return obj.GetDateTime(realname); } \
+	static void Set##name(ds_jsonparser::object &obj, time_t nValue) { obj.SetDateTime(realname, nValue); } \
 
 #endif
