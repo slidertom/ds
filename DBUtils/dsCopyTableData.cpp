@@ -23,7 +23,7 @@ dsCopyTableData::dsCopyTableData(dsDatabase *pSrcDB, dsDatabase *pDstDB)
     ASSERT(m_pSrcDB->IsOpen());
     ASSERT(m_pDstDB->IsOpen());
 
-    m_bAttached = false;
+    m_bAttached  = false;
 }
 
 dsCopyTableData::~dsCopyTableData()
@@ -37,9 +37,19 @@ bool dsCopyTableData::BeginCopy()
     const dsDBType nSrcTyle = m_pSrcDB->GetType();
     const dsDBType nDstTyle = m_pDstDB->GetType();
  
-    if (nSrcTyle == dsType_SqLite && nDstTyle == dsType_SqLite)  {
-        if ( !sqlite_util::sqlite_attach_database(m_pSrcDB, m_pDstDB) ) {
+    if (nSrcTyle == dsType_SqLite && nDstTyle == dsType_SqLite) 
+    {
+        CSqLiteDatabaseImpl *pDstSqlite = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
+        CSqLiteDatabaseImpl *pSrcSqLite = dynamic_cast<CSqLiteDatabaseImpl *>(m_pSrcDB->m_pDatabase);
+        const bool bTransMode = pDstSqlite->IsTransMode();
+        if ( bTransMode ) { // SQL logic error or missing database[1]: cannot ATTACH database within transaction
+            pDstSqlite->CommitTrans(); // maybe restore point should be used...
+        }
+        if ( !sqlite_util::sqlite_attach_database(pSrcSqLite, pDstSqlite) ) {
             return false;
+        }
+        if ( bTransMode ) {
+            pDstSqlite->BeginTrans();
         }
         m_bAttached = true;
     }
@@ -49,11 +59,20 @@ bool dsCopyTableData::BeginCopy()
 
 bool dsCopyTableData::EndCopy()
 {
-    if ( m_bAttached ) {
-        if ( !sqlite_util::sqlite_detach_database(m_pDstDB) ) {
+    if ( m_bAttached ) 
+    {
+        CSqLiteDatabaseImpl *pDstSqlite = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
+        const bool bTransMode = pDstSqlite->IsTransMode();
+        if ( bTransMode ) { // SQL logic error or missing database[1]: cannot DETACH database within transaction
+            pDstSqlite->CommitTrans();
+        }
+        if ( !sqlite_util::sqlite_detach_database(pDstSqlite) ) {
             return false;
         }
         m_bAttached = false;
+        if ( bTransMode ) { 
+           pDstSqlite->BeginTrans();
+        }
     }
 
     return true;
@@ -157,7 +176,7 @@ bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst
         CSqLiteDatabaseImpl *pDstDBImpl = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
 
         if ( dst_info.size() == 0 ) {
-            CStdStringA sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
+            std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
             CStdStringA sError;
             sError.Format("Destination table %s there are no fields defined. ", sTableNameDstUTF8.c_str()); 
             pDstDBImpl->OnError(sError.c_str(), "sqlite_util::ImportTableData");
@@ -168,9 +187,10 @@ bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst
         if (nSrcType == dsType_SqLite && m_bAttached ) 
         {
             // field count should match for the sqlite insert statement
-            if ( dst_info.size() == union_info.size() )
+            if ( dst_info.size() == src_info.size() )
             {
-                if ( sqlite_util::sqlite_insert_table_from_attached_db(m_pDstDB, sTableNameSrc, sTableNameDst) ) {
+                CSqLiteDatabaseImpl *pDstSqlite = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
+                if ( sqlite_util::sqlite_insert_table_from_attached_db(pDstSqlite, sTableNameSrc, sTableNameDst) ) {
                     return true;
                 }
                 return false;
