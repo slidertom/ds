@@ -14,9 +14,9 @@ namespace sqlite_util
 
     // Attach, detach controls attached database name as SrcDB.
     // Do attach src db for the dst db.
-    bool sqlite_attach_database(dsDatabase *pSrcDB, dsDatabase *pDstDB);
-    bool sqlite_detach_database(dsDatabase *pDstDB);
-    bool sqlite_insert_table_from_attached_db(dsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
+    bool sqlite_attach_database(CSqLiteDatabaseImpl *pSrcDB, CSqLiteDatabaseImpl *pDstDB);
+    bool sqlite_detach_database(CSqLiteDatabaseImpl *pDstDB);
+    bool sqlite_insert_table_from_attached_db(CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
 };
 
 #endif 

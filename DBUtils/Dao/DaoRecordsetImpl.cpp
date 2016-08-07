@@ -326,8 +326,9 @@ bool CDaoRecordsetImpl::Update()
 		m_pSet->Update();
 	}
     catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::Update Table='%s'"), m_sCurTable);
+        std::wstring sMsg = L"CDaoRecordsetImpl::Update Table='";
+                     sMsg += m_sCurTable;
+                     sMsg += L"'";
 		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
         e->Delete();
@@ -429,12 +430,12 @@ bool CDaoRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
 	return false;
 }
 
-CStdString CDaoRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
+std::wstring CDaoRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 {
 	try {
 		COleVariant var;
 		m_pSet->GetFieldValue(sFieldName, var);
-		return dao_database_util::GetString(var);
+		return dao_database_util::GetString(var).c_str();
 	}
 	catch (CDaoException *e) {
         CStdString sMsg;
@@ -444,7 +445,7 @@ CStdString CDaoRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 		e->Delete();
 	}
 
-	return CStdString(_T(""));
+	return std::wstring(_T(""));
 }
 
 void CDaoRecordsetImpl::SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue)
@@ -604,7 +605,7 @@ void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, LPCTSTR sFunction)
 
 std::string CDaoRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
 {
-    const CStdString sValue = GetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+    const std::wstring sValue = GetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
     return ds_str_conv::ConvertToUTF8(sValue.c_str());
 }
 

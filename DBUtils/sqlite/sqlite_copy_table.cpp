@@ -7,8 +7,6 @@
 
 #include "SqLiteRecordsetImpl.h"
 
-#include "../dsDatabase.h"
-#include "../AbsDatabase.h"
 #include "../dsStrConv.h"
 #include "../dsTable.h"
 
@@ -26,9 +24,10 @@ namespace sqlite_util
     bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, const dsTableFieldInfo &union_info)
     {
         if ( union_info.size() == 0 ) {
-            CStdStringA sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
-            CStdStringA sError;
-            sError.Format("There are no fields to import in the table: %s.", sTableNameDstUTF8.c_str());
+            const std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
+            std::string sError = "There are no fields to import in the table: ";
+                       sError += sTableNameDstUTF8.c_str();
+                       sError += ".";
             pDstDB->GetErrorHandler()->OnError(sError.c_str(), "sqlite_util::ImportTableData");
             return false;
         }
@@ -101,22 +100,25 @@ namespace sqlite_util
         return true;
     }
 
-    bool sqlite_attach_database(dsDatabase *pSrcDB, dsDatabase *pDstDB)
+    bool sqlite_attach_database(CSqLiteDatabaseImpl *pSrcDB, CSqLiteDatabaseImpl *pDstDB)
     {
-        ASSERT(pSrcDB->GetType() == dsType_SqLite);
-        ASSERT(pDstDB->GetType() == dsType_SqLite);
+        const std::wstring sPath = pSrcDB->GetName();
+        std::string sPathUTF8 = ds_str_conv::ConvertToUTF8(sPath.c_str());
 
-        const CStdString sPath = pSrcDB->GetName();
         // dsCopyTableData should be constructured before BeginTrans
-        CStdString sSQL;
-        sSQL.Format(_T("ATTACH DATABASE \"%s\" as SrcDB;"), sPath.c_str());
-        if ( !pDstDB->Execute(sSQL.c_str()) ) {
+        std::string sSQL;
+        sSQL += "ATTACH DATABASE \"";
+        sSQL += sPathUTF8;
+        sSQL += "\"";
+        sSQL += " as SrcDB;";
+
+        if ( !pDstDB->ExecuteUTF8(sSQL.c_str()) ) {
             return false;
         }
         return true;
     }
 
-    bool sqlite_detach_database(dsDatabase *pDstDB) 
+    bool sqlite_detach_database(CSqLiteDatabaseImpl *pDstDB) 
     {  
         ASSERT(pDstDB->GetType() == dsType_SqLite);
 
@@ -127,7 +129,7 @@ namespace sqlite_util
         return true;
     }
 
-    bool sqlite_insert_table_from_attached_db(dsDatabase *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
+    bool sqlite_insert_table_from_attached_db(CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
     {
         ASSERT(pDstDB->GetType() == dsType_SqLite);
 

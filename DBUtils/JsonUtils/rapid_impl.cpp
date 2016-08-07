@@ -237,6 +237,34 @@ namespace ds_jsonparser
             return false;
         }
 
+        void set_field_null(void *impl, const char *sField)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+            if ( found == doc->MemberEnd() ) {
+                return;
+            }
+
+            rapidjson::Value &value = found->value;
+            value.SetNull();
+        }
+
+        bool get_field_null(void *impl, const char *sField)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+            if ( found == doc->MemberEnd() ) {
+                return true;
+            }
+
+            const rapidjson::Value &value = found->value;
+            if ( value.IsNull() ) {
+                return true;
+            }
+
+            return false;
+        }
+
         bool get_field_int(void *impl, const char *sField, int &nValue)
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;

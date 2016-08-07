@@ -188,7 +188,7 @@ bool CAdoDotNetRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
 	return !m_pSet->IsEmpty();
 }
 
-CStdString CAdoDotNetRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
+std::wstring CAdoDotNetRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 {
 	return (LPCTSTR)m_pSet->GetFieldString(sFieldName);
 }

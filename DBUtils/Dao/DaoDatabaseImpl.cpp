@@ -183,12 +183,10 @@ bool CDaoDatabaseImpl::IsOpen() const
 	return m_pDatabase->IsOpen() != FALSE;
 }
 
-CStdString CDaoDatabaseImpl::GetName()
+std::wstring CDaoDatabaseImpl::GetName()
 {
-    CString sName = m_pDatabase->GetName();
-	const CStdString str = sName;
-    TRACE(str.c_str());TRACE(_T("\n"));
-    return str;
+    const std::wstring sName = m_pDatabase->GetName();
+    return sName;
 }
 
 bool CDaoDatabaseImpl::DoesTableExist(LPCTSTR sTable)
@@ -355,7 +353,7 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
     CDaoFieldInfo fieldInfo;
     
     short nFields = tableInfo.GetFieldCount();
-    for(short i = 0; i < nFields; ++i) 
+    for (short i = 0; i < nFields; ++i) 
     {
         tableInfo.GetFieldInfo(i, fieldInfo);
         const short nType = fieldInfo.m_nType;

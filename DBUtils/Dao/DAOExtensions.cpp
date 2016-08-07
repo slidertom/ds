@@ -57,7 +57,7 @@ namespace dao_extensions
             if (oSrcDaoTableInfo.IsOpen())
             {
                 short nFields = oSrcDaoTableInfo.GetFieldCount();
-                for(short i = 0; i < nFields; ++i) {
+                for (short i = 0; i < nFields; ++i) {
                     oSrcDaoTableInfo.GetFieldInfo(i, fieldInfo);
                     mapColumns.SetAt(fieldInfo.m_strName, nControlValue);
                 }

@@ -21,9 +21,7 @@ static char THIS_FILE[] = __FILE__;
 CSqLiteDatabaseImpl::CSqLiteDatabaseImpl() 
 : m_bReadOnly(false), m_pDB(nullptr)
 {
-#ifdef _DEBUG
     m_bTransMode = false;
-#endif
     m_pErrorHandler = new CSqLiteErrorHandler;
 }
 
@@ -67,10 +65,9 @@ bool CSqLiteDatabaseImpl::CompactDatabase()
 
 bool CSqLiteDatabaseImpl::BeginTrans() 
 {
-#ifdef _DEBUG
     ASSERT(!m_bTransMode); // nested transactions are not supported 
     m_bTransMode = true;
-#endif
+
     VERIFY(ExecuteUTF8("begin transaction"));
     //VERIFY(ExecuteUTF8("begin exclusive transaction"));
     //ExecuteUTF8("begin immediate transaction");
@@ -79,20 +76,18 @@ bool CSqLiteDatabaseImpl::BeginTrans()
 
 bool CSqLiteDatabaseImpl::CommitTrans() 
 {
-#ifdef _DEBUG
     ASSERT(m_bTransMode); // transaction should be started
     m_bTransMode = false;
-#endif
+
     VERIFY(ExecuteUTF8("commit transaction"));
 	return true;
 }
 
 bool CSqLiteDatabaseImpl::Rollback()   
 {
-#ifdef _DEBUG
     ASSERT(m_bTransMode); // transaction should be started
     m_bTransMode = false;
-#endif
+#
     ExecuteUTF8("rollback transaction");
 	return true;
 }
@@ -203,7 +198,7 @@ bool CSqLiteDatabaseImpl::IsOpen() const
     return (m_pDB) ? true : false;
 }
 
-CStdString CSqLiteDatabaseImpl::GetName()
+std::wstring CSqLiteDatabaseImpl::GetName()
 {
 	return m_sFilePath;
 }
@@ -266,7 +261,7 @@ bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
     else
     {
         m_pErrorHandler->OnError(rc, localError, _T("CSqLiteDatabaseImpl::ExecuteUTF8"));
-        const CStdString sSQL = ds_str_conv::ConvertFromUTF8(sqlUTF8);
+        const std::wstring sSQL = ds_str_conv::ConvertFromUTF8(sqlUTF8);
         m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteDatabaseImpl::ExecuteUTF8"));
         sqlite3_free(localError);
     }

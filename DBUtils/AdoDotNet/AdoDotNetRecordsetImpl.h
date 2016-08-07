@@ -40,7 +40,7 @@ public:
 
 	virtual void SetFieldValueNull(LPCTSTR lpszName) override;
 
-	virtual CStdString GetFieldString(LPCTSTR sFieldName) override;
+	virtual std::wstring GetFieldString(LPCTSTR sFieldName) override;
 	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) override;
 
     virtual std::string GetFieldStringUTF8(const char *sFieldName) override;

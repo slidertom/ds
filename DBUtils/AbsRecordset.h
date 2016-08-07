@@ -42,7 +42,7 @@ public:
 	virtual void SetFieldValueNull(LPCTSTR lpszName)  = 0;
     virtual bool IsFieldValueNull(LPCTSTR sFieldName) = 0;
 
-	virtual CStdString GetFieldString(LPCTSTR sFieldName) = 0;
+	virtual std::wstring GetFieldString(LPCTSTR sFieldName) = 0;
 	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) = 0;
 
     virtual std::string GetFieldStringUTF8(const char *sFieldName) = 0;

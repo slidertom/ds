@@ -31,20 +31,20 @@ namespace ds_str_conv
     }
 
     // Convert an UTF8 string to a wide Unicode String
-    CStdString ConvertFromUTF8(const char *str)
+    std::wstring ConvertFromUTF8(const char *str)
     {
         if ( !str ) {
-            return CStdString();
+            return std::wstring();
         }
 
         const int nLen = strlen(str);
         if ( nLen <= 0 ) {
-            return CStdString();
+            return std::wstring();
         }
 
         int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], nLen, NULL, 0);
 
-        CStdString wstrTo(size_needed, 0);
+        std::wstring wstrTo(size_needed, 0);
         MultiByteToWideChar(CP_UTF8, 0, &str[0], nLen, &wstrTo[0], size_needed);
 
         return wstrTo;
@@ -85,8 +85,9 @@ namespace ds_str_conv
         std::stringstream strstream;
         // max_digits10
         // http://www.cplusplus.com/reference/limits/numeric_limits/
-        strstream.precision(dbl::digits10+2); // double: 15 decimal places + point
-        strstream << dValue;
+        //strstream.precision(dbl::digits10+2); // double: 15 decimal places + point
+        strstream.precision(dbl::digits10+1); // double: 15 decimal places + point
+		strstream << dValue;
         strstream >> sValue;
         return sValue;
     }

@@ -86,7 +86,7 @@ bool CAdoDotNetDatabaseImpl::IsOpen() const
 	return m_pDatabase->IsOpen();
 }
 
-CStdString CAdoDotNetDatabaseImpl::GetName()
+std::wstring CAdoDotNetDatabaseImpl::GetName()
 {
 	return m_sConnString;
 }

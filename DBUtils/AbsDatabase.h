@@ -49,7 +49,7 @@ public:
 	virtual bool IsReadOnly() const = 0;
 	virtual bool IsOpen()     const = 0;
 
-	virtual CStdString GetName() = 0;
+	virtual std::wstring GetName() = 0;
 
 	virtual bool DoesTableExist(LPCTSTR sTable) = 0;
 

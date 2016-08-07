@@ -28,7 +28,6 @@ public:
 	virtual bool Rollback() override;    
 
 	virtual bool Execute(LPCTSTR lpszSQL) override; 
-
     bool ExecuteUTF8(const char *sqlUTF8);
 
 	virtual void Close() override; 
@@ -39,7 +38,7 @@ public:
 	virtual bool IsReadOnly() const override;
 	virtual bool IsOpen() const override;
 
-	virtual CStdString GetName() override;
+	virtual std::wstring GetName() override;
 	
 	virtual bool DoesTableExist(LPCTSTR sTable) override;
 	
@@ -62,6 +61,7 @@ public:
     CSqLiteErrorHandler *GetErrorHandler() { return m_pErrorHandler; }
     void OnError(const char *sError, const char *sFunctionName);
     const sqlite_util::CFieldInfoMap *GetTableFieldInfoImpl(const char *sTableNameUTF8);
+    bool IsTransMode() const { return m_bTransMode; }
 
 // Attributes
 private:
@@ -71,8 +71,10 @@ private:
     CSqLiteErrorHandler *m_pErrorHandler;
     std::unordered_map<std::string, sqlite_util::CFieldInfoMap *>  m_table_field_info_map;
 
-#ifdef _DEBUG
     bool m_bTransMode; // invariant
+
+#ifdef _DEBUG
+    friend class CSqLiteRecordsetImpl;
 #endif
 };
 

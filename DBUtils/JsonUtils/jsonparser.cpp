@@ -65,12 +65,12 @@ namespace ds_jsonparser
     void object::SetDateTime(const char* sField, time_t value) {
         _impl::set_field_date_time(m_impl, sField, value);
     }
-    CStdString object::GetText(const char *sField) const {
+    std::wstring object::GetText(const char *sField) const {
         std::string value_str;
         if (!_impl::get_field_string(m_impl, sField, value_str)) {
             return _T("");
         }
-        const CStdString value = ds_str_conv::ConvertFromUTF8(value_str.c_str());
+        const std::wstring value = ds_str_conv::ConvertFromUTF8(value_str.c_str());
         return value;
     }
     std::string object::GetTextUTF8(const char *sField) const
@@ -103,6 +103,12 @@ namespace ds_jsonparser
             return 0;
         }
         return nValue;
+    }
+    bool object::IsNull(const char *sField) const {
+        return _impl::get_field_null(m_impl, sField);
+    }
+    void object::SetNull(const char *sField) {
+        return _impl::set_field_null(m_impl, sField);
     }
 
     void str2obj(const char* sJson, object &obj) {
@@ -137,7 +143,7 @@ namespace ds_jsonparser
         _impl::get_array_string(m_impl, i, sValue);
         return sValue;
     }
-    CStdString json_array::GetString(int i) const {
+    std::wstring json_array::GetString(int i) const {
         const std::string sValue = GetStringUTF8(i);
         return ds_str_conv::ConvertFromUTF8(sValue.c_str());
     }

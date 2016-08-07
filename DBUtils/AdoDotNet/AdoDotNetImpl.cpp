@@ -285,7 +285,7 @@ public:
 
 			const int nCount = reader->FieldCount;
 
-			for(int i=0;i<nCount;i++)
+			for (int i=0;i<nCount;i++)
 			{
 				const CString sColName = reader->GetName(i);sColName;
 				const dsFieldType field_type = GetFieldType(reader->GetFieldType(i));

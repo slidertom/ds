@@ -441,11 +441,13 @@ static inline std::string save_data_to_error_values_string(sqlite_util::CFieldDa
     for (auto it = beg_it; it != end_it; ++it) {
         if ( sValues.empty() ) {
             sValues += it->first;
+            sValues += "=";
             sValues += it->second->GetValueAsString();
         }
         else {
             sValues += ",";
             sValues += it->first;
+            sValues += "=";
             sValues += it->second->GetValueAsString();
         }
     }
@@ -513,6 +515,7 @@ bool CSqLiteRecordsetImpl::DoUpdate()
 bool CSqLiteRecordsetImpl::Update()
 {
     ASSERT(m_pSaveData);
+    ASSERT(m_pDB->m_bTransMode);
 
     const bool bRetVal = DoUpdate();
 
@@ -612,7 +615,7 @@ void CSqLiteRecordsetImpl::OnErrorCode(int rc, const char *sFunctionName)
 {
     sqlite3 *pDB = m_pDB->GetSqLiteDB();
     const char *localError = ::sqlite3_errmsg(pDB);
-    CStdString sFunctionNameW = ds_str_conv::ConvertFromUTF8(sFunctionName);
+    std::wstring sFunctionNameW = ds_str_conv::ConvertFromUTF8(sFunctionName);
     m_pErrorHandler->OnError(rc, localError, sFunctionNameW.c_str());
 }
 
@@ -732,7 +735,7 @@ std::string CSqLiteRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
     return sValue;
 }
 
-CStdString CSqLiteRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
+std::wstring CSqLiteRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 {
     //int nRowId = sqlite3_column_int(m_stmt, 0);
     //nRowId;

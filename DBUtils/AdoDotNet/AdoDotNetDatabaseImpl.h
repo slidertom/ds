@@ -34,7 +34,7 @@ public:
 	virtual bool IsReadOnly() const override;
 	virtual bool IsOpen() const override;
 
-	virtual CStdString GetName() override;
+	virtual std::wstring GetName() override;
 	
 	virtual bool DoesTableExist(LPCTSTR sTable) override;
 	
@@ -58,7 +58,7 @@ private:
 
 	CDotNetDatabaseAbs *m_pDatabase;
 
-    CStdString m_sConnString;
+    std::wstring m_sConnString;
 };
 
 #endif 
