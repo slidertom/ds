@@ -2,9 +2,9 @@
 #####Sqlite (read-write), Ms DAO mdb (read-write), Ms SQL (read-only),
 databases access system. 
 
-DS is an easy to use C++ [**SQLite3**](https://sqlite.org/), **DAO**, **Ms SQL** C++ based wrapper.
+DS is an easy to use C++ [**SQLite3**](https://sqlite.org/), [**DAO**](https://msdn.microsoft.com/en-us/library/aa984815(v=vs.71).aspx), **Ms SQL** C++ based wrapper.
 
-Provides a **Recordset** (MFC: [CDaoRecordSet](https://msdn.microsoft.com/en-us/library/8wht5w3w.aspx), [CRecordset](https://msdn.microsoft.com/en-us/library/92bcy0kw.aspx)) like  interface for a SQLite3, MsSQL, [DAO](https://msdn.microsoft.com/en-us/library/aa984815(v=vs.71).aspx) databases.
+Provides a **Recordset** (MFC: [CDaoRecordSet](https://msdn.microsoft.com/en-us/library/8wht5w3w.aspx), [CRecordset](https://msdn.microsoft.com/en-us/library/92bcy0kw.aspx)) like  interface for a SQLite3, MsSQL, DAO databases.
 
 You can access sqlite database in the same way as mdb file with the minimal code changes inside your project.
  
