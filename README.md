@@ -4,7 +4,7 @@ databases access system.
 
 DS is an easy to use C++ **SQLite3**, **DAO**, **Ms SQL** C++ based wrapper.
 
-Provides a **Recordset** (MFC: [CDaoRecordSet}(https://msdn.microsoft.com/en-us/library/8wht5w3w.aspx), CRecordset) like  interface for a SQLite3, MsSQL, DAO databases.
+Provides a **Recordset** (MFC: [CDaoRecordSet](https://msdn.microsoft.com/en-us/library/8wht5w3w.aspx), CRecordset) like  interface for a SQLite3, MsSQL, DAO databases.
 
 You can access sqlite database in the same way as mdb file with the minimal code changes inside your project.
  
