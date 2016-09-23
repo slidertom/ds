@@ -3,6 +3,8 @@
 
 #include "../dsConfig.h"
 
+#include "mutex"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -33,18 +35,14 @@ namespace internal
     }
 };
 
-#ifdef DS_LOG_MUTEX
-static dsMutex g_log_mutex; // just in case do allow only one thread to log data
-                            // dao single threaded
-#endif
+static std::mutex g_log_mutex; // just in case do allow only one thread to log data
+                               // dao single threaded
 
 void CLogImpl::Log(LPCTSTR sMsg)
 {
-    #ifdef DS_LOG_MUTEX
-    dsMutexLock lock(g_log_mutex);
-    #endif
+    std::lock_guard<std::mutex> lock(g_log_mutex);
 
-    const CStdString sFilePath = ds_log_file_path::GetDefaultPath();
+    const std::wstring sFilePath = ds_log_file_path::GetDefaultPath();
 
     time_t rawtime;
     struct tm *timeinfo;
@@ -54,8 +52,13 @@ void CLogImpl::Log(LPCTSTR sMsg)
     const char *sTime = internal::asctime_impl(timeinfo);
     CStdString sTimeUnicode = sTime;
 
-    CStdString sMsgImpl;
-    sMsgImpl.Format(_T("[%s] %s\n"), sTimeUnicode.c_str(), sMsg);
+    std::wstring sMsgImpl;
+    sMsgImpl += _T("[");
+    sMsgImpl += sTimeUnicode.c_str();
+    sMsgImpl += _T("] ");
+    sMsgImpl += sMsg;
+    sMsgImpl += _T("\n");
+
     TRACE(sMsgImpl.c_str());
     FILE *pFile = _tfopen(sFilePath.c_str(), _T("a"));    
     if ( !pFile ) {
