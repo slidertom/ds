@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 
 namespace sqlite_util
 {   
-    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, const dsTableFieldInfo &union_info)
+    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, const dsTableFieldInfo &union_info)
     {
         if ( union_info.size() == 0 ) {
             const std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
@@ -122,20 +122,20 @@ namespace sqlite_util
     {  
         ASSERT(pDstDB->GetType() == dsType_SqLite);
 
-        LPCTSTR sSQL = _T("DETACH DATABASE SrcDB;");
-        if ( !pDstDB->Execute(sSQL) ) {
+        const char *sSQL = "DETACH DATABASE SrcDB;";
+        if ( !pDstDB->ExecuteUTF8(sSQL) ) {
             return false;
         }
         return true;
     }
 
-    bool sqlite_insert_table_from_attached_db(CSqLiteDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
+    bool sqlite_insert_table_from_attached_db(CSqLiteDatabaseImpl *pDstDB, const char *sTableNameSrc, const char *sTableNameDst)
     {
         ASSERT(pDstDB->GetType() == dsType_SqLite);
 
-        CStdString sSQL;
-        sSQL.Format(_T("INSERT INTO %s SELECT * FROM SrcDB.%s;"), sTableNameDst, sTableNameSrc);
-        if ( !pDstDB->Execute(sSQL.c_str()) ) {
+        CStdStringA sSQL;
+        sSQL.Format("INSERT INTO %s SELECT * FROM SrcDB.%s;", sTableNameDst, sTableNameSrc);
+        if ( !pDstDB->ExecuteUTF8(sSQL.c_str()) ) {
             return false;
         }
 

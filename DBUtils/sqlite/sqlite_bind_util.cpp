@@ -15,16 +15,10 @@ static char THIS_FILE[] = __FILE__;
 
 namespace sqlite_util
 {
-    class CDeletor  {
-    public:
-        template <class TPair>
-        void operator()(TPair &pair) {
-            delete pair.second;
-        }
-    };
-
     void CFieldDataMap::clear() {
-        std::for_each(begin(), end(), CDeletor());
+        for ( auto elem : *this ) {
+            delete elem.second;
+        }
         std::unordered_map<std::string, CFieldData *>::clear();
     }
 

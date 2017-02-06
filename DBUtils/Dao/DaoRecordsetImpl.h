@@ -26,12 +26,12 @@ public:
 
 // Overrides
 public:
-	virtual bool Open(LPCTSTR sTableName) override;
-	virtual bool OpenSQL(LPCTSTR sSQL) override;
-	virtual bool OpenView(LPCTSTR sViewName) override;
+	virtual bool Open(const wchar_t *sTableName) override;
+	virtual bool OpenSQL(const wchar_t *sSQL) override;
+	virtual bool OpenView(const wchar_t *sViewName) override;
 
-    virtual bool SeekByString(LPCTSTR sIndex, LPCTSTR sValue) override;
-	virtual bool SeekByLong(LPCTSTR sIndex, long nValue) override;
+    virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) override;
+	virtual bool SeekByLong(const wchar_t *sIndex, long nValue) override;
 
 	virtual bool MoveNext() override;
 	virtual bool MoveFirst() override;
@@ -45,35 +45,35 @@ public:
 
 	virtual bool IsEOF() override;
 
-	virtual void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize) override;
-	virtual void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) override;
+	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize) override;
+	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) override;
 	virtual void FreeBinary(unsigned char *pData) override;
 
-    virtual void SetFieldValueNull(LPCTSTR lpszName) override;
+    virtual void SetFieldValueNull(const wchar_t *lpszName) override;
 
-	virtual std::wstring GetFieldString(LPCTSTR sFieldName) override;
-	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) override;
+	virtual std::wstring GetFieldString(const wchar_t *sFieldName) override;
+	virtual void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) override;
 
     virtual std::string GetFieldStringUTF8(const char *sFieldName) override;
 	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) override;
 
-	virtual long GetFieldLong(LPCTSTR sFieldName) override;
-	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue) override;
+	virtual long GetFieldLong(const wchar_t *sFieldName) override;
+	virtual void SetFieldLong(const wchar_t *sFieldName, long lValue) override;
 
-	virtual double GetFieldDouble(LPCTSTR sFieldName) override;
-	virtual void SetFieldDouble(LPCTSTR sFieldName, double dValue) override;
+	virtual double GetFieldDouble(const wchar_t *sFieldName) override;
+	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
 
-	virtual time_t GetFieldDateTime(LPCTSTR sFieldName) override;
-	virtual void SetFieldDateTime(LPCTSTR sFieldName, const time_t &time) override;
+	virtual time_t GetFieldDateTime(const wchar_t *sFieldName) override;
+	virtual void SetFieldDateTime(const wchar_t *sFieldName, const time_t &time) override;
 
-	virtual bool IsFieldValueNull(LPCTSTR sFieldName) override;
+	virtual bool IsFieldValueNull(const wchar_t *sFieldName) override;
 
-	virtual bool DoesFieldExist(LPCTSTR sFieldName) override;
+	virtual bool DoesFieldExist(const wchar_t *sFieldName) override;
 
 private:
 	bool IsOpen() const;
-	void SetIndex(LPCTSTR sIndex);
-    void DoOnDaoException(CDaoException *e, LPCTSTR sFunction);
+	void SetIndex(const wchar_t *sIndex);
+    void DoOnDaoException(CDaoException *e, const wchar_t *sFunction);
     
 // Attributes
 private:

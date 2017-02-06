@@ -27,9 +27,9 @@ public:
     bool BeginCopy();
     bool EndCopy();
 
-	bool CopyTableData(LPCTSTR sTableName);
-	bool CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
-	bool CopyTableDataEx(LPCTSTR sTableName);//Slow simple copy. Dst table flushed.
+	bool CopyTableData(const wchar_t *sTableName);
+	bool CopyTableData(const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst);
+	bool CopyTableDataEx(const wchar_t *sTableName);//Slow simple copy. Dst table flushed.
 
     dsDatabase *GetSrcDB();
     dsDatabase *GetDstDB();

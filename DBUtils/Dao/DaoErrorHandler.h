@@ -13,10 +13,10 @@ public:
 
 // Operations
 public:
-    void OnDaoException(CDaoException *e, LPCTSTR sFunctionName);
-    void OnError(LPCTSTR sError, LPCTSTR sFunctionName);
+    void OnDaoException(CDaoException *e, const wchar_t *sFunctionName);
+    void OnError(const wchar_t *sError, const wchar_t *sFunctionName);
 
-    typedef void (*dbErrorHandler)(LPCTSTR msg); 
+    typedef void (*dbErrorHandler)(const wchar_t *msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler);
 
 // Operations

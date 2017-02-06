@@ -3,6 +3,8 @@
 
 #include "jsonparser.h"
 
+#include "string"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -12,8 +14,7 @@ static char THIS_FILE[] = __FILE__;
 namespace ds_jsonparser_rbg
 {
     void SetRGB(ds_jsonparser::object &obj, const char *sField, unsigned long color) {
-        CStdStringA sRGB;
-	    sRGB.Format("%d", color);
+        std::string sRGB = std::to_string(color);
         obj.SetTextUTF8(sField, sRGB.c_str());
     }
 

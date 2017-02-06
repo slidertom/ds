@@ -43,7 +43,7 @@ namespace ds_jsonparser
         _impl::destroy(m_impl);
     }
 
-    void object::SetText(const char* sField, LPCTSTR value) {
+    void object::SetText(const char* sField, const wchar_t *value) {
         const std::string value_str = ds_str_conv::ConvertToUTF8(value);
         _impl::set_field_string(m_impl, sField, value_str.c_str());
     }
@@ -59,6 +59,14 @@ namespace ds_jsonparser
     void object::SetArray(const char *sField, const json_array &array) {
         _impl::set_field_array(m_impl, sField, array.m_impl);
     }
+	void object::SetStringArray(const char *sField, const std::vector<std::wstring> &array)
+	{
+		ds_jsonparser::json_array array_json;
+		for ( const auto &it : array ) {
+			array_json.AddString(it.c_str());
+		}
+		_impl::set_field_array(m_impl, sField, array_json.m_impl);
+	}
     void object::SetObject(const char *sField, const object &obj) {
         _impl::set_field_object(m_impl, sField, obj.m_impl);
     }
@@ -82,7 +90,15 @@ namespace ds_jsonparser
     void object::GetArray(const char *sField, json_array &array) const {
         _impl::get_field_array(m_impl, sField, array.m_impl);
     }
-
+	void object::GetStringArray(const char *sField, std::vector<std::wstring> &array) const
+	{
+		json_array array_json;
+		_impl::get_field_array(m_impl, sField, array_json.m_impl);
+		const int nCnt = array_json.GetSize();
+		for (int i = 0; i < nCnt; ++i) {
+			array.push_back(array_json.GetString(i));
+		}	
+	}
     double object::GetDouble(const char *sField) const {
         double dValue; 
         if (!_impl::get_field_double(m_impl, sField, dValue)) {
@@ -134,6 +150,9 @@ namespace ds_jsonparser
         std::string sValue = ds_str_conv::ConvertToUTF8(str);
         _impl::add_array_string(m_impl, sValue.c_str());
     }
+	void json_array::AddInt(int nValue) {
+		_impl::add_array_int(m_impl, nValue);
+	}
 
     int json_array::GetSize() const {
         return _impl::get_array_size(m_impl);
@@ -147,6 +166,9 @@ namespace ds_jsonparser
         const std::string sValue = GetStringUTF8(i);
         return ds_str_conv::ConvertFromUTF8(sValue.c_str());
     }
+	int json_array::GetInt(int i) const {
+		return _impl::get_array_int(m_impl, i);
+	}
     
     void json_array::GetJsonObject(int i, object &obj) const {
         _impl::get_array_object(m_impl, i, obj.m_impl);

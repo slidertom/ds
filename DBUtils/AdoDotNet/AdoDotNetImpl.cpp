@@ -5,8 +5,6 @@
 #using <System.dll>
 #using <System.Data.dll>
 
- #include "Collections/StdString.h"
-
 #include <vcclr.h>
 
 using namespace System;
@@ -21,9 +19,9 @@ static char THIS_FILE[] = __FILE__;
 
 namespace dot_net_exception_format
 {
-    CStdString FormatSQLException(SqlException ^e, LPCTSTR sFunctionName)
+    std::wstring FormatSQLException(SqlException ^e, const wchar_t *sFunctionName)
     {
-        CStdString sFormatted;
+        std::wstring sFormatted;
         sFormatted = _T(".NET SQL Exception [");
         sFormatted += sFunctionName;
         sFormatted += _T("] - ");
@@ -32,9 +30,9 @@ namespace dot_net_exception_format
         return sFormatted;
     }
 
-	CStdString FormatArgException(ArgumentException ^e, LPCTSTR sFunctionName)
+	std::wstring FormatArgException(ArgumentException ^e, const wchar_t *sFunctionName)
     {
-        CStdString sFormatted;
+        std::wstring sFormatted;
         sFormatted = _T(".NET Argument Exception [");
         sFormatted += sFunctionName;
         sFormatted += _T("] - ");
@@ -43,9 +41,9 @@ namespace dot_net_exception_format
         return sFormatted;
     }
 
-	CStdString FormatIndexOutOfRangeException(IndexOutOfRangeException ^e, LPCTSTR sFunctionName)
+	std::wstring FormatIndexOutOfRangeException(IndexOutOfRangeException ^e, const wchar_t *sFunctionName)
 	{
-        CStdString sFormatted;
+        std::wstring sFormatted;
         sFormatted = _T(".NET IndexOutOfRange Exception [");
         sFormatted += sFunctionName;
         sFormatted += _T("] - ");
@@ -54,9 +52,9 @@ namespace dot_net_exception_format
         return sFormatted;
 	}
 
-	CStdString FormatInvalidCastException(InvalidCastException ^e, LPCTSTR sFunctionName)
+	std::wstring FormatInvalidCastException(InvalidCastException ^e, const wchar_t *sFunctionName)
 	{
-        CStdString sFormatted;
+        std::wstring sFormatted;
         sFormatted = _T(".NET InvalidCast Exception [");
         sFormatted += sFunctionName;
         sFormatted += _T("] - ");
@@ -70,58 +68,60 @@ class CDotNetErrorHandler
 {
 // Construction/Destruction
 public:
-	CDotNetErrorHandler() : m_pErrorHandler(nullptr) {};
+	CDotNetErrorHandler() : m_pErrorHandler(nullptr) { }
     ~CDotNetErrorHandler() { }
 
 // Operations
 public:
-    void OnDotNetSQLException(SqlException ^e, LPCTSTR sFunctionName)
+    void OnDotNetSQLException(SqlException ^e, const wchar_t *sFunctionName)
 	{
 		if ( !m_pErrorHandler ) {
 			return;
 		}
-		const CStdString str = dot_net_exception_format::FormatSQLException(e, sFunctionName);
+		const std::wstring str = dot_net_exception_format::FormatSQLException(e, sFunctionName);
 		(*m_pErrorHandler)(str.c_str());
 	}
 
-	void OnDotNetArgException(ArgumentException ^e, LPCTSTR sFunctionName)
+	void OnDotNetArgException(ArgumentException ^e, const wchar_t *sFunctionName)
 	{
 		if ( !m_pErrorHandler ) {
 			return;
 		}
-		const CStdString str = dot_net_exception_format::FormatArgException(e, sFunctionName);
+		const std::wstring str = dot_net_exception_format::FormatArgException(e, sFunctionName);
 		(*m_pErrorHandler)(str.c_str());
 	}
 
-	void OnDotNetIndexOutOfRangeException(IndexOutOfRangeException ^e, LPCTSTR sFunctionName)
+	void OnDotNetIndexOutOfRangeException(IndexOutOfRangeException ^e, const wchar_t *sFunctionName)
 	{
 		if ( !m_pErrorHandler ) {
 			return;
 		}
-		const CStdString str = dot_net_exception_format::FormatIndexOutOfRangeException(e, sFunctionName);
+		const std::wstring str = dot_net_exception_format::FormatIndexOutOfRangeException(e, sFunctionName);
 		(*m_pErrorHandler)(str.c_str());
 	}
 
-	void OnDotNetInvalidCastException(InvalidCastException ^e, LPCTSTR sFunctionName)
+	void OnDotNetInvalidCastException(InvalidCastException ^e, const wchar_t *sFunctionName)
 	{
 		if ( !m_pErrorHandler ) {
 			return;
 		}
-		const CStdString str = dot_net_exception_format::FormatInvalidCastException(e, sFunctionName);
+		const std::wstring str = dot_net_exception_format::FormatInvalidCastException(e, sFunctionName);
 		(*m_pErrorHandler)(str.c_str());
 	}
 
-    void OnError(LPCTSTR sError, LPCTSTR sFunctionName)
+    void OnError(const wchar_t *sError, const wchar_t *sFunctionName)
 	{
 		if ( !m_pErrorHandler ) {
 			return;
 		}
-		CStdString sMsg;
-		sMsg.Format(_T("%s-%s"), sError, sFunctionName);
+		std::wstring sMsg;
+        sMsg += sError;
+        sMsg += L"-";
+        sMsg += sFunctionName;
 		(*m_pErrorHandler)(sMsg.c_str());
 	}
 
-    typedef void (*dbErrorHandler)(LPCTSTR msg); 
+    typedef void (*dbErrorHandler)(const wchar_t *msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler)
 	{
 		dbErrorHandler prevHandler = m_pErrorHandler;
@@ -148,7 +148,7 @@ public:
 	}
 
 public:
-	virtual bool Open(LPCTSTR sConn)
+	virtual bool Open(const wchar_t *sConn)
 	{
 		SqlConnection ^pConnection = gcnew SqlConnection;
 		try
@@ -187,7 +187,7 @@ public:
 		return !m_sConn.IsEmpty();
 	}
 
-	virtual bool Execute(LPCTSTR sSQL)
+	virtual bool Execute(const wchar_t *sSQL)
 	{
 		SqlConnection ^pConnection = gcnew SqlConnection;
 		SqlCommand ^pCommand = gcnew SqlCommand();
@@ -266,7 +266,7 @@ public:
 		return dsFieldType_Undefined;
 	}
 
-	virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
+	virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
 	{
 		SqlConnection ^pConnection = gcnew SqlConnection;
 		SqlCommand ^pCommand = gcnew SqlCommand();
@@ -307,7 +307,7 @@ public:
         return true;
 	}
 
-	virtual bool DoesTableExists(LPCTSTR sTable)
+	virtual bool DoesTableExists(const wchar_t *sTable)
 	{
 		SqlConnection ^pConnection = gcnew SqlConnection;
 		SqlCommand ^pCommand = gcnew SqlCommand();
@@ -410,7 +410,7 @@ public:
 	};
 
 public:
-	virtual bool Open(LPCTSTR sSQL)
+	virtual bool Open(const wchar_t *sSQL) override
 	{
 		try
 		{
@@ -430,7 +430,29 @@ public:
 		return true;
 	}
 
-	virtual void Close()
+	virtual bool SeekByString(const wchar_t *sSQL, const wchar_t *sValue) override
+	{
+		try
+		{
+			m_pCommand->CommandText = gcnew String(sSQL) + "@P0";
+			m_pCommand->Parameters->Clear();
+			m_pCommand->Parameters->Add(gcnew SqlParameter(gcnew String("P0"), gcnew String(sValue)));
+			m_pReader = m_pCommand->ExecuteReader();
+			m_bIsOk = m_pReader->Read();//To get on first record
+			m_bOpen = true;
+		}
+		catch (SqlException ^sql_ex)
+		{
+			ASSERT(FALSE);
+			m_pErrorHandler->OnDotNetSQLException(sql_ex, _T("CDotNetRecordSetImpl::SeekByString"));
+			delete sql_ex;
+			return false;
+		}
+
+		return true;
+	}
+
+	virtual void Close() override
 	{
 		m_pReader->Close();
 		m_bIsOk = false;
@@ -442,7 +464,7 @@ public:
 		return m_bOpen;
 	}
 
-	virtual bool IsEmpty()
+	virtual bool IsEmpty() override
 	{
 		try {
 			return !m_pReader->HasRows;
@@ -457,7 +479,7 @@ public:
 		return true;
 	}
 
-	virtual bool MoveNext()
+	virtual bool MoveNext() override
 	{
 		try {
 			m_bIsOk = m_pReader->Read();
@@ -473,12 +495,12 @@ public:
 		return m_bIsOk;
 	}
 
-	virtual bool IsEOF()
+	virtual bool IsEOF() override
 	{
 		return !m_bIsOk;
 	}
 
-	virtual CString GetFieldString(LPCTSTR sFieldName)
+	virtual CString GetFieldString(const wchar_t *sFieldName) override
 	{
 		try
 		{
@@ -525,12 +547,12 @@ public:
 		return _T("");
 	}
 
-	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue)
+	virtual void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) override
 	{
 		ASSERT(FALSE);
 	}
 
-	virtual long GetFieldLong(LPCTSTR sFieldName)
+	virtual long GetFieldLong(const wchar_t *sFieldName) override
 	{
 		try
 		{
@@ -603,12 +625,12 @@ public:
 		return 0;
 	}
 
-	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue)
+	virtual void SetFieldLong(const wchar_t *sFieldName, long lValue) override
 	{
 		ASSERT(FALSE);
 	}
 
-	virtual double GetFieldDouble(LPCTSTR sFieldName)
+	virtual double GetFieldDouble(const wchar_t *sFieldName) override
 	{
 		try
 		{
@@ -649,12 +671,12 @@ public:
 		return 0.0;
 	}
 
-	virtual void SetFieldDouble(LPCTSTR sFieldName, double dValue)
+	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override
 	{
 		ASSERT(FALSE);
 	}
 
-	virtual time_t GetFieldDateTime(LPCTSTR sFieldName)
+	virtual time_t GetFieldDateTime(const wchar_t *sFieldName) override
 	{
 		try
 		{
@@ -686,12 +708,12 @@ public:
 		return 0;
 	}
 
-	virtual void SetFieldDateTime(LPCTSTR sFieldName, const time_t &time)
+	virtual void SetFieldDateTime(const wchar_t *sFieldName, const time_t &time) override
 	{
 		ASSERT(FALSE);
 	}
 
-	virtual bool IsFieldValueNull(LPCTSTR sFieldName)
+	virtual bool IsFieldValueNull(const wchar_t *sFieldName) override
 	{
 		try
 		{
@@ -725,7 +747,7 @@ public:
 		return false;
 	}
 
-	virtual bool DoesFieldExist(LPCTSTR sFieldName)
+	virtual bool DoesFieldExist(const wchar_t *sFieldName) override
 	{
 		String ^sFieldName_ = gcnew String(sFieldName);
 		

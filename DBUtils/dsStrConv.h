@@ -2,9 +2,7 @@
 #define __DS_STR_CONV_H__
 #pragma once
 
-#ifndef STDSTRING_H
-    #include "Collections/StdString.h"
-#endif
+#include "string"
 
 namespace ds_str_conv
 {

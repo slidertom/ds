@@ -25,7 +25,7 @@ class DB_UTILS_API dsTable
 {
 // Construction/Destruction
 public:
-	dsTable(dsDatabase *pDatabase, LPCTSTR sTableName);		
+	dsTable(dsDatabase *pDatabase, const wchar_t *sTableName);		
 	virtual ~dsTable();
 
 // Attributes
@@ -40,46 +40,46 @@ public:
 // Operations
 public:
 	bool Open();                     
-	void OpenSQL(LPCTSTR sSQL);      
-	bool OpenView(LPCTSTR sViewName); // returns true if open succeeds
+	void OpenSQL(const wchar_t *sSQL);      
+	bool OpenView(const wchar_t *sViewName); // returns true if open succeeds
 
-	bool SeekIndex(LPCTSTR sIndex, LPCTSTR sValue);          
-	bool SeekIndex(LPCTSTR sIndex, long nValue);             
+	bool SeekIndex(const wchar_t *sIndex, const wchar_t *sValue);          
+	bool SeekIndex(const wchar_t *sIndex, long nValue);             
 
-	CStdString GetFieldString(LPCTSTR sFieldName) const;     
-    void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue); 
+	std::wstring GetFieldString(const wchar_t *sFieldName) const;     
+    void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue); 
     std::string GetFieldStringUTF8(const char *sFieldName) const;     
     void SetFieldStringUTF8(const char *sFieldName, const char *sValue); 
 
-	long GetFieldLong(LPCTSTR sFieldName) const;             
-    void SetFieldLong(LPCTSTR sFieldName, long nValue);      
+	long GetFieldLong(const wchar_t *sFieldName) const;             
+    void SetFieldLong(const wchar_t *sFieldName, long nValue);      
 
-	double GetFieldDouble(LPCTSTR sFieldName) const;         
-    void SetFieldDouble(LPCTSTR sFieldName, double dValue);  
+	double GetFieldDouble(const wchar_t *sFieldName) const;         
+    void SetFieldDouble(const wchar_t *sFieldName, double dValue);  
 
-	bool GetFieldBool(LPCTSTR sFieldName) const;             
-    void SetFieldBool(LPCTSTR sFieldName, bool bValue);      
+	bool GetFieldBool(const wchar_t *sFieldName) const;             
+    void SetFieldBool(const wchar_t *sFieldName, bool bValue);      
 
-	time_t GetFieldDateTime(LPCTSTR sFieldName) const;        
-    void SetFieldDateTime(LPCTSTR sFieldName, time_t nValue); 
+	time_t GetFieldDateTime(const wchar_t *sFieldName) const;        
+    void SetFieldDateTime(const wchar_t *sFieldName, time_t nValue); 
 
-	COLORREF GetFieldRGB(LPCTSTR sFieldName) const;          
-	void SetFieldRGB(LPCTSTR sFieldName, COLORREF color);    
+	COLORREF GetFieldRGB(const wchar_t *sFieldName) const;          
+	void SetFieldRGB(const wchar_t *sFieldName, COLORREF color);    
     
-	bool DoesFieldExist(LPCTSTR sFieldName);         
-	bool IsFieldValueNull(LPCTSTR sFieldName) const; 
-	void SetFieldNull(LPCTSTR sFieldName);           
+	bool DoesFieldExist(const wchar_t *sFieldName);         
+	bool IsFieldValueNull(const wchar_t *sFieldName) const; 
+	void SetFieldNull(const wchar_t *sFieldName);           
 
-	void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) const; 
-	void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize);
+	void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) const; 
+	void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize);
     void FreeBinary(unsigned char *pData);
 	
 	// Deletes all records with given value 
 	// Returns true if any record was deleted
-	bool DeleteAllByIndex(LPCTSTR sField, LPCTSTR sValue); // returns false in case of error 
-	bool DeleteAllByIndex(LPCTSTR sField, long    nValue); // returns false in case of error 
-    bool DeleteByIndex(LPCTSTR sField, LPCTSTR sValue);
-    bool DeleteByIndex(LPCTSTR sField, long nValue);
+	bool DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue); // returns false in case of error 
+	bool DeleteAllByIndex(const wchar_t *sField, long    nValue); // returns false in case of error 
+    bool DeleteByIndex(const wchar_t *sField, const wchar_t *sValue);
+    bool DeleteByIndex(const wchar_t *sField, long nValue);
 
     void Flush();  // Deletes all records in table
 	bool Delete(); // returns false in case of error 
@@ -90,13 +90,13 @@ public:
 
 	long GetRecordCount(); 
 
-	LPCTSTR GetTableName() const;
+	const wchar_t *GetTableName() const;
 
-    CStdString GetUniqueTextFieldValue(LPCTSTR sFieldName, LPCTSTR sPrefix, int width); 
+    std::wstring GetUniqueTextFieldValue(const wchar_t *sFieldName, const wchar_t *sPrefix, int width); 
 
 // Attributes
 private:
-	CStdString m_sTableName;
+	std::wstring m_sTableName;
 	CAbsRecordset *m_pSet;
 	dsDatabase  *m_pDatabase;
 };
@@ -116,10 +116,14 @@ private:
 // Field macros with renaming
 
 #define FIELD_TEXT(name, realname) \
-	CStdString Get##name() const   { return GetFieldString(realname);  } \
-	void Set##name(LPCTSTR sValue) { SetFieldString(realname, sValue); } \
+	CStdString Get##name() const          { return GetFieldString(realname);  } \
+	void Set##name(const wchar_t *sValue) { SetFieldString(realname, sValue); } \
 	FIELD_INDICATORS(name, realname)
 
+#define FIELD_TEXT_UTF8(name, realname_utf8) \
+    std::string Get##name##UTF8() const      { return GetFieldStringUTF8(realname_utf8);  } \
+	void Set##name##UTF8(const char *sValue) { SetFieldStringUTF8(realname_utf8, sValue); } \
+	
 #define FIELD_LONG(name, realname) \
 	long Get##name() const      { return GetFieldLong(realname); } \
 	void Set##name(long nValue) { SetFieldLong(realname, nValue); } \
@@ -152,9 +156,9 @@ private:
 
 // indexes
 #define KEY_TEXT(name, realname) \
-	bool SeekBy##name(LPCTSTR sValue)      { return SeekIndex(realname, sValue); } \
-	bool DeleteAllBy##name(LPCTSTR sValue) { return DeleteAllByIndex(realname, sValue); } \
-	bool DeleteBy##name(LPCTSTR sValue)    { return DeleteByIndex(realname, sValue); } \
+	bool SeekBy##name(const wchar_t *sValue)      { return SeekIndex(realname, sValue); } \
+	bool DeleteAllBy##name(const wchar_t *sValue) { return DeleteAllByIndex(realname, sValue); } \
+	bool DeleteBy##name(const wchar_t *sValue)    { return DeleteByIndex(realname, sValue); } \
     FIELD_TEXT(name, realname)
 	
 #define KEY_LONG(name, realname) \

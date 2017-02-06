@@ -6,8 +6,6 @@
 
 #include "../dsStrConv.h"
 
-#include "Collections/StdString.h"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -23,40 +21,28 @@ void CSqLiteErrorHandler::OnError(const char *sError, const char *sFunctionName)
     std::string sMsg  = sError;
                 sMsg += "-";
                 sMsg += sFunctionName;
-    CStdStringW sErrorMsg = ds_str_conv::ConvertFromUTF8(sMsg.c_str());  
+    std::wstring sErrorMsg = ds_str_conv::ConvertFromUTF8(sMsg.c_str());  
     (*m_pErrorHandler)(sErrorMsg.c_str());
 }
 
-void CSqLiteErrorHandler::OnError(LPCTSTR sError, LPCTSTR sFunctionName)
+void CSqLiteErrorHandler::OnErrorCode(int errorCode, sqlite3 *pDB, const char *sFunctionName)
 {
-    if ( !m_pErrorHandler ) {
-        return;
-    }
-
-    CStdString sMsg  = sError;
-               sMsg += _T("-");
-               sMsg += sFunctionName;
-    (*m_pErrorHandler)(sMsg.c_str());
+    const char *localError = sqlite3_errmsg(pDB);
+    OnErrorCode(errorCode, localError, sFunctionName);
 }
 
-void CSqLiteErrorHandler::OnError(int errorCode, const char *sErrorUTF8, LPCTSTR sFunctionName)
+void CSqLiteErrorHandler::OnErrorCode(int errorCode, const char *sErrorUTF8, const char *sFunctionName)
 {
     const char *sErrMsg = sqlite3_errstr(errorCode);
-
-    CStdStringW sCode;
-    sCode.Format(_T("%d"), errorCode);
-
-    CStdStringW sErrorW  = ds_str_conv::ConvertFromUTF8(sErrorUTF8);               
-    CStdStringW sErrMsgW = ds_str_conv::ConvertFromUTF8(sErrMsg);               
-
-    CStdStringW sError = sErrMsgW.c_str();
-                sError += _T("[");
+    std::string sCode = std::to_string(errorCode);
+    std::string sError = sErrMsg;
+                sError += "[";
                 sError += sCode.c_str();
-                sError += _T("]: ");
-                sError += sErrorW;
-    OnError(sError .c_str(), sFunctionName);
+                sError += "]: ";
+                sError += sErrorUTF8;
+    OnError(sError.c_str(), sFunctionName);
 }
-   
+
 CSqLiteErrorHandler::dbErrorHandler CSqLiteErrorHandler::SetErrorHandler(dbErrorHandler newHandler)
 {
     dbErrorHandler prevHandler = m_pErrorHandler;

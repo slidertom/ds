@@ -66,7 +66,7 @@ namespace dao_database_util
 			    return pSrc->lVal;
 
 		    case VT_BSTR:
-			    return _ttoi((LPCTSTR)pSrc->bstrVal);
+			    return _ttoi((const wchar_t *)pSrc->bstrVal);
 	    }
 
 	    return 0;
@@ -76,15 +76,12 @@ namespace dao_database_util
     inline bool IsDouble(TOleVariant &varSrc)
     {
 	    LPCVARIANT pSrc = (LPCVARIANT)varSrc;
-
 	    switch (pSrc->vt)
 	    {
 	    case VT_R4:
 	    case VT_R8:
 		    return true;
-
 	    }
-
 	    return false;
     }
 
@@ -96,10 +93,10 @@ namespace dao_database_util
 	    switch (pSrc->vt)
 	    {
 	    case VT_BSTR:
-		    return CStdString((LPCTSTR)pSrc->bstrVal);
+		    return CStdString((const wchar_t *)pSrc->bstrVal);
 
 	    case VT_DATE:
-		    return (LPCTSTR)COleDateTime(varSrc).Format();
+		    return (const wchar_t *)COleDateTime(varSrc).Format();
 
 	    case VT_UI1:
             {

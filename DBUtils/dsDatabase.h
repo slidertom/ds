@@ -47,7 +47,7 @@ public:
 public:
 	bool IsReadOnly() const;
 	bool IsOpen() const;
-	CStdString GetName() const;
+	std::wstring GetName() const;
 	
 // Operators
 public:
@@ -59,12 +59,24 @@ public:
 	void CommitTrans(); 
 	void RollbackTrans();    
 
-	bool Execute(LPCTSTR lpszSQL); 
+	bool Execute(const wchar_t *lpszSQL); 
 	
-    void Close(); 
+    void Close();
+
+	class dsParams
+	{
+	public:
+		dsParams() : m_bReadOnly(false), m_bMultiUser(false) {};
+		~dsParams() {};
+
+	public:
+		bool m_bReadOnly;
+		bool m_bMultiUser;
+		std::wstring m_sKey;
+	};
 
     // sKey - Database encryption key.
-    bool OpenDB(LPCTSTR sPath, bool bReadOnly = false, LPCTSTR sKey = _T("")); 
+    bool OpenDB(const wchar_t *sPath, const dsParams &params = dsParams());
 
     // Do call this function if you want to commit all the data from the memory to file
     // if possible do not use this function.
@@ -73,7 +85,7 @@ public:
     void CommitDatabase(); 
 
     bool CompactDatabase(); // or VACUUM
-    static bool CompactDatabase(LPCTSTR sPath);
+    static bool CompactDatabase(const wchar_t *sPath);
 
 // Operations
 public:
@@ -88,12 +100,14 @@ public:
 		
 // Database structure help functions
 public:
-	bool DoesTableExist(LPCTSTR sTable) const; 
-	void DeleteRelation(LPCTSTR sRelation); 
-	bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-						LPCTSTR sField, LPCTSTR sForeignField);
+	bool DoesTableExist(const wchar_t *sTable) const; 
+    bool DoesTableExist(const char *sTable) const; 
 
-    typedef void (*dbErrorHandler)(LPCTSTR msg); 
+	void DeleteRelation(const wchar_t *sRelation); 
+	bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+						const wchar_t *sField, const wchar_t *sForeignField);
+
+    typedef void (*dbErrorHandler)(const wchar_t *msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler);
 
 // Attributes

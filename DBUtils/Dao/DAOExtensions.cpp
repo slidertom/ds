@@ -4,6 +4,8 @@
 #include "AfxDao.h"
 #include "DaoErrorHandler.h"
 
+#include "Collections/StdString.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -14,7 +16,7 @@ namespace dao_extensions
 {
 	namespace internal
 	{
-		static void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR pszTableNameSrc, LPCTSTR pszTableNameDst, LPCTSTR pszColumnName, CDaoErrorHandler *pErrorHandler)
+		static void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *pszTableNameSrc, const wchar_t *pszTableNameDst, const wchar_t *pszColumnName, CDaoErrorHandler *pErrorHandler)
 		{
             CString strFormat;
 			strFormat.Format(_T("INSERT INTO %s IN '%s' SELECT %s FROM %s;"), pszTableNameDst, pDbDst->GetName(), pszColumnName, pszTableNameSrc);
@@ -33,7 +35,7 @@ namespace dao_extensions
 		}
 	}
 
-    void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, CDaoErrorHandler *pErrorHandler)
+    void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, CDaoErrorHandler *pErrorHandler)
     {
         ASSERT(sTableNameSrc);
 		ASSERT(sTableNameDst);
@@ -46,11 +48,11 @@ namespace dao_extensions
 
         int nControlValue(1);
 
-        CMap<CString, LPCTSTR, int, int> mapColumns;
+        CMap<CString, const wchar_t *, int, int> mapColumns;
 
         // collect all column names from dst
         {
-            CDaoTableDef oSrcDaoTableInfo(pDbDst);
+            CDaoTableDef oSrcDaoTableInfo(pDbSrc);
             CDaoFieldInfo fieldInfo;
 
             oSrcDaoTableInfo.Open(sTableNameSrc);
@@ -68,7 +70,7 @@ namespace dao_extensions
         // collect all column names from src
         {
             int nValue;
-            CDaoTableDef oDstDaoTableInfo(pDbSrc);
+            CDaoTableDef oDstDaoTableInfo(pDbDst);
             CDaoFieldInfo fieldInfo;
 
             oDstDaoTableInfo.Open(sTableNameDst);
@@ -121,7 +123,7 @@ namespace dao_extensions
         }
     }
 
-    bool CopyTableDataImpl(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst, CDaoErrorHandler *pErrorHandler)
+    bool CopyTableDataImpl(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, CDaoErrorHandler *pErrorHandler)
     {
         try {
 		    dao_extensions::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, pErrorHandler);

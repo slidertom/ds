@@ -15,15 +15,15 @@ static char THIS_FILE[] = __FILE__;
 
 namespace inernal_dao_file_utils
 {
-    inline bool DoesFileExist(LPCTSTR fileName) {
+    inline bool DoesFileExist(const wchar_t *fileName) {
 	    return (GetFileAttributes(fileName) != 0xffffffff);
     }
 
-    inline void RemoveFile(LPCTSTR fileName) {
+    inline void RemoveFile(const wchar_t *fileName) {
         ::_tremove(fileName);
     }
 
-    inline bool CopyFile(LPCTSTR sSrcFile, LPCTSTR sDstFile) {
+    inline bool CopyFile(const wchar_t *sSrcFile, const wchar_t *sDstFile) {
         return ::CopyFile(sSrcFile, sDstFile, FALSE) != FALSE;
     }
 };
@@ -41,7 +41,7 @@ CDaoDatabaseImpl::~CDaoDatabaseImpl()
     delete m_pErrorHandler;
 }
 
-bool CDaoDatabaseImpl::IsDaoDB(LPCTSTR sPath)
+bool CDaoDatabaseImpl::IsDaoDB(const wchar_t *sPath)
 {
     FILE *pFile = _tfopen(sPath, _T("rb"));
     if ( !pFile ) {
@@ -118,7 +118,7 @@ bool CDaoDatabaseImpl::Rollback()
 	return true;
 }
 
-bool CDaoDatabaseImpl::Execute(LPCTSTR lpszSQL) 
+bool CDaoDatabaseImpl::Execute(const wchar_t *lpszSQL) 
 {
     try {
 	    m_pDatabase->Execute(lpszSQL);
@@ -144,7 +144,7 @@ void CDaoDatabaseImpl::Close()
 	}
 }
 
-bool CDaoDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) 
+bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) 
 {
 	m_bReadOnly = bReadOnly;
 
@@ -189,7 +189,7 @@ std::wstring CDaoDatabaseImpl::GetName()
     return sName;
 }
 
-bool CDaoDatabaseImpl::DoesTableExist(LPCTSTR sTable)
+bool CDaoDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
 	bool bTableExists = false;
 	try
@@ -238,19 +238,19 @@ void CDaoDatabaseImpl::CommitDatabase()
     // NOTE: we do not call dsDatabase::Close(), to avoid m_listners call -> close.
     
     const bool bReadOnly   = this->IsReadOnly();
-    const CStdString sName = m_pDatabase->GetName();
+    const std::wstring sName = m_pDatabase->GetName();
     
     m_pDatabase->Close(); // we do not close locker
     delete m_pDatabase;
     m_pDatabase = new CDaoDatabase;
-	this->OpenDB(sName.c_str(), bReadOnly, _T(""));
+	bool bNetwork = false;
+	this->OpenDB(sName.c_str(), bReadOnly, _T(""), bNetwork);
 }
 
 bool CDaoDatabaseImpl::CompactDatabase()
 {
     const bool bReadOnly   = this->IsReadOnly();
-    const CStdString sName = this->GetName();
-    TRACE(sName.c_str());TRACE(_T("\n"));
+    const std::wstring sName = this->GetName();
 
     try
     {
@@ -278,7 +278,8 @@ bool CDaoDatabaseImpl::CompactDatabase()
         inernal_dao_file_utils::RemoveFile(sTemp.c_str());
 
         m_pDatabase = new CDaoDatabase;
-	    this->OpenDB(sName.c_str(), bReadOnly, _T(""));
+		bool bNetwork = false;
+	    this->OpenDB(sName.c_str(), bReadOnly, _T(""), bNetwork);
     }
     catch (CDaoException *e)
     {
@@ -291,7 +292,7 @@ bool CDaoDatabaseImpl::CompactDatabase()
     return true;
 }
 
-bool CDaoDatabaseImpl::CopyTableData(CDaoDatabaseImpl *pSrcDB, CDaoDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
+bool CDaoDatabaseImpl::CopyTableData(CDaoDatabaseImpl *pSrcDB, CDaoDatabaseImpl *pDstDB, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst)
 {
     ASSERT(pSrcDB);
     ASSERT(pDstDB);
@@ -304,7 +305,7 @@ CDaoDatabaseImpl::dbErrorHandler CDaoDatabaseImpl::SetErrorHandler(CDaoDatabaseI
     return m_pErrorHandler->SetErrorHandler(newHandler);
 }
 
-void CDaoDatabaseImpl::DeleteRelation(LPCTSTR sRelation)
+void CDaoDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
 {
 	try
 	{
@@ -317,8 +318,8 @@ void CDaoDatabaseImpl::DeleteRelation(LPCTSTR sRelation)
     }
 }
 
-bool CDaoDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-									  LPCTSTR sField, LPCTSTR sForeignField)
+bool CDaoDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+									  const wchar_t *sField, const wchar_t *sForeignField)
 {
 	ASSERT(m_pDatabase);
 
@@ -336,7 +337,7 @@ bool CDaoDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sFo
 	return true;
 }
 
-bool CDaoDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
+bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
 {
     ASSERT(m_pDatabase);
     CDaoTableDef tableInfo(m_pDatabase);

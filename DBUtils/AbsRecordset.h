@@ -28,36 +28,36 @@ public:
 	virtual void Edit()	  = 0;
 	virtual bool Update() = 0;
 
-	virtual bool Open(LPCTSTR sTableName)    = 0;
-	virtual bool OpenSQL(LPCTSTR sSQL)       = 0;
-	virtual bool OpenView(LPCTSTR sViewName) = 0;
+	virtual bool Open(const wchar_t *sTableName)    = 0;
+	virtual bool OpenSQL(const wchar_t *sSQL)       = 0;
+	virtual bool OpenView(const wchar_t *sViewName) = 0;
 
-    virtual bool SeekByString(LPCTSTR sIndex, LPCTSTR sValue) = 0;
-	virtual bool SeekByLong(LPCTSTR sIndex,   long nValue)    = 0;
+    virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) = 0;
+	virtual bool SeekByLong(const wchar_t *sIndex,   long nValue)    = 0;
 
-	virtual void SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize)   = 0;
-	virtual void GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) = 0;
+	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)   = 0;
+	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) = 0;
     virtual void FreeBinary(unsigned char *pData) = 0;
 
-	virtual void SetFieldValueNull(LPCTSTR lpszName)  = 0;
-    virtual bool IsFieldValueNull(LPCTSTR sFieldName) = 0;
+	virtual void SetFieldValueNull(const wchar_t *lpszName)  = 0;
+    virtual bool IsFieldValueNull(const wchar_t *sFieldName) = 0;
 
-	virtual std::wstring GetFieldString(LPCTSTR sFieldName) = 0;
-	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) = 0;
+	virtual std::wstring GetFieldString(const wchar_t *sFieldName) = 0;
+	virtual void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) = 0;
 
     virtual std::string GetFieldStringUTF8(const char *sFieldName) = 0;
 	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) = 0;
 
-	virtual long GetFieldLong(LPCTSTR sFieldName) = 0;
-	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue) = 0;
+	virtual long GetFieldLong(const wchar_t *sFieldName) = 0;
+	virtual void SetFieldLong(const wchar_t *sFieldName, long lValue) = 0;
 
-	virtual double GetFieldDouble(LPCTSTR sFieldName) = 0;
-	virtual void SetFieldDouble(LPCTSTR sFieldName, double dValue) = 0;
+	virtual double GetFieldDouble(const wchar_t *sFieldName) = 0;
+	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) = 0;
 
-	virtual time_t GetFieldDateTime(LPCTSTR sFieldName) = 0;
-	virtual void   SetFieldDateTime(LPCTSTR sFieldName, const time_t &time) = 0;
+	virtual time_t GetFieldDateTime(const wchar_t *sFieldName) = 0;
+	virtual void   SetFieldDateTime(const wchar_t *sFieldName, const time_t &time) = 0;
 
-	virtual bool DoesFieldExist(LPCTSTR sFieldName) = 0; 
+	virtual bool DoesFieldExist(const wchar_t *sFieldName) = 0; 
 
 // Default realizations - do override if it's required
 public:
@@ -74,7 +74,7 @@ public:
     }
 
     // returns true if any record was been deleted
-    virtual bool DeleteAllByStringValue(LPCTSTR sField, LPCTSTR sValue)
+    virtual bool DeleteAllByStringValue(const wchar_t *sField, const wchar_t *sValue)
     {
         if ( !SeekByString(sField, sValue) ) {
             return false;
@@ -90,7 +90,7 @@ public:
 	    return bRetVal;
     }
 
-    virtual bool DeleteAllByLongValue(LPCTSTR sField, long nValue)
+    virtual bool DeleteAllByLongValue(const wchar_t *sField, long nValue)
     {
         if ( !SeekByLong(sField, nValue) ) {
             return false;
@@ -106,7 +106,7 @@ public:
 	    return bRetVal;
     }
 
-    virtual bool DeleteByLongValue(LPCTSTR sField, long nValue)
+    virtual bool DeleteByLongValue(const wchar_t *sField, long nValue)
     {
         if ( !SeekByLong(sField, nValue) ) {
             return false; 
@@ -119,7 +119,7 @@ public:
         return true;
     }
 
-    virtual bool DeleteByStringValue(LPCTSTR sField, LPCTSTR sValue)
+    virtual bool DeleteByStringValue(const wchar_t *sField, const wchar_t *sValue)
     {
         if ( !SeekByString(sField, sValue) ) {
             return false; 

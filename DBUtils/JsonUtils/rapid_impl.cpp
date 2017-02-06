@@ -368,6 +368,17 @@ namespace ds_jsonparser
             doc->PushBack(value, allocator);
         }
 
+		void add_array_int(void *impl, int nValue) 
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            ASSERT(doc->IsArray());
+
+            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
+            rapidjson::Value value;
+            value.SetInt(nValue);
+            doc->PushBack(value, allocator);
+        }
+
         void add_array_object(void *impl, const void *obj) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
@@ -402,6 +413,17 @@ namespace ds_jsonparser
             }
             internal::value2str(value, sValue);
         }
+
+		int get_array_int(const void *impl, int i)
+		{
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            const rapidjson::Value &value = (*doc)[i];
+            if ( value.IsInt() ) {
+                return value.GetInt();
+            }
+			
+			return 0;
+		}
 
         void get_array_object(const void *impl, int i, void *obj) 
         {

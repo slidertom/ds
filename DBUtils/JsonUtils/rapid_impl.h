@@ -2,6 +2,8 @@
 #define __RAPID_IMPL_H__
 #pragma once
 
+#include "string"
+
 namespace ds_jsonparser
 {
     namespace _impl_rapid
@@ -35,9 +37,11 @@ namespace ds_jsonparser
         //////////////////////////////////////////////////////////
         void create_array(void *&impl);
         void add_array_string(void *impl, const char *str);
+		void add_array_int(void *impl, int nValue);
         void add_array_object(void *impl, const void *obj);
         int  get_array_size(const void *impl);
         void get_array_string(const void *impl, int i, std::string &sValue);
+		int get_array_int(const void *impl, int i);
         void get_array_object(const void *impl, int i, void *obj);
     }
 }

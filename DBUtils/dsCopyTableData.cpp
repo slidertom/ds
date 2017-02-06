@@ -102,7 +102,7 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
                 {
                 case dsFieldType_Text:
                     {
-                        const CStdString sValue = src_table.GetFieldString(sFieldName);
+                        const std::wstring sValue = src_table.GetFieldString(sFieldName);
                         dst_table.SetFieldString(sFieldName, sValue.c_str());
                     }
                     break;
@@ -142,12 +142,12 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
     return true;
 }
 
-bool dsCopyTableData::CopyTableData(LPCTSTR sTableName)
+bool dsCopyTableData::CopyTableData(const wchar_t *sTableName)
 {
     return CopyTableData(sTableName, sTableName);
 }
 
-bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst)
+bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst)
 {
     ASSERT(m_pSrcDB);
 	ASSERT(m_pDstDB);
@@ -177,8 +177,9 @@ bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst
 
         if ( dst_info.size() == 0 ) {
             std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
-            CStdStringA sError;
-            sError.Format("Destination table %s there are no fields defined. ", sTableNameDstUTF8.c_str()); 
+            std::string sError = "Destination table ";
+                        sError += sTableNameDstUTF8.c_str(); 
+                        sError += " there are no fields defined. ";
             pDstDBImpl->OnError(sError.c_str(), "sqlite_util::ImportTableData");
             return false;
         }
@@ -186,11 +187,13 @@ bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst
         // special case for the sqlite database 
         if (nSrcType == dsType_SqLite && m_bAttached ) 
         {
-            // field count should match for the sqlite insert statement
-            if ( dst_info.size() == src_info.size() )
+            // field count and field names should match for the sqlite insert statement
+            if ( dst_info == src_info )
             {
                 CSqLiteDatabaseImpl *pDstSqlite = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
-                if ( sqlite_util::sqlite_insert_table_from_attached_db(pDstSqlite, sTableNameSrc, sTableNameDst) ) {
+                if ( sqlite_util::sqlite_insert_table_from_attached_db(pDstSqlite, 
+                                                                       ds_str_conv::ConvertToUTF8(sTableNameSrc).c_str(), 
+                                                                       ds_str_conv::ConvertToUTF8(sTableNameDst).c_str()) ) {
                     return true;
                 }
                 return false;
@@ -205,7 +208,7 @@ bool dsCopyTableData::CopyTableData(LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst
     return dsCopyTableData::CopyTableData(src_table, dst_table, union_info);
 }
 
-bool dsCopyTableData::CopyTableDataEx(LPCTSTR sTableName)
+bool dsCopyTableData::CopyTableDataEx(const wchar_t *sTableName)
 {
     ASSERT(m_pSrcDB);
 	ASSERT(m_pDstDB);

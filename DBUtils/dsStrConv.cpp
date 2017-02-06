@@ -15,6 +15,10 @@ static char THIS_FILE[] = __FILE__;
 // Convert a wide Unicode string to an UTF8 string
 namespace ds_str_conv
 {
+    // or maybe should be used:
+    // http://stackoverflow.com/questions/4358870/convert-wstring-to-string-encoded-in-utf-8
+    // std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+    // return myconv.to_bytes(str);
     std::string ConvertToUTF8(const wchar_t *wstr)
     {
         const int nLen = wcslen(wstr);

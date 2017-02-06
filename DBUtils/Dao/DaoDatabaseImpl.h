@@ -18,7 +18,7 @@ public:
 
 // Static operations
 public:
-    static bool IsDaoDB(LPCTSTR sPath);
+    static bool IsDaoDB(const wchar_t *sPath);
 
 // Overrides
 public:
@@ -26,9 +26,9 @@ public:
 	virtual bool CommitTrans() override;
 	virtual bool Rollback() override;
 
-	virtual bool Execute(LPCTSTR lpszSQL) override; 
+	virtual bool Execute(const wchar_t *lpszSQL) override; 
 	virtual void Close() override; 
-	virtual bool OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) override;
+	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) override;
 
 	virtual dsDBType GetType() override;
 
@@ -37,7 +37,7 @@ public:
 
 	virtual std::wstring GetName() override;
 	
-	virtual bool DoesTableExist(LPCTSTR sTable) override; 
+	virtual bool DoesTableExist(const wchar_t *sTable) override; 
 	
 	virtual CAbsRecordset *CreateRecordset() override;
 
@@ -45,17 +45,17 @@ public:
 
     virtual bool CompactDatabase() override;
 
-	virtual void DeleteRelation(LPCTSTR sRelation) override;
-	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-								LPCTSTR sField, LPCTSTR sForeignField) override;
+	virtual void DeleteRelation(const wchar_t *sRelation) override;
+	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+								const wchar_t *sField, const wchar_t *sForeignField) override;
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
-    virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) override;
+    virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) override;
 
 // Static operations
 public:
-    static bool CopyTableData(CDaoDatabaseImpl *pSrcDB, CDaoDatabaseImpl *pDstDB, LPCTSTR sTableNameSrc, LPCTSTR sTableNameDst);
+    static bool CopyTableData(CDaoDatabaseImpl *pSrcDB, CDaoDatabaseImpl *pDstDB, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst);
 
 public:
     CDaoDatabase *GetDaoDB() { return m_pDatabase; }

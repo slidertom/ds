@@ -18,11 +18,14 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define SQL_BUSY_TIMEOUT  5000
+
 CSqLiteDatabaseImpl::CSqLiteDatabaseImpl() 
 : m_bReadOnly(false), m_pDB(nullptr)
 {
     m_bTransMode = false;
     m_pErrorHandler = new CSqLiteErrorHandler;
+	m_bMultiUser = false;
 }
 
 CSqLiteDatabaseImpl::~CSqLiteDatabaseImpl()
@@ -31,7 +34,7 @@ CSqLiteDatabaseImpl::~CSqLiteDatabaseImpl()
     delete m_pErrorHandler;
 }
 
-bool CSqLiteDatabaseImpl::IsSqLiteDB(LPCTSTR sPath)
+bool CSqLiteDatabaseImpl::IsSqLiteDB(const wchar_t *sPath)
 {
     FILE *pFile = _tfopen(sPath, _T("rb"));
     if ( !pFile ) {
@@ -68,9 +71,17 @@ bool CSqLiteDatabaseImpl::BeginTrans()
     ASSERT(!m_bTransMode); // nested transactions are not supported 
     m_bTransMode = true;
 
-    VERIFY(ExecuteUTF8("begin transaction"));
+    //m_bNetwork controls if there can be database usage by multiple processes at one time
+	if ( m_bMultiUser )
+	{
+		VERIFY(ExecuteUTF8("begin immediate transaction"));
+	}
+	else
+	{
+		VERIFY(ExecuteUTF8("begin transaction"));
+	}
+
     //VERIFY(ExecuteUTF8("begin exclusive transaction"));
-    //ExecuteUTF8("begin immediate transaction");
 	return true;
 }
 
@@ -87,12 +98,12 @@ bool CSqLiteDatabaseImpl::Rollback()
 {
     ASSERT(m_bTransMode); // transaction should be started
     m_bTransMode = false;
-#
+
     ExecuteUTF8("rollback transaction");
 	return true;
 }
 
-bool CSqLiteDatabaseImpl::Execute(LPCTSTR lpszSQL) 
+bool CSqLiteDatabaseImpl::Execute(const wchar_t *lpszSQL) 
 {
     std::string sql = ds_str_conv::ConvertToUTF8(lpszSQL);
     return ExecuteUTF8(sql.c_str());
@@ -113,7 +124,7 @@ void CSqLiteDatabaseImpl::Close()
     m_table_field_info_map.clear();
 }
 
-bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) 
+bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) 
 {
     //int nRetVal = sqlite3_config(SQLITE_CONFIG_SERIALIZED); // SQLITE_CONFIG_SERIALIZED SQLITE_CONFIG_MULTITHREAD open -> SQLITE_OPEN_FULLMUTEX
     //VERIFY(nRetVal == SQLITE_OK);
@@ -148,7 +159,7 @@ bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw)
     m_sFilePath = sPath;
     // UTF8 path required
     std::string localFileName = ds_str_conv::ConvertToUTF8(sPath);
-    int rc = sqlite3_open_v2(localFileName.c_str(), &m_pDB, bReadOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE, NULL);
+    int rc = sqlite3_open_v2(localFileName.c_str(), &m_pDB, bReadOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX, NULL);
     // sqlite3_open16 - UTF-16 does not allow to open in the read only mode
     //int rc = sqlite3_open16(sPath, &m_pDB);
 
@@ -160,15 +171,30 @@ bool CSqLiteDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw)
             localError = sqlite3_errmsg(m_pDB);
             Close();
         }
-        m_pErrorHandler->OnError(rc, localError, _T("CSqLiteDatabaseImpl::OpenDB"));
+        m_pErrorHandler->OnErrorCode(rc, localError, "CSqLiteDatabaseImpl::OpenDB");
+        return false;
+    }
+
+	rc = sqlite3_enable_shared_cache(1);
+	if (rc != SQLITE_OK)
+    {
+        m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::OpenDB::sqlite3_enable_shared_cache");
+        Close();
         return false;
     }
 
     rc = sqlite3_extended_result_codes(m_pDB, 1);
     if (rc != SQLITE_OK)
     {
-        const char *localError = sqlite3_errmsg(m_pDB);
-        m_pErrorHandler->OnError(rc, localError, _T("CSqLiteDatabaseImpl::OpenDB"));
+        m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::OpenDB");
+        Close();
+        return false;
+    }
+
+	rc = sqlite3_busy_timeout(m_pDB, SQL_BUSY_TIMEOUT);
+    if (rc != SQLITE_OK)
+    {
+        m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::OpenDB::sqlite3_busy_timeout");
         Close();
         return false;
     }
@@ -203,12 +229,12 @@ std::wstring CSqLiteDatabaseImpl::GetName()
 	return m_sFilePath;
 }
 
-bool CSqLiteDatabaseImpl::DoesTableExist(LPCTSTR sTable)
+bool CSqLiteDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
     std::string sTableUTF8 = ds_str_conv::ConvertToUTF8(sTable);
-    std::string sSQL  = "PRAGMA table_info(";
+    std::string sSQL  = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = '";
                 sSQL += sTableUTF8;
-                sSQL += ")";
+                sSQL += "' COLLATE NOCASE";
     
     CSqLiteRecordsetImpl loader(this, m_pErrorHandler);
     if ( !loader.OpenSQLUTF8(sSQL.c_str()) ) {
@@ -233,14 +259,14 @@ CSqLiteDatabaseImpl::dbErrorHandler CSqLiteDatabaseImpl::SetErrorHandler(CSqLite
     return m_pErrorHandler->SetErrorHandler(newHandler);
 }
 
-void CSqLiteDatabaseImpl::DeleteRelation(LPCTSTR sRelation)
+void CSqLiteDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
 {
 	//ASSERT(FALSE);
     //sqlite3_exec
 }
 
-bool CSqLiteDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-									     LPCTSTR sField, LPCTSTR sForeignField)
+bool CSqLiteDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+									     const wchar_t *sField, const wchar_t *sForeignField)
 {
 	//ASSERT(FALSE);
 	//Impl must be simillar to
@@ -250,19 +276,34 @@ bool CSqLiteDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR 
 	return true;
 }
 
+#define SQLTM_COUNT 100  /** -> SQLTM_COUNT*SQLTM_TIME = ms timeout **/
+#define SQLTM_TIME  50
+
 bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
 {
     char *localError = 0;
-    const int rc = sqlite3_exec(m_pDB, sqlUTF8, 0, 0, &localError);
+	int rc(0);
+	int nRepeatCount(0);
+
+	do
+    {
+        rc = sqlite3_exec(m_pDB, sqlUTF8, 0, 0, &localError);
+
+        if ( rc == SQLITE_LOCKED || rc == SQLITE_LOCKED_SHAREDCACHE || rc == SQLITE_BUSY)
+        {
+            nRepeatCount++;
+            Sleep(SQLTM_TIME);
+        }
+		
+    } while ( (nRepeatCount < SQLTM_COUNT) && ( rc == SQLITE_BUSY || rc == SQLITE_LOCKED || rc == SQLITE_LOCKED_SHAREDCACHE ) );
 
     if (rc == SQLITE_OK) {
         return true;
     }
     else
     {
-        m_pErrorHandler->OnError(rc, localError, _T("CSqLiteDatabaseImpl::ExecuteUTF8"));
-        const std::wstring sSQL = ds_str_conv::ConvertFromUTF8(sqlUTF8);
-        m_pErrorHandler->OnError(sSQL.c_str(), _T("CSqLiteDatabaseImpl::ExecuteUTF8"));
+        m_pErrorHandler->OnErrorCode(rc, localError, "CSqLiteDatabaseImpl::ExecuteUTF8");
+        m_pErrorHandler->OnError(sqlUTF8, "CSqLiteDatabaseImpl::ExecuteUTF8");
         sqlite3_free(localError);
     }
 
@@ -292,14 +333,14 @@ void CSqLiteDatabaseImpl::OnError(const char *sError, const char *sFunctionName)
     m_pErrorHandler->OnError(sError, sFunctionName);
 }
 
-bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
+bool CSqLiteDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
 {
     std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTable);
     const sqlite_util::CFieldInfoMap *pFieldInfoMap = GetTableFieldInfoImpl(sTableNameUTF8.c_str());
     if ( !pFieldInfoMap ) {
-        CStdString sError;
-        sError.Format(_T("GetTableFieldInfo failed. Table %s."), sTable);
-        m_pErrorHandler->OnError(sError.c_str(), _T("CSqLiteDatabaseImpl::GetTableFieldInfo"));
+        std::string sError = "GetTableFieldInfo failed. Table ";
+                    sError += sTableNameUTF8;
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::GetTableFieldInfo");
         return false;
     }
 
@@ -324,7 +365,7 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &in
             break;
         }
     
-        const CStdString sColName = ds_str_conv::ConvertFromUTF8(it->first.c_str());
+        const std::wstring sColName = ds_str_conv::ConvertFromUTF8(it->first.c_str());
         info[sColName] = field_type;
     }
 

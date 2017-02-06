@@ -43,23 +43,22 @@ bool CAdoDotNetRecordsetImpl::IsEOF()
 	return m_pSet->IsEOF();
 }
 
-bool CAdoDotNetRecordsetImpl::Open(LPCTSTR sTableName)
+bool CAdoDotNetRecordsetImpl::Open(const wchar_t *sTableName)
 {
 	m_sTable = sTableName;
 	return true;
 }
 
-bool CAdoDotNetRecordsetImpl::OpenSQL(LPCTSTR sSQL)
+bool CAdoDotNetRecordsetImpl::OpenSQL(const wchar_t *sSQL)
 {
-    if ( IsOpen() )
-	{
+    if ( IsOpen() ) {
 		m_pSet->Close();
 	}
 
 	return m_pSet->Open(sSQL);
 }
 
-bool CAdoDotNetRecordsetImpl::OpenView(LPCTSTR sViewName)
+bool CAdoDotNetRecordsetImpl::OpenView(const wchar_t *sViewName)
 {
 	ASSERT(FALSE);
 	return false;
@@ -75,12 +74,12 @@ bool CAdoDotNetRecordsetImpl::IsOpen() const
 	return m_pSet->IsOpen();
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize)
+void CAdoDotNetRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)
 {
 	ASSERT(FALSE);
 }
 
-void CAdoDotNetRecordsetImpl::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize)
+void CAdoDotNetRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize)
 {
 	ASSERT(FALSE);
 }
@@ -125,17 +124,17 @@ long CAdoDotNetRecordsetImpl::GetRecordCount()
 	return nCount;
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldValueNull(LPCTSTR lpszName)
+void CAdoDotNetRecordsetImpl::SetFieldValueNull(const wchar_t *lpszName)
 {
 	ASSERT(FALSE);
 }
 
-bool CAdoDotNetRecordsetImpl::DoesFieldExist(LPCTSTR sFieldName) 
+bool CAdoDotNetRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName) 
 {
 	return m_pSet->DoesFieldExist(sFieldName);
 }
 
-bool CAdoDotNetRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
+bool CAdoDotNetRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValue)
 {
 	if ( _tcslen(sIndex) <= 0 ) {
 		ASSERT(FALSE);
@@ -152,16 +151,16 @@ bool CAdoDotNetRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
 	}
 
 	CString sFind;
-	sFind.Format(_T("SELECT * FROM %s WHERE %s = '%s'"), m_sTable, sIndex, sValue);
-	
-	if ( !m_pSet->Open(sFind) ) {
+	sFind.Format(_T("SELECT * FROM %s WHERE %s = "), m_sTable, sIndex);
+
+	if ( !m_pSet->SeekByString(sFind, sValue) ) {
 		return false;
 	}
 
 	return !m_pSet->IsEmpty();
 }
 
-bool CAdoDotNetRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
+bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, long nValue)
 {
 	if ( _tcslen(sIndex) <= 0 ) {
 		ASSERT(FALSE);
@@ -188,54 +187,54 @@ bool CAdoDotNetRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
 	return !m_pSet->IsEmpty();
 }
 
-std::wstring CAdoDotNetRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
+std::wstring CAdoDotNetRecordsetImpl::GetFieldString(const wchar_t *sFieldName)
 {
-	return (LPCTSTR)m_pSet->GetFieldString(sFieldName);
+	return (const wchar_t *)m_pSet->GetFieldString(sFieldName);
 }
 
-long CAdoDotNetRecordsetImpl::GetFieldLong(LPCTSTR sFieldName)
+long CAdoDotNetRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 {
 	return m_pSet->GetFieldLong(sFieldName);
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldLong(LPCTSTR sFieldName, long lValue)
+void CAdoDotNetRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, long lValue)
 {
 	m_pSet->SetFieldLong(sFieldName, lValue);
 }
 
-double CAdoDotNetRecordsetImpl::GetFieldDouble(LPCTSTR sFieldName) 
+double CAdoDotNetRecordsetImpl::GetFieldDouble(const wchar_t *sFieldName) 
 {
 	return m_pSet->GetFieldDouble(sFieldName);
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldDouble(LPCTSTR sFieldName, double dValue)
+void CAdoDotNetRecordsetImpl::SetFieldDouble(const wchar_t *sFieldName, double dValue)
 {
 	m_pSet->SetFieldDouble(sFieldName, dValue);
 }
 
-time_t CAdoDotNetRecordsetImpl::GetFieldDateTime(LPCTSTR sFieldName)
+time_t CAdoDotNetRecordsetImpl::GetFieldDateTime(const wchar_t *sFieldName)
 {
 	return m_pSet->GetFieldDateTime(sFieldName);
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldDateTime(LPCTSTR sFieldName, const time_t &time)
+void CAdoDotNetRecordsetImpl::SetFieldDateTime(const wchar_t *sFieldName, const time_t &time)
 {
 	m_pSet->SetFieldDateTime(sFieldName, time);
 }
 
-bool CAdoDotNetRecordsetImpl::IsFieldValueNull(LPCTSTR sFieldName)
+bool CAdoDotNetRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
 {
 	return m_pSet->IsFieldValueNull(sFieldName);
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue)
+void CAdoDotNetRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue)
 {
 	m_pSet->SetFieldString(sFieldName, sValue);
 }
 
 std::string CAdoDotNetRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
 {
-    const CStdString sValue = GetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+    const std::wstring sValue = GetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
     return ds_str_conv::ConvertToUTF8(sValue.c_str());
 }
 

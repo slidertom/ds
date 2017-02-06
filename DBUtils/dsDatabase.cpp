@@ -8,6 +8,7 @@
 
 #include "dsCopyTableData.h"
 #include "dsTable.h"
+#include "dsStrConv.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -62,19 +63,26 @@ bool dsDatabase::IsOpen() const
 	return m_pDatabase->IsOpen();
 }
 
-CStdString dsDatabase::GetName() const
+std::wstring dsDatabase::GetName() const
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->GetName();
 }
 
-bool dsDatabase::DoesTableExist(LPCTSTR sTable) const
+bool dsDatabase::DoesTableExist(const char *sTable) const
+{
+    ASSERT(m_pDatabase);
+    std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
+	return m_pDatabase->DoesTableExist(sTableUTF16.c_str());
+}
+
+bool dsDatabase::DoesTableExist(const wchar_t *sTable) const
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->DoesTableExist(sTable);
 }
 
-bool dsDatabase::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR sKey)
+bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params)
 {
 	Close(); // do auto close if opened
     
@@ -96,7 +104,7 @@ bool dsDatabase::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR sKey)
 
     m_pDatabase->SetErrorHandler(m_pErrorHandler);
 
-	if ( !m_pDatabase->OpenDB(sPath, bReadOnly, sKey) ) {
+	if ( !m_pDatabase->OpenDB(sPath, params.m_bReadOnly, params.m_sKey.c_str(), params.m_bMultiUser) ) {
         Close();
         return false;
     }
@@ -122,7 +130,7 @@ void dsDatabase::RollbackTrans()
 	m_pDatabase->Rollback();
 }
 
-bool dsDatabase::Execute(LPCTSTR lpszSQL)
+bool dsDatabase::Execute(const wchar_t *lpszSQL)
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->Execute(lpszSQL);
@@ -164,10 +172,10 @@ bool dsDatabase::CompactDatabase()
     return m_pDatabase->CompactDatabase();
 }
 
-bool dsDatabase::CompactDatabase(LPCTSTR sPath)
+bool dsDatabase::CompactDatabase(const wchar_t *sPath)
 {
     dsDatabase database;
-    if ( !database.OpenDB(sPath, false) ) {
+    if ( !database.OpenDB(sPath) ) {
         return false;
     }
     return database.CompactDatabase();
@@ -183,16 +191,15 @@ dsDatabase::dbErrorHandler dsDatabase::SetErrorHandler(dsDatabase::dbErrorHandle
     return prevHandler;
 }
 
-void dsDatabase::DeleteRelation(LPCTSTR sRelation)
+void dsDatabase::DeleteRelation(const wchar_t *sRelation)
 {
 	ASSERT(m_pDatabase);
     return m_pDatabase->DeleteRelation(sRelation);
 }
 
-bool dsDatabase::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-						        LPCTSTR sField, LPCTSTR sForeignField)
+bool dsDatabase::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+						        const wchar_t *sField, const wchar_t *sForeignField)
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->CreateRelation(sName, sTable, sForeignTable, lAttr, sField, sForeignField);
 }
-

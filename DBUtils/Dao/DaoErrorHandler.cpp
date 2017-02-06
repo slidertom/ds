@@ -13,7 +13,7 @@ static char THIS_FILE[] = __FILE__;
 
 namespace dao_exception_format
 {
-    CStdString FormatException(CDaoException *e, LPCTSTR sFunctionName)
+    CStdString FormatException(CDaoException *e, const wchar_t *sFunctionName)
     {
         TCHAR szCause[255];
         e->GetErrorMessage(szCause, 255);
@@ -33,7 +33,7 @@ namespace dao_exception_format
         return sFormatted;
     }
 
-    void LogError(LPCTSTR sError, LPCTSTR sFunctionName)
+    void LogError(const wchar_t *sError, const wchar_t *sFunctionName)
     {
         
     }
@@ -45,7 +45,7 @@ CDaoErrorHandler::CDaoErrorHandler()
 
 }
 
-void CDaoErrorHandler::OnDaoException(CDaoException *e, LPCTSTR sFunctionName)
+void CDaoErrorHandler::OnDaoException(CDaoException *e, const wchar_t *sFunctionName)
 {
     if ( !m_pErrorHandler ) {
         return;
@@ -54,7 +54,7 @@ void CDaoErrorHandler::OnDaoException(CDaoException *e, LPCTSTR sFunctionName)
     (*m_pErrorHandler)(str.c_str());
 }
 
-void CDaoErrorHandler::OnError(LPCTSTR sError, LPCTSTR sFunctionName)
+void CDaoErrorHandler::OnError(const wchar_t *sError, const wchar_t *sFunctionName)
 {
     if ( !m_pErrorHandler ) {
         return;

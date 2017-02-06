@@ -22,7 +22,7 @@ enum dsFieldType
     dsFieldType_Binary
 };
 
-class dsTableFieldInfo : public std::unordered_map<CStdString, dsFieldType, std::hash<std::basic_string<TCHAR> > > { };
+class dsTableFieldInfo : public std::unordered_map<std::wstring, dsFieldType, std::hash<std::basic_string<wchar_t> > > { };
 
 class CAbsRecordset;
 
@@ -39,10 +39,10 @@ public:
 	virtual bool CommitTrans() = 0; 
 	virtual bool Rollback()    = 0; 
 
-	virtual bool Execute(LPCTSTR lpszSQL) = 0; 
+	virtual bool Execute(const wchar_t *lpszSQL) = 0; 
 
     virtual void Close() = 0;
-    virtual bool OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) = 0;
+    virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) = 0;
     
 	virtual dsDBType GetType() = 0;
 
@@ -51,7 +51,7 @@ public:
 
 	virtual std::wstring GetName() = 0;
 
-	virtual bool DoesTableExist(LPCTSTR sTable) = 0;
+	virtual bool DoesTableExist(const wchar_t *sTable) = 0;
 
 	virtual CAbsRecordset *CreateRecordset() = 0;
 
@@ -59,13 +59,13 @@ public:
 
     virtual bool CompactDatabase() = 0;
 
-	virtual void DeleteRelation(LPCTSTR sRelation) = 0;
-	virtual bool CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-								LPCTSTR sField, LPCTSTR sForeignField) = 0;
+	virtual void DeleteRelation(const wchar_t *sRelation) = 0;
+	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+								const wchar_t *sField, const wchar_t *sForeignField) = 0;
 
-    virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) = 0;
+    virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) = 0;
 
-    typedef void (*dbErrorHandler)(LPCTSTR msg); 
+    typedef void (*dbErrorHandler)(const wchar_t *msg); 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) = 0;
 };
 
@@ -83,7 +83,7 @@ namespace ds_table_field_info_util
         }
     }    
 
-    inline bool fields_union(dsTableFieldInfo &union_info, CAbsDatabase *pSrcDB, LPCTSTR sTableNameSrc, CAbsDatabase *pDstDB, LPCTSTR sTableNameDst) 
+    inline bool fields_union(dsTableFieldInfo &union_info, CAbsDatabase *pSrcDB, const wchar_t *sTableNameSrc, CAbsDatabase *pDstDB, const wchar_t *sTableNameDst) 
     {
         dsTableFieldInfo dst_info;
         if ( !pDstDB->GetTableFieldInfo(sTableNameDst, dst_info) ) {

@@ -18,22 +18,23 @@
 class CDotNetDatabaseAbs
 {
 public:
-	virtual bool Open(LPCTSTR sConn) = 0;
+	virtual bool Open(const wchar_t *sConn) = 0;
 	virtual void Close() = 0;
-	virtual bool Execute(LPCTSTR sSQL) = 0;
+	virtual bool Execute(const wchar_t *sSQL) = 0;
 	virtual bool IsOpen() = 0;
-	typedef void (*dbErrorHandler)(LPCTSTR msg); 
+	typedef void (*dbErrorHandler)(const wchar_t *msg); 
 	virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) = 0;
 
-	virtual bool GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info) = 0;
+	virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) = 0;
 
-	virtual bool DoesTableExists(LPCTSTR sTable) = 0;
+	virtual bool DoesTableExists(const wchar_t *sTable) = 0;
 };
 
 class CDotNetRecordSetAbs
 {
 public:
-	virtual bool Open(LPCTSTR sTableName) = 0;
+	virtual bool Open(const wchar_t *sSQL) = 0;
+	virtual bool SeekByString(const wchar_t *sSQL, const wchar_t *sValue) = 0;
 	virtual bool IsOpen() = 0;
 	virtual bool IsEmpty() = 0;
 	virtual void Close() = 0;
@@ -42,21 +43,21 @@ public:
 
 	virtual bool MoveNext() = 0;
 
-	virtual CString GetFieldString(LPCTSTR sFieldName) = 0;
-	virtual void SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) = 0;
+	virtual CString GetFieldString(const wchar_t *sFieldName) = 0;
+	virtual void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) = 0;
 	
-	virtual long GetFieldLong(LPCTSTR sFieldName) = 0;
-	virtual void SetFieldLong(LPCTSTR sFieldName, long lValue) = 0;
+	virtual long GetFieldLong(const wchar_t *sFieldName) = 0;
+	virtual void SetFieldLong(const wchar_t *sFieldName, long lValue) = 0;
 
-	virtual double GetFieldDouble(LPCTSTR sFieldName) = 0;
-	virtual void SetFieldDouble(LPCTSTR sFieldName, double dValue) = 0;
+	virtual double GetFieldDouble(const wchar_t *sFieldName) = 0;
+	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) = 0;
 
-	virtual time_t GetFieldDateTime(LPCTSTR sFieldName) = 0;
-	virtual void SetFieldDateTime(LPCTSTR sFieldName, const time_t &time) = 0;
+	virtual time_t GetFieldDateTime(const wchar_t *sFieldName) = 0;
+	virtual void SetFieldDateTime(const wchar_t *sFieldName, const time_t &time) = 0;
 
-	virtual bool IsFieldValueNull(LPCTSTR sFieldName) = 0;
+	virtual bool IsFieldValueNull(const wchar_t *sFieldName) = 0;
 
-	virtual bool DoesFieldExist(LPCTSTR sFieldName) = 0;
+	virtual bool DoesFieldExist(const wchar_t *sFieldName) = 0;
 };
 
 class CAdoDotNetUtils

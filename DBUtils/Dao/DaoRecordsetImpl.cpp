@@ -20,8 +20,8 @@ static char THIS_FILE[] = __FILE__;
 
 /*
 template <class TDaoDatabase>
-inline void ChangeDBFieldName(TDaoDatabase *pDB, LPCTSTR sTableName, LPCTSTR oldFieldName, 
-                                                 LPCTSTR newFieldName, LPCTSTR oldIndexName, LPCTSTR newIndexName)
+inline void ChangeDBFieldName(TDaoDatabase *pDB, const wchar_t *sTableName, const wchar_t *oldFieldName, 
+                                                 const wchar_t *newFieldName, const wchar_t *oldIndexName, const wchar_t *newIndexName)
 {
 	ASSERT(pDB);
 	ASSERT(sTableName);
@@ -73,7 +73,7 @@ CDaoRecordsetImpl::~CDaoRecordsetImpl()
 	delete m_pSet;
 }
 
-void CDaoRecordsetImpl::SetIndex(LPCTSTR sIndex) 
+void CDaoRecordsetImpl::SetIndex(const wchar_t *sIndex) 
 {
 	if ( m_sCurIndex == sIndex ) {
         return; // small optimization if index same
@@ -83,8 +83,11 @@ void CDaoRecordsetImpl::SetIndex(LPCTSTR sIndex)
 	    m_pSet->SetCurrentIndex(sIndex);
     }
     catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetIndex(index='%s') Table='%s'"), sIndex, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SetIndex(index='";
+		sMsg += sIndex;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -100,8 +103,9 @@ bool CDaoRecordsetImpl::MoveNext()
 	    m_pSet->MoveNext();
 	}
 	catch (CDaoException *e) {
-		CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::MoveNext Table='%s'"), m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::MoveNext Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
 		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -124,7 +128,7 @@ bool CDaoRecordsetImpl::MoveFirst()
 	return true;
 }
 
-bool CDaoRecordsetImpl::Open(LPCTSTR sTableName)
+bool CDaoRecordsetImpl::Open(const wchar_t *sTableName)
 {
 	if ( IsOpen() ) {
 		return true;
@@ -138,9 +142,12 @@ bool CDaoRecordsetImpl::Open(LPCTSTR sTableName)
 		m_pSet->Open(dbOpenTable, sTableName);
 	}
 	catch (CDaoException *e) {
-        CStdString sDBName = m_pDatabase->GetName();
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::Open. Database: %s. Table='%s'"), sDBName.c_str(), sTableName);
+        std::wstring sDBName = m_pDatabase->GetName();
+		std::wstring sMsg = L"CDaoRecordsetImpl::Open. Database: ";
+		sMsg += sDBName.c_str();
+		sMsg += L". Table='";
+		sMsg += sTableName;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();
@@ -152,7 +159,7 @@ bool CDaoRecordsetImpl::Open(LPCTSTR sTableName)
 	return true;
 }
 
-bool CDaoRecordsetImpl::OpenSQL(LPCTSTR sSQL)
+bool CDaoRecordsetImpl::OpenSQL(const wchar_t *sSQL)
 {
 	ASSERT(!IsOpen());
 	// OPEN TYPE       Snapshot  Dynaset  ForwardOnly  dbOpenTable
@@ -168,8 +175,9 @@ bool CDaoRecordsetImpl::OpenSQL(LPCTSTR sSQL)
 		m_pSet->Open(dbOpenDynaset, sSQL);
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::OpenSQL(sql='%s')"), sSQL);
+		std::wstring sMsg = L"CDaoRecordsetImpl::OpenSQL(sql='";
+		sMsg += sSQL;
+		sMsg += L"')";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();
@@ -179,7 +187,7 @@ bool CDaoRecordsetImpl::OpenSQL(LPCTSTR sSQL)
 	return true;
 }
 
-bool CDaoRecordsetImpl::OpenView(LPCTSTR sViewName)
+bool CDaoRecordsetImpl::OpenView(const wchar_t *sViewName)
 {
 	ASSERT(!IsOpen());
 	delete m_pTableDef;
@@ -194,8 +202,9 @@ bool CDaoRecordsetImpl::OpenView(LPCTSTR sViewName)
 		m_pSet->Open(m_pTableDef);
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::OpenView(viewname='%s')"), sViewName);
+		std::wstring sMsg = L"CDaoRecordsetImpl::OpenView(viewname='";
+		sMsg += sViewName;
+		sMsg += L"')";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
@@ -212,8 +221,9 @@ bool CDaoRecordsetImpl::IsEOF()
 		return m_pSet->IsEOF() != FALSE;
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::IsEOF Table='%s'"), m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::IsEOF Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -232,7 +242,7 @@ bool CDaoRecordsetImpl::IsOpen() const
 	return m_pSet->IsOpen() != FALSE;
 }
 
-void CDaoRecordsetImpl::SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize)
+void CDaoRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)
 {
 	try {
 		COleVariant var;
@@ -240,15 +250,23 @@ void CDaoRecordsetImpl::SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData,
 		m_pSet->SetFieldValue(sFieldName, var);
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldBinary(field='%s', data=0x%X, size=%d) Table='%s'"), sFieldName, pData, nSize, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SetFieldBinary(field='";
+		const char *pDat = (char *)pData;
+		sMsg += sFieldName;
+		sMsg += L"', data=0x";
+		sMsg += ds_str_conv::ConvertFromUTF8(pDat);
+		sMsg += L", size=";
+		sMsg += std::to_wstring(nSize);
+		sMsg += L") Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
 	}
 }
 
-void CDaoRecordsetImpl::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize)
+void CDaoRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize)
 {
 	try {
 		*pData = NULL;
@@ -263,8 +281,11 @@ void CDaoRecordsetImpl::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData
 		VERIFY(dao_binary_field_util::GetBinaryFromVariant(var, pData, &nSize));
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldBinary(field='%s', ...) Table='%s'"), sFieldName, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldBinary(field='";
+		sMsg += sFieldName;
+		sMsg += L"', ...) Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -282,8 +303,9 @@ bool CDaoRecordsetImpl::Delete()
 		m_pSet->Delete();
 	}
 	catch(CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::Delete Table='%s'"), m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::Delete Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
 		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -298,8 +320,9 @@ void CDaoRecordsetImpl::AddNew()
 	    m_pSet->AddNew();
     }
     catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::AddNew Table='%s'"), m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::AddNew Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
 		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
         e->Delete();
@@ -312,8 +335,9 @@ void CDaoRecordsetImpl::Edit()
 	    m_pSet->Edit();
     }
     catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::Edit Table='%s'"), m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::Edit Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
 		DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
         e->Delete();
@@ -344,8 +368,9 @@ long CDaoRecordsetImpl::GetRecordCount()
 	    return m_pSet->GetRecordCount();
     }
     catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetRecordCount Table='%s'"), m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetRecordCount Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
 		DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();
@@ -353,22 +378,25 @@ long CDaoRecordsetImpl::GetRecordCount()
     return 0;
 }
 
-void CDaoRecordsetImpl::SetFieldValueNull(LPCTSTR sFieldName)
+void CDaoRecordsetImpl::SetFieldValueNull(const wchar_t *sFieldName)
 {
 	try {
 		m_pSet->SetFieldValueNull(sFieldName);
 	}
 	catch (CDaoException *e)
 	{
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldValueNull(field='%s') Table='%s'"), sFieldName, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SetFieldValueNull(field='";
+		sMsg += sFieldName;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
 	}
 }
 
-bool CDaoRecordsetImpl::DoesFieldExist(LPCTSTR sFieldName) 
+bool CDaoRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName) 
 {
     ASSERT(_tcslen(sFieldName) != 0);
 
@@ -386,7 +414,7 @@ bool CDaoRecordsetImpl::DoesFieldExist(LPCTSTR sFieldName)
 }
 
 // building variants
-static inline COleVariant MakeVariant(LPCTSTR strSrc) {
+static inline COleVariant MakeVariant(const wchar_t *strSrc) {
     if (strSrc == NULL || strSrc[0] == _T('\0')) {
 		return COleVariant();
     }
@@ -394,7 +422,7 @@ static inline COleVariant MakeVariant(LPCTSTR strSrc) {
 		return COleVariant(strSrc, VT_BSTRT);
     }
 }
-bool CDaoRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
+bool CDaoRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValue)
 {
 	SetIndex(sIndex);
 
@@ -402,8 +430,13 @@ bool CDaoRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
 		return m_pSet->Seek(_T("="), &MakeVariant(sValue)) != FALSE;
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SeekByString(index='%s', value='%s') Table='%s'"), sIndex, sValue, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SeekByString(index='";
+		sMsg += sIndex;
+		sMsg += L"', value='";
+		sMsg += sValue;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -412,7 +445,7 @@ bool CDaoRecordsetImpl::SeekByString(LPCTSTR sIndex, LPCTSTR sValue)
 	return false;
 }
 
-bool CDaoRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
+bool CDaoRecordsetImpl::SeekByLong(const wchar_t *sIndex, long nValue)
 {
 	SetIndex(sIndex);
 
@@ -420,8 +453,13 @@ bool CDaoRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
 		return m_pSet->Seek(_T("="), &COleVariant(nValue)) != FALSE;
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SeekByLong(index='%s', value=%d) Table='%s'"), sIndex, nValue, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SeekByLong(index='";
+		sMsg += sIndex;
+		sMsg += L"', value='";
+		sMsg += std::to_wstring(nValue);
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -430,7 +468,7 @@ bool CDaoRecordsetImpl::SeekByLong(LPCTSTR sIndex, long nValue)
 	return false;
 }
 
-std::wstring CDaoRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
+std::wstring CDaoRecordsetImpl::GetFieldString(const wchar_t *sFieldName)
 {
 	try {
 		COleVariant var;
@@ -438,8 +476,11 @@ std::wstring CDaoRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 		return dao_database_util::GetString(var).c_str();
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldString(field='%s') Table='%s'"), sFieldName, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldString(field='";
+		sMsg += sFieldName;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -448,21 +489,26 @@ std::wstring CDaoRecordsetImpl::GetFieldString(LPCTSTR sFieldName)
 	return std::wstring(_T(""));
 }
 
-void CDaoRecordsetImpl::SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue)
+void CDaoRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue)
 {
 	try {
 		m_pSet->SetFieldValue(sFieldName, ::MakeVariant(sValue));
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldString(field='%s', value='%s') Table='%s'"), sFieldName, sValue, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SetFieldString(field='";
+		sMsg += sFieldName;
+		sMsg += L"', value='";
+		sMsg += sValue;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
 	}
 }
 
-long CDaoRecordsetImpl::GetFieldLong(LPCTSTR sFieldName)
+long CDaoRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 {
 	try {
 		COleVariant var;
@@ -470,8 +516,11 @@ long CDaoRecordsetImpl::GetFieldLong(LPCTSTR sFieldName)
 		return dao_database_util::GetInt(var);
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldLong(field='%s') Table='%s'"), sFieldName, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldLong(field='";
+		sMsg += sFieldName;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
@@ -480,21 +529,26 @@ long CDaoRecordsetImpl::GetFieldLong(LPCTSTR sFieldName)
 	return 0;
 }
 
-void CDaoRecordsetImpl::SetFieldLong(LPCTSTR sFieldName, long lValue)
+void CDaoRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, long lValue)
 {
 	try {
 		m_pSet->SetFieldValue(sFieldName, lValue);
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldLong(field='%s', value=%d) Table='%s'"), sFieldName, lValue, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SetFieldLong(field='";
+		sMsg += sFieldName;
+		sMsg += L"', value='";
+		sMsg += std::to_wstring(lValue);
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
 	}
 }
 
-double CDaoRecordsetImpl::GetFieldDouble(LPCTSTR sFieldName) 
+double CDaoRecordsetImpl::GetFieldDouble(const wchar_t *sFieldName) 
 {
 	try {
 		COleVariant var;
@@ -502,8 +556,11 @@ double CDaoRecordsetImpl::GetFieldDouble(LPCTSTR sFieldName)
 		return dao_database_util::GetDouble(var); 
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldDouble(field='%s') Table='%s'"), sFieldName, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldDouble(field='";
+		sMsg += sFieldName;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -512,14 +569,19 @@ double CDaoRecordsetImpl::GetFieldDouble(LPCTSTR sFieldName)
 	return 0.0;
 }
 
-void CDaoRecordsetImpl::SetFieldDouble(LPCTSTR sFieldName, double dValue)
+void CDaoRecordsetImpl::SetFieldDouble(const wchar_t *sFieldName, double dValue)
 {
 	try {
 		m_pSet->SetFieldValue(sFieldName, dValue);
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::SetFieldDouble(field='%s', value=%f) Table='%s'"), sFieldName, dValue, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::SetFieldDouble(field='";
+		sMsg += sFieldName;
+		sMsg += L"', value='";
+		sMsg += std::to_wstring(dValue);
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -539,7 +601,7 @@ static inline COleDateTime GetDateTime(const TOleVariant &varSrc) {
 	return dt;
 }
 
-time_t CDaoRecordsetImpl::GetFieldDateTime(LPCTSTR sFieldName)
+time_t CDaoRecordsetImpl::GetFieldDateTime(const wchar_t *sFieldName)
 {
 	try {
 		COleVariant var;
@@ -548,8 +610,11 @@ time_t CDaoRecordsetImpl::GetFieldDateTime(LPCTSTR sFieldName)
 		return ::VariantToTime(time);
 	}
 	catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::GetFieldDateTime(field='%s') Table='%s'"), sFieldName, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldDateTime(field='";
+		sMsg += sFieldName;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
 		ASSERT(FALSE);
 		e->Delete();
@@ -558,7 +623,7 @@ time_t CDaoRecordsetImpl::GetFieldDateTime(LPCTSTR sFieldName)
 	return time_t(-1);
 }
 
-void CDaoRecordsetImpl::SetFieldDateTime(LPCTSTR sFieldName, const time_t &time)
+void CDaoRecordsetImpl::SetFieldDateTime(const wchar_t *sFieldName, const time_t &time)
 {
 	if (time != -1)
 	{
@@ -567,8 +632,13 @@ void CDaoRecordsetImpl::SetFieldDateTime(LPCTSTR sFieldName, const time_t &time)
 			m_pSet->SetFieldValue(sFieldName, var);
 		}
 		catch (CDaoException *e) {
-            CStdString sMsg;
-            sMsg.Format(_T("CDaoRecordsetImpl::SetFieldDateTime(field='%s', time=%d) Table='%s'"), sFieldName, time, m_sCurTable);
+			std::wstring sMsg = L"CDaoRecordsetImpl::SetFieldDateTime(field='";
+			sMsg += sFieldName;
+			sMsg += L"', time=";
+			sMsg += std::to_wstring(time);
+			sMsg += L"') Table='";
+			sMsg += m_sCurTable;
+			sMsg += L"'";
             DoOnDaoException(e, sMsg.c_str());
 			ASSERT(FALSE);
 			e->Delete();
@@ -579,7 +649,7 @@ void CDaoRecordsetImpl::SetFieldDateTime(LPCTSTR sFieldName, const time_t &time)
 	}
 }
 
-bool CDaoRecordsetImpl::IsFieldValueNull(LPCTSTR sFieldName)
+bool CDaoRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
 {
 	ASSERT(_tcslen(sFieldName) != 0);
     try {
@@ -588,8 +658,11 @@ bool CDaoRecordsetImpl::IsFieldValueNull(LPCTSTR sFieldName)
 	    return (var.vt == VT_NULL);
     }
     catch (CDaoException *e) {
-        CStdString sMsg;
-        sMsg.Format(_T("CDaoRecordsetImpl::IsFieldValueNull(field='%s') Table='%s'"), sFieldName, m_sCurTable);
+		std::wstring sMsg = L"CDaoRecordsetImpl::IsFieldValueNull(field='";
+		sMsg += sFieldName;
+		sMsg += L"') Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
         e->Delete();
@@ -597,7 +670,7 @@ bool CDaoRecordsetImpl::IsFieldValueNull(LPCTSTR sFieldName)
     return true;
 }
 
-void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, LPCTSTR sFunction)
+void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, const wchar_t *sFunction)
 {
     ASSERT(m_pErrorHandler);
     m_pErrorHandler->OnDaoException(e, sFunction);

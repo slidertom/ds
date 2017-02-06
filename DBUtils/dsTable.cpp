@@ -12,7 +12,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-dsTable::dsTable(dsDatabase *pDatabase, LPCTSTR sTableName)
+dsTable::dsTable(dsDatabase *pDatabase, const wchar_t *sTableName)
 :   m_pDatabase(pDatabase),
 	m_sTableName(sTableName)
 {
@@ -31,12 +31,12 @@ bool dsTable::Open()
 	return m_pSet->Open(m_sTableName.c_str());
 }
 
-void dsTable::OpenSQL(LPCTSTR sSQL)
+void dsTable::OpenSQL(const wchar_t *sSQL)
 {
 	m_pSet->OpenSQL(sSQL);
 }
 
-bool dsTable::OpenView(LPCTSTR sViewName)
+bool dsTable::OpenView(const wchar_t *sViewName)
 {
     m_sTableName = sViewName; // view and table name indicated as same
                               // related with the ::Open realization
@@ -53,12 +53,12 @@ void dsTable::Flush()
     m_pSet->Flush();
 }
 
-void dsTable::SetFieldBinary(LPCTSTR sFieldName, unsigned char *pData, unsigned long nSize)
+void dsTable::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)
 {
 	m_pSet->SetFieldBinary(sFieldName, pData, nSize);
 }
 
-void dsTable::GetFieldBinary(LPCTSTR sFieldName, unsigned char **pData, unsigned long &nSize) const
+void dsTable::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) const
 {
 	m_pSet->GetFieldBinary(sFieldName, pData, nSize);
 }
@@ -84,88 +84,87 @@ bool dsTable::MoveFirst()
 	return m_pSet->MoveFirst(); 
 }
 
-COLORREF dsTable::GetFieldRGB(LPCTSTR sFieldName) const
+COLORREF dsTable::GetFieldRGB(const wchar_t *sFieldName) const
 {
-	const CStdString sRGB = GetFieldString(sFieldName);
+	const std::wstring sRGB = GetFieldString(sFieldName);
 	COLORREF color = _ttol(sRGB.c_str());
 	return color;
 }
 
-void dsTable::SetFieldRGB(LPCTSTR sFieldName, COLORREF color)
+void dsTable::SetFieldRGB(const wchar_t *sFieldName, COLORREF color)
 {
-	CStdString sRGB;
-	sRGB.Format(_T("%d"), color);
+	const std::wstring sRGB = std::to_wstring(color);
 	m_pSet->SetFieldString(sFieldName, sRGB.c_str());
 }
 
-bool dsTable::SeekIndex(LPCTSTR sIndex, LPCTSTR sValue)
+bool dsTable::SeekIndex(const wchar_t *sIndex, const wchar_t *sValue)
 {
 	VERIFY(Open());
 	return m_pSet->SeekByString(sIndex, sValue);
 }
 
-bool dsTable::SeekIndex(LPCTSTR sIndex, long nValue)
+bool dsTable::SeekIndex(const wchar_t *sIndex, long nValue)
 {
 	VERIFY(Open());
 	return m_pSet->SeekByLong(sIndex, nValue);
 }
 
-bool dsTable::IsFieldValueNull(LPCTSTR sFieldName) const
+bool dsTable::IsFieldValueNull(const wchar_t *sFieldName) const
 {
 	return m_pSet->IsFieldValueNull(sFieldName);
 }
 
-CStdString dsTable::GetFieldString(LPCTSTR sFieldName) const 
+std::wstring dsTable::GetFieldString(const wchar_t *sFieldName) const 
 {
 	return m_pSet->GetFieldString(sFieldName);
 }
 
-void dsTable::SetFieldString(LPCTSTR sFieldName, LPCTSTR sValue) 
+void dsTable::SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) 
 {
 	m_pSet->SetFieldString(sFieldName, sValue);
 }
 
-long dsTable::GetFieldLong(LPCTSTR sFieldName) const 
+long dsTable::GetFieldLong(const wchar_t *sFieldName) const 
 {
 	return m_pSet->GetFieldLong(sFieldName);
 }
 
-void dsTable::SetFieldLong(LPCTSTR sFieldName, long nValue) 
+void dsTable::SetFieldLong(const wchar_t *sFieldName, long nValue) 
 {
 	m_pSet->SetFieldLong(sFieldName, nValue);
 }
 
-double dsTable::GetFieldDouble(LPCTSTR sFieldName) const 
+double dsTable::GetFieldDouble(const wchar_t *sFieldName) const 
 {
 	return m_pSet->GetFieldDouble(sFieldName);
 }
 
-void dsTable::SetFieldDouble(LPCTSTR sFieldName, double dValue)
+void dsTable::SetFieldDouble(const wchar_t *sFieldName, double dValue)
 {
 	m_pSet->SetFieldDouble(sFieldName, dValue);
 }
 
-bool dsTable::GetFieldBool(LPCTSTR sFieldName) const 
+bool dsTable::GetFieldBool(const wchar_t *sFieldName) const 
 {
 	return m_pSet->GetFieldLong(sFieldName) != 0;
 }
 
-void dsTable::SetFieldBool(LPCTSTR sFieldName, bool bValue) 
+void dsTable::SetFieldBool(const wchar_t *sFieldName, bool bValue) 
 {
 	m_pSet->SetFieldLong(sFieldName, bValue ? 1 : 0);
 }
 
-time_t dsTable::GetFieldDateTime(LPCTSTR sFieldName) const 
+time_t dsTable::GetFieldDateTime(const wchar_t *sFieldName) const 
 {
 	return m_pSet->GetFieldDateTime(sFieldName);
 }
 
-void dsTable::SetFieldDateTime(LPCTSTR sFieldName, time_t nValue)
+void dsTable::SetFieldDateTime(const wchar_t *sFieldName, time_t nValue)
 {
 	m_pSet->SetFieldDateTime(sFieldName, nValue);
 }
 
-void dsTable::SetFieldNull(LPCTSTR sFieldName) 
+void dsTable::SetFieldNull(const wchar_t *sFieldName) 
 {
 	m_pSet->SetFieldValueNull(sFieldName);
 }
@@ -197,13 +196,13 @@ long dsTable::GetRecordCount()
     return m_pSet->GetRecordCount(); 
 }
 
-bool dsTable::DoesFieldExist(LPCTSTR sFieldName)
+bool dsTable::DoesFieldExist(const wchar_t *sFieldName)
 {
     VERIFY(Open());
 	return m_pSet->DoesFieldExist(sFieldName);
 }
 
-CStdString dsTable::GetUniqueTextFieldValue(LPCTSTR sFieldName, LPCTSTR sPrefix, int width)
+std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const wchar_t *sPrefix, int width)
 {
 	VERIFY(Open());
 	
@@ -219,7 +218,7 @@ CStdString dsTable::GetUniqueTextFieldValue(LPCTSTR sFieldName, LPCTSTR sPrefix,
 		if ( !SeekIndex(sFieldName, sTemp) ) {
 			return sTemp;
 		}
-		index++;
+		++index;
 	}	
 
     ASSERT(FALSE);
@@ -231,31 +230,31 @@ dsDatabase *dsTable::GetDatabase() const
     return m_pDatabase; 
 }
 
-bool dsTable::DeleteAllByIndex(LPCTSTR sField, LPCTSTR sValue)
+bool dsTable::DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue)
 {
     VERIFY(Open());
     return m_pSet->DeleteAllByStringValue(sField, sValue);
 }
 
-bool dsTable::DeleteAllByIndex(LPCTSTR sField, long nValue)
+bool dsTable::DeleteAllByIndex(const wchar_t *sField, long nValue)
 {
     VERIFY(Open());
     return m_pSet->DeleteAllByLongValue(sField, nValue);
 }
 
-bool dsTable::DeleteByIndex(LPCTSTR sField, LPCTSTR sValue)
+bool dsTable::DeleteByIndex(const wchar_t *sField, const wchar_t *sValue)
 {
     VERIFY(Open());
     return m_pSet->DeleteByStringValue(sField, sValue);
 }
 
-bool dsTable::DeleteByIndex(LPCTSTR sField, long nValue)
+bool dsTable::DeleteByIndex(const wchar_t *sField, long nValue)
 {
     VERIFY(Open());
     return m_pSet->DeleteByLongValue(sField, nValue);
 }
 
-LPCTSTR dsTable::GetTableName() const
+const wchar_t *dsTable::GetTableName() const
 {
     return m_sTableName.c_str();
 }

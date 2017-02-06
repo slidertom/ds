@@ -12,7 +12,7 @@ static char THIS_FILE[] = __FILE__;
 
 // String sample:
 // Data Source=SQL-SERVER;Initial Catalog=catalog_name;Integrated Security=False;User ID=sa;Password=passsword
-bool CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(LPCTSTR sPath)
+bool CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(const wchar_t *sPath)
 {
 	if (_tcsstr(sPath, _T("Data Source")) ||
 	    _tcsstr(sPath, _T("Server")))
@@ -49,7 +49,7 @@ bool CAdoDotNetDatabaseImpl::Rollback()
 	return true;
 }
 
-bool CAdoDotNetDatabaseImpl::Execute(LPCTSTR lpszSQL) 
+bool CAdoDotNetDatabaseImpl::Execute(const wchar_t *lpszSQL) 
 {
 	return m_pDatabase->Execute(lpszSQL);
 }
@@ -60,7 +60,7 @@ void CAdoDotNetDatabaseImpl::Close()
     m_sConnString = _T("");
 }
 
-bool CAdoDotNetDatabaseImpl::OpenDB(LPCTSTR sPath, bool bReadOnly, LPCTSTR szPsw) 
+bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) 
 {
     m_sConnString = sPath;
 
@@ -91,7 +91,7 @@ std::wstring CAdoDotNetDatabaseImpl::GetName()
 	return m_sConnString;
 }
 
-bool CAdoDotNetDatabaseImpl::DoesTableExist(LPCTSTR sTable)
+bool CAdoDotNetDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
 	return m_pDatabase->DoesTableExists(sTable);
 }
@@ -106,13 +106,13 @@ CAdoDotNetDatabaseImpl::dbErrorHandler CAdoDotNetDatabaseImpl::SetErrorHandler(C
     return m_pDatabase->SetErrorHandler(newHandler);
 }
 
-void CAdoDotNetDatabaseImpl::DeleteRelation(LPCTSTR sRelation)
+void CAdoDotNetDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
 {
 	ASSERT(FALSE);
 }
 
-bool CAdoDotNetDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTSTR sForeignTable, long lAttr,
-											LPCTSTR sField, LPCTSTR sForeignField)
+bool CAdoDotNetDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+											const wchar_t *sField, const wchar_t *sForeignField)
 {
 	ASSERT(FALSE);
 	//Impl must be simillar to
@@ -122,7 +122,7 @@ bool CAdoDotNetDatabaseImpl::CreateRelation(LPCTSTR sName, LPCTSTR sTable, LPCTS
 	return true;
 }
 
-bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(LPCTSTR sTable, dsTableFieldInfo &info)
+bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
 {
 	return m_pDatabase->GetTableFieldInfo(sTable, info);
 }
