@@ -123,7 +123,40 @@ void CSqLiteDatabaseImpl::Close()
     }
     m_table_field_info_map.clear();
 }
+/**
+ * Exec an sql statement in values[0] against
+ * the database in pData.
+ */
+int process_ddl_row(void * pData, int nColumns, 
+        char **values, char **columns)
+{
+        if (nColumns != 1)
+                return 1; // Error
 
+        sqlite3* db = (sqlite3*)pData;
+        sqlite3_exec(db, values[0], NULL, NULL, NULL);
+
+        return 0;
+}
+/**
+ * Insert from a table named by backup.{values[0]}
+ * into main.{values[0]} in database pData.
+ */
+int process_dml_row(void *pData, int nColumns, 
+        char **values, char **columns)
+{
+        if (nColumns != 1)
+                return 1; // Error
+        
+        sqlite3* db = (sqlite3*)pData;
+
+        char *stmt = sqlite3_mprintf("insert into main.%q "
+                                     "select * from backup.%q", values[0], values[0]);
+        sqlite3_exec(db, stmt, NULL, NULL, NULL);
+        sqlite3_free(stmt);     
+
+        return 0;
+}
 bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) 
 {
     //int nRetVal = sqlite3_config(SQLITE_CONFIG_SERIALIZED); // SQLITE_CONFIG_SERIALIZED SQLITE_CONFIG_MULTITHREAD open -> SQLITE_OPEN_FULLMUTEX
@@ -154,7 +187,6 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wch
     // * Using a shared connection is always faster than using multiple connections. 
     // WAL - http://www.sqlite.org/draft/wal.html
     // All processes using a database must be on the same host computer; WAL does not work over a network filesystem. 
-
     // http://utf8everywhere.org/
     m_sFilePath = sPath;
     // UTF8 path required
@@ -198,14 +230,33 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wch
         Close();
         return false;
     }
+    /*
+    if ( bReadOnly )
+    {   // https://sqlite.org/backup.html
+        sqlite3* memorydb;
+        sqlite3_open(":memory:", &memorydb);
+
+        sqlite3_backup *pBackup = sqlite3_backup_init(memorydb, "main", m_pDB, "main");
+        if( pBackup ){
+            (void)sqlite3_backup_step(pBackup, -1);
+            (void)sqlite3_backup_finish(pBackup);
+        }
+        rc = sqlite3_errcode(memorydb);
+        // TODO: error output    
+        (void)sqlite3_close(m_pDB);
+        m_pDB = memorydb;
+    }
+    */
 
     // http://www.sqlite.org/foreignkeys.html#fk_enable
     // Foreign key constraints are disabled by default (for backwards compatibility), 
     // so must be enabled separately for each database connection. (Note, however, that future releases of SQLite might change so that foreign key 
     // constraints enabled by default. 
     ExecuteUTF8("PRAGMA foreign_keys = ON");
+    ExecuteUTF8("PRAGMA cache_size = 20000"); // default 2000
     //ExecuteUTF8("PRAGMA main.journal_mode = OFF");
     //ExecuteUTF8("PRAGMA busy_timeout=1000");
+
     return true;
 }
 
@@ -303,7 +354,12 @@ bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
     else
     {
         m_pErrorHandler->OnErrorCode(rc, localError, "CSqLiteDatabaseImpl::ExecuteUTF8");
-        m_pErrorHandler->OnError(sqlUTF8, "CSqLiteDatabaseImpl::ExecuteUTF8");
+        const std::string sPathUTF8 = ds_str_conv::ConvertToUTF8(GetName().c_str());
+        std::string sFuncDescr = " DB path: ";
+                    sFuncDescr += sPathUTF8;
+                    sFuncDescr += ".";
+                    sFuncDescr += " CSqLiteDatabaseImpl::ExecuteUTF8";
+        m_pErrorHandler->OnError(sqlUTF8, sFuncDescr.c_str());
         sqlite3_free(localError);
     }
 
