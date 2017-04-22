@@ -74,7 +74,7 @@ private:
 	bool IsOpen() const;
 	void SetIndex(const wchar_t *sIndex);
     void DoOnDaoException(CDaoException *e, const wchar_t *sFunction);
-    
+
 // Attributes
 private:
 	std::wstring m_sCurIndex;

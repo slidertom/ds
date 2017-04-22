@@ -502,6 +502,8 @@ void CDaoRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar_t 
 		sMsg += L"') Table='";
 		sMsg += m_sCurTable;
 		sMsg += L"'";
+        sMsg += L";Path=";
+        sMsg += m_pDatabase->GetName();
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
@@ -516,11 +518,11 @@ long CDaoRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 		return dao_database_util::GetInt(var);
 	}
 	catch (CDaoException *e) {
-		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldLong(field='";
-		sMsg += sFieldName;
-		sMsg += L"') Table='";
-		sMsg += m_sCurTable;
-		sMsg += L"'";
+        std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldLong(field='";
+	    sMsg += sFieldName;
+	    sMsg += L"') Table='";
+	    sMsg += m_sCurTable;
+	    sMsg += L"'";
         DoOnDaoException(e, sMsg.c_str());
         ASSERT(FALSE);
 		e->Delete();
@@ -673,7 +675,10 @@ bool CDaoRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
 void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, const wchar_t *sFunction)
 {
     ASSERT(m_pErrorHandler);
-    m_pErrorHandler->OnDaoException(e, sFunction);
+    std::wstring sMsg = sFunction;
+    sMsg += L";Path=";
+    sMsg += m_pDatabase->GetName();
+    m_pErrorHandler->OnDaoException(e, sMsg.c_str());
 }
 
 std::string CDaoRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
