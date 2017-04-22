@@ -64,11 +64,13 @@ loader.DeleteById(nNewId); // do delete one record ID=nNewId
 loader.DeleteAllByCode(_T("New")); 
 
 // do iterate all Table1 records and do retrieve code values
+std::vector<std::wstring> codes;
 if ( loader.MoveFirst() )
 {
     while ( !loader.IsEOF() ) )
     {
-        CStdString sCode = loader.GetCode(); 
+        std::wstring sCode = loader.GetCode(); 
+	codes.push_back(sCode); 
         loader.MoveNext();
     }
 }
