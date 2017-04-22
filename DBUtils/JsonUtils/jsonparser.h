@@ -100,10 +100,12 @@ namespace ds_jsonparser
     static void SetNull##name(ds_jsonparser::object &obj) { obj.SetNull(realname); } \
 
 #define JSON_TEXT(name, realname) \
-	static std::wstring Get##name(const ds_jsonparser::object &obj) { return obj.GetText(realname); } \
-	static void Set##name(ds_jsonparser::object &obj, const wchar_t *sValue) { obj.SetText(realname, sValue); } \
-    static std::string Get##name##UTF8(const ds_jsonparser::object &obj) { return obj.GetTextUTF8(realname); } \
-    static void Set##name##UTF8(ds_jsonparser::object &obj, const char *sValue) { obj.SetTextUTF8(realname, sValue); } \
+	static std::wstring Get##name(const ds_jsonparser::object &obj)                    { return obj.GetText(realname); }              \
+	static void Set##name(ds_jsonparser::object &obj, const wchar_t *sValue)           { obj.SetText(realname, sValue); }             \
+    static void Set##name(ds_jsonparser::object &obj, const std::wstring &sValue)      { obj.SetText(realname, sValue.c_str()); }     \
+    static std::string Get##name##UTF8(const ds_jsonparser::object &obj)               { return obj.GetTextUTF8(realname); }          \
+    static void Set##name##UTF8(ds_jsonparser::object &obj, const char *sValue)        { obj.SetTextUTF8(realname, sValue); }         \
+    static void Set##name##UTF8(ds_jsonparser::object &obj, const std::string &sValue) { obj.SetTextUTF8(realname, sValue.c_str()); } \
     static bool IsNull##name(const ds_jsonparser::object &obj) { return obj.IsNull(realname); } \
     static void SetNull##name(ds_jsonparser::object &obj) { obj.SetNull(realname); } \
 
