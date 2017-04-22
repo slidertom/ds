@@ -116,7 +116,7 @@ bool CAdoDotNetDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t 
 {
 	ASSERT(FALSE);
 	//Impl must be simillar to
-	//CStdString sCreateRelSQL;
+	//std::wstring sCreateRelSQL;
 	//sCreateRelSQL.Format(_T("ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE"), sTable1, sRelName, sField1, sTable2, sField2);
 	//pDB->ExecuteSQL(sCreateRelSQL.c_str());
 	return true;

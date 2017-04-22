@@ -221,6 +221,11 @@ public:
 			return dsFieldType_Long;
 		}
 
+		if (field_type == Int64().GetType())
+		{
+			return dsFieldType_Long;
+		}
+
 		if (field_type == long().GetType())
 		{
 			return dsFieldType_Long;
@@ -518,6 +523,11 @@ public:
 				return m_pReader->GetInt32(nColID).ToString();
 			}
 
+			if (m_pReader->GetFieldType(nColID) == Int64().GetType())
+			{
+				return m_pReader->GetInt64(nColID).ToString();
+			}
+
 			if (m_pReader->GetFieldType(nColID) == System::Guid().GetType() ) {
 				ASSERT(FALSE); //#22569 - should not go here
 				return _T("");
@@ -569,6 +579,11 @@ public:
 			if (field_type == int().GetType())
 			{
 				return m_pReader->GetInt32(nColID);
+			}
+
+			if (field_type == Int64().GetType())
+			{
+				return (long)m_pReader->GetInt64(nColID);
 			}
 
 			if (field_type == long().GetType())
@@ -645,6 +660,11 @@ public:
 			if (m_pReader->GetFieldType(nColID) == int().GetType())
 			{
 				return (double)m_pReader->GetInt32(nColID);
+			}
+
+			if (m_pReader->GetFieldType(nColID) == Int64().GetType())
+			{
+				return (double)m_pReader->GetInt64(nColID);
 			}
 
 			return m_pReader->GetDouble(nColID);
