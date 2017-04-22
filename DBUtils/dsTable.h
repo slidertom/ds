@@ -77,7 +77,7 @@ public:
 	// Deletes all records with given value 
 	// Returns true if any record was deleted
 	bool DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue); // returns false in case of error 
-	bool DeleteAllByIndex(const wchar_t *sField, long    nValue); // returns false in case of error 
+	bool DeleteAllByIndex(const wchar_t *sField, long nValue);           // returns false in case of error 
     bool DeleteByIndex(const wchar_t *sField, const wchar_t *sValue);
     bool DeleteByIndex(const wchar_t *sField, long nValue);
 
@@ -116,8 +116,9 @@ private:
 // Field macros with renaming
 
 #define FIELD_TEXT(name, realname) \
-	CStdString Get##name() const          { return GetFieldString(realname);  } \
-	void Set##name(const wchar_t *sValue) { SetFieldString(realname, sValue); } \
+	std::wstring Get##name() const             { return GetFieldString(realname);  } \
+	void Set##name(const wchar_t *sValue)      { SetFieldString(realname, sValue); } \
+    void Set##name(const std::wstring &sValue) { SetFieldString(realname, sValue.c_str()); } \
 	FIELD_INDICATORS(name, realname)
 
 #define FIELD_TEXT_UTF8(name, realname_utf8) \
@@ -125,7 +126,7 @@ private:
 	void Set##name##UTF8(const char *sValue) { SetFieldStringUTF8(realname_utf8, sValue); } \
 	
 #define FIELD_LONG(name, realname) \
-	long Get##name() const      { return GetFieldLong(realname); } \
+	long Get##name() const      { return GetFieldLong(realname);  } \
 	void Set##name(long nValue) { SetFieldLong(realname, nValue); } \
 	FIELD_INDICATORS(name, realname)
 
@@ -156,9 +157,12 @@ private:
 
 // indexes
 #define KEY_TEXT(name, realname) \
-	bool SeekBy##name(const wchar_t *sValue)      { return SeekIndex(realname, sValue); } \
-	bool DeleteAllBy##name(const wchar_t *sValue) { return DeleteAllByIndex(realname, sValue); } \
-	bool DeleteBy##name(const wchar_t *sValue)    { return DeleteByIndex(realname, sValue); } \
+	bool SeekBy##name(const wchar_t *sValue)           { return SeekIndex(realname, sValue);                }  \
+    bool SeekBy##name(const std::wstring &sValue)      { return SeekIndex(realname, sValue.c_str());        }  \
+	bool DeleteAllBy##name(const wchar_t *sValue)      { return DeleteAllByIndex(realname, sValue);         }  \
+    bool DeleteAllBy##name(const std::wstring &sValue) { return DeleteAllByIndex(realname, sValue.c_str()); }  \
+	bool DeleteBy##name(const wchar_t *sValue)         { return DeleteByIndex(realname, sValue);            }  \
+    bool DeleteBy##name(const std::wstring &sValue)    { return DeleteByIndex(realname, sValue.c_str());    }  \
     FIELD_TEXT(name, realname)
 	
 #define KEY_LONG(name, realname) \
