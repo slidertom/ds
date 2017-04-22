@@ -52,7 +52,7 @@ public:
 };
 
 CCodeDescrLoader loader(&db, _T("Table1"));
-loader.Flush(); // delete all recored from the Table1
+loader.Flush(); // delete all records from the Table1
 loader.AddNew();
    int nNewId = loader.GetId();
    loader.SetCode(_T("New"));
