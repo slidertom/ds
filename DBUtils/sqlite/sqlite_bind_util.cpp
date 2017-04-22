@@ -76,7 +76,7 @@ namespace sqlite_util
     }
 
     std::string CFieldDataLong::GetValueAsString() {
-        return ds_str_conv::int_to_string(m_nValue);
+        return std::to_string(m_nValue);
     }
     std::string CFieldDataDouble::GetValueAsString() {
         return ds_str_conv::double_to_string(m_dValue);
