@@ -9,8 +9,6 @@ namespace ds_str_conv
     std::string ConvertToUTF8(const wchar_t *wstr);
     std::wstring ConvertFromUTF8(const char *str);
 
-    std::string int_to_string(int nValue);
-    std::string long_to_string(long nValue);
     long string_to_long(const char *sValue);
 
     std::string double_to_string(double dValue);
