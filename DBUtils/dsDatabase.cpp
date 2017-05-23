@@ -93,8 +93,8 @@ bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params)
 		m_pDatabase = new CAdoDotNetDatabaseImpl;
 	}
     else if ( CSqLiteDatabaseImpl::IsSqLiteDB(sPath) ) {
-        m_pDatabase = new CSqLiteDatabaseImpl;
-    }
+        m_pDatabase = new CSqLiteDatabaseImpl(params.m_bMultiUser);
+    }	
     else if ( CDaoDatabaseImpl::IsDaoDB(sPath) ) {
 		m_pDatabase = new CDaoDatabaseImpl;
 	} 
@@ -104,7 +104,7 @@ bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params)
 
     m_pDatabase->SetErrorHandler(m_pErrorHandler);
 
-	if ( !m_pDatabase->OpenDB(sPath, params.m_bReadOnly, params.m_sKey.c_str(), params.m_bMultiUser) ) {
+	if ( !m_pDatabase->OpenDB(sPath, params.m_bReadOnly, params.m_sKey.c_str()) ) {
         Close();
         return false;
     }

@@ -4,7 +4,7 @@
 #include "AfxDao.h"
 #include "DaoErrorHandler.h"
 
-#include "Collections/StdString.h"
+#include "string"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -26,10 +26,13 @@ namespace dao_extensions
             catch (CDaoException *e) {
                 ASSERT(FALSE);
 		        pErrorHandler->OnDaoException(e, _T("CDaoDatabaseImpl::CopyTableData"));
-                CStdString sMsg;
-                sMsg.Format(_T("CopyTableData From: %s To %s."), pszTableNameSrc, pszTableNameDst);
-                pErrorHandler->OnError(sMsg.c_str(), _T("CDaoDatabaseImpl::CopyTableData"));
-                pErrorHandler->OnError(strFormat, _T("CDaoDatabaseImpl::CopyTableData"));
+                std::wstring sMsg  = L"CopyTableData From: ";
+                             sMsg += pszTableNameSrc;
+                             sMsg += L" To ";
+                             sMsg += pszTableNameDst;
+                             sMsg += L".";
+                pErrorHandler->OnError(sMsg.c_str(), L"CDaoDatabaseImpl::CopyTableData");
+                pErrorHandler->OnError(strFormat, L"CDaoDatabaseImpl::CopyTableData");
 		        e->Delete();
             }
 		}
@@ -103,7 +106,7 @@ namespace dao_extensions
 
         if (mapColumns.GetCount())
         {
-            CString strColumns;
+            std::wstring strColumns;
             pos = mapColumns.GetStartPosition();
             while ( pos )
             {
@@ -111,7 +114,7 @@ namespace dao_extensions
                 CString str;
 
                 mapColumns.GetNextAssoc(pos, str, nValue);
-                if (!strColumns.IsEmpty())
+                if (!strColumns.empty())
                 {
                     strColumns += _T(",");
                 }
@@ -119,7 +122,7 @@ namespace dao_extensions
                 strColumns += CString(sTableNameSrc) + _T(".[") + str + _T("]");
             }
 
-            internal::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, strColumns, pErrorHandler);
+            internal::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, strColumns.c_str(), pErrorHandler);
         }
     }
 
@@ -131,8 +134,11 @@ namespace dao_extensions
         catch (CDaoException *e) {
             ASSERT(FALSE);
 		    pErrorHandler->OnDaoException(e, _T("CopyTableDataImpl"));
-            CStdString sMsg;
-            sMsg.Format(_T("CopyTableData From: %s To %s."), sTableNameSrc, sTableNameDst);
+            std::wstring sMsg  = L"CopyTableData From: ";
+                         sMsg += sTableNameSrc;
+                         sMsg += L" To ";
+                         sMsg += sTableNameDst;
+                         sMsg += L".";
             pErrorHandler->OnError(sMsg.c_str(), _T("CopyTableDataImpl"));
 		    e->Delete();
 		    return false;

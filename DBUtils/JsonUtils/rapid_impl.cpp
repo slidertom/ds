@@ -164,6 +164,29 @@ namespace ds_jsonparser
             }
         }
 
+        bool get_field_object(void *impl, const char *sField, void *obj)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+            if ( found == doc->MemberEnd() ) {
+                return false;
+            }
+
+            const rapidjson::Value &value = found->value;
+            if ( value.IsObject() ) {
+                rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
+                doc_obj->CopyFrom(value, doc_obj->GetAllocator());
+                return true;
+            }
+            else if ( value.IsString() ) {
+                std::string sJson;
+                get_field_string(impl, sField, sJson);
+                str2obj(sJson.c_str(), obj);
+                return true;
+            }
+            return false;
+        }
+
         void set_field_array(void *impl, const char *sField, void *obj) 
         {
             // Alternative:

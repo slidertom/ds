@@ -20,12 +20,11 @@ static char THIS_FILE[] = __FILE__;
 
 #define SQL_BUSY_TIMEOUT  5000
 
-CSqLiteDatabaseImpl::CSqLiteDatabaseImpl() 
-: m_bReadOnly(false), m_pDB(nullptr)
+CSqLiteDatabaseImpl::CSqLiteDatabaseImpl(bool bMultiUser) 
+: m_bReadOnly(false), m_pDB(nullptr), m_bMultiUser(bMultiUser)
 {
     m_bTransMode = false;
     m_pErrorHandler = new CSqLiteErrorHandler;
-	m_bMultiUser = false;
 }
 
 CSqLiteDatabaseImpl::~CSqLiteDatabaseImpl()
@@ -71,7 +70,7 @@ bool CSqLiteDatabaseImpl::BeginTrans()
     ASSERT(!m_bTransMode); // nested transactions are not supported 
     m_bTransMode = true;
 
-    //m_bNetwork controls if there can be database usage by multiple processes at one time
+    //m_bMultiUser controls if there can be database usage by multiple processes at one time
 	if ( m_bMultiUser )
 	{
 		VERIFY(ExecuteUTF8("begin immediate transaction"));
@@ -157,7 +156,8 @@ int process_dml_row(void *pData, int nColumns,
 
         return 0;
 }
-bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) 
+
+bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) 
 {
     //int nRetVal = sqlite3_config(SQLITE_CONFIG_SERIALIZED); // SQLITE_CONFIG_SERIALIZED SQLITE_CONFIG_MULTITHREAD open -> SQLITE_OPEN_FULLMUTEX
     //VERIFY(nRetVal == SQLITE_OK);
@@ -176,6 +176,12 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wch
     // http://www.mimec.org/node/297
     //database.exec( "PRAGMA encoding = \"UTF-16\"" );
 
+	//For shared database usage. Also for multithreaded database usage.
+	if ( m_bMultiUser )
+    {
+		sqlite3_enable_shared_cache(1);
+    }
+
     // http://manski.net/2012/10/sqlite-performance/
     // Read:
     // * using a read-only connection doesn’t provide any performance benefit
@@ -191,7 +197,15 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wch
     m_sFilePath = sPath;
     // UTF8 path required
     std::string localFileName = ds_str_conv::ConvertToUTF8(sPath);
-    int rc = sqlite3_open_v2(localFileName.c_str(), &m_pDB, bReadOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE | SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX, NULL);
+	int nFlags = bReadOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE;
+	
+	//For shared database usage. Also for multithreaded database usage.
+	if ( m_bMultiUser )
+    {
+		nFlags |= SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX;
+    }
+
+    int rc = sqlite3_open_v2(localFileName.c_str(), &m_pDB, nFlags, NULL);
     // sqlite3_open16 - UTF-16 does not allow to open in the read only mode
     //int rc = sqlite3_open16(sPath, &m_pDB);
 
@@ -207,15 +221,7 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wch
         return false;
     }
 
-	rc = sqlite3_enable_shared_cache(1);
-	if (rc != SQLITE_OK)
-    {
-        m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::OpenDB::sqlite3_enable_shared_cache");
-        Close();
-        return false;
-    }
-
-    rc = sqlite3_extended_result_codes(m_pDB, 1);
+	rc = sqlite3_extended_result_codes(m_pDB, 1);
     if (rc != SQLITE_OK)
     {
         m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::OpenDB");
@@ -321,7 +327,6 @@ bool CSqLiteDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sT
 {
 	//ASSERT(FALSE);
 	//Impl must be simillar to
-	//CStdString sCreateRelSQL;
 	//sCreateRelSQL.Format(_T("ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE"), sTable1, sRelName, sField1, sTable2, sField2);
 	//pDB->ExecuteSQL(sCreateRelSQL.c_str());
 	return true;

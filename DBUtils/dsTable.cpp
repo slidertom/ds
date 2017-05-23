@@ -3,9 +3,7 @@
 
 #include "AbsDatabase.h"
 #include "AbsRecordset.h"
-
-#include "Collections/StdString.h"
-
+#include "dsStrConv.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -206,16 +204,19 @@ std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const w
 {
 	VERIFY(Open());
 	
-    CStdString sTemp;
+    std::wstring sFormat  = L"%s%0";
+                 sFormat += std::to_wstring(width);
+                 sFormat += L"d";
+    
 	int index = 1;
-
-	CStdString sFormat;
-	sFormat.Format(_T("%%s%%0%dd"), width);
-
 	while (true)
 	{
-		sTemp.Format(sFormat, sPrefix, index);
-		if ( !SeekIndex(sFieldName, sTemp) ) {
+        int sz = std::swprintf(nullptr, 0, sFormat.c_str(), sPrefix, index);
+        std::vector<wchar_t> buf(sz + 1); // note +1 for null terminator
+        std::swprintf(&buf[0], buf.size(), sFormat.c_str(), sPrefix, index);
+        std::wstring sTemp(buf.begin(), buf.end());
+
+		if ( !SeekIndex(sFieldName, sTemp.c_str()) ) {
 			return sTemp;
 		}
 		++index;

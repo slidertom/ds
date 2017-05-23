@@ -2,8 +2,8 @@
 #define __DAO_DATABASE_UTIL_H__
 #pragma once
 
-#ifndef STDSTRING_H
-    #include "Collections/StdString.h"
+#ifndef __DS_STR_CONV_H__
+    #include "../dsStrConv.h"
 #endif
 
 namespace dao_database_util
@@ -86,53 +86,47 @@ namespace dao_database_util
     }
 
     template <class TOleVariant>
-    inline CStdString GetString(const TOleVariant &varSrc)
+    inline std::wstring GetString(const TOleVariant &varSrc)
     {
 	    LPCVARIANT pSrc = (LPCVARIANT)varSrc;
 
 	    switch (pSrc->vt)
 	    {
 	    case VT_BSTR:
-		    return CStdString((const wchar_t *)pSrc->bstrVal);
+		    return std::wstring((const wchar_t *)pSrc->bstrVal);
 
 	    case VT_DATE:
 		    return (const wchar_t *)COleDateTime(varSrc).Format();
 
 	    case VT_UI1:
             {
-                CStdString str;
-		        str.Format(_T("%i"),int(pSrc->bVal));
+                const std::wstring str = std::to_wstring(int(pSrc->bVal));
 		        return str;
             }
 	    case VT_I2:
             {
-                CStdString str;
-		        str.Format(_T("%i"),int(pSrc->iVal));
+                const std::wstring str = std::to_wstring(int(pSrc->iVal));
 		        return str;
             }
 	    case VT_I4:
             {
-                CStdString str;
-		        str.Format(_T("%i"),int(pSrc->lVal));
+                const std::wstring str = std::to_wstring(int(pSrc->lVal));
 		        return str;
             }
 	    case VT_R4:
             {
-                CStdString str;
-		        str.Format(_T("%.2f"), double(pSrc->fltVal));
+                const std::wstring str = ds_str_conv::FormatStr(_T("%.2f"), double(pSrc->fltVal));
 		        return str;
             }
 	    case VT_R8:
             {
-                CStdString str;
-		        str.Format(_T("%.2f"), double(pSrc->dblVal));
-		        return str;
+                const std::wstring str = ds_str_conv::FormatStr(_T("%.2f"), double(pSrc->dblVal));
+                return str;
             }
 	    case VT_CY:
             {
-                CStdString str;
-		        str.Format(_T("%.2f"), _tcstod(COleCurrency(varSrc).Format(), NULL));
-		        return str;
+                const std::wstring str = ds_str_conv::FormatStr(_T("%.2f"), _tcstod(COleCurrency(varSrc).Format(), NULL));
+                return str;
             }
 	    case VT_BOOL:
 		    return V_BOOL(pSrc) != 0 ? _T("true") : _T("false");

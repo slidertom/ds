@@ -6,8 +6,6 @@
 
 #include "afx.h"
 
-#include "Collections/StdString.h" // LPCTSTR define
-
 #define _BUILD_DB_UTILS_IMPL
 #include "DBUtilsImpl.h"
 

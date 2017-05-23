@@ -105,7 +105,7 @@ private:
 	bool m_bSQLOpened;
     
     __int64 m_nEditRowId;
-    std::unordered_map<CStdString, int, std::hash<std::basic_string<TCHAR>>> m_name_to_index;
+    std::unordered_map<std::wstring, int, std::hash<std::basic_string<wchar_t>>> m_name_to_index;
 
     sqlite_util::CFieldDataMap *m_pSaveData;
     const sqlite_util::CFieldInfoMap *m_pFieldInfoData;

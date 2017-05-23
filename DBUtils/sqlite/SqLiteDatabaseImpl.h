@@ -14,7 +14,7 @@ class CSqLiteDatabaseImpl : public CAbsDatabase
 {
 // Construction/Destruction
 public:
-	CSqLiteDatabaseImpl();
+	CSqLiteDatabaseImpl(bool bMultiUser);
 	virtual ~CSqLiteDatabaseImpl();
 
 // Static operations
@@ -31,7 +31,7 @@ public:
     bool ExecuteUTF8(const char *sqlUTF8);
 
 	virtual void Close() override; 
-	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) override;
+	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
 
 	virtual dsDBType GetType() override;
 

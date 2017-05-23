@@ -2,10 +2,6 @@
 #define __ABS_DATABASE_H__
 #pragma once
 
-#ifndef STDSTRING_H
-    #include "Collections/StdString.h"
-#endif
-
 #ifndef __DATABASE_TYPE_H__
 	#include "DatabaseType.h"
 #endif
@@ -42,7 +38,7 @@ public:
 	virtual bool Execute(const wchar_t *lpszSQL) = 0; 
 
     virtual void Close() = 0;
-    virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) = 0;
+    virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) = 0;
     
 	virtual dsDBType GetType() = 0;
 

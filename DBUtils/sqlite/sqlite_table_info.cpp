@@ -5,6 +5,8 @@
 #include "sqlite_bind_util.h"
 #include "sqlite_include.h"
 
+#include "algorithm"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -15,8 +17,9 @@ namespace sqlite_util
 {
     eFieldType CFieldInfo::GetFieldType() const
     {
-        CStdStringA sType = m_sType;
-        sType.ToUpper();
+        std::string sType = m_sType;
+        std::transform(sType.begin(), sType.end(), sType.begin(), ::toupper); // do use ANSI based -> check out if statements
+
         if ( sType == "INTEGER" ) {
             return eFieldType_Long;
         }

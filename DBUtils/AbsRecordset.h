@@ -2,10 +2,6 @@
 #define __ABS_RECORD_SET_H__
 #pragma once
 
-#ifndef STDSTRING_H
-    #include "Collections/StdString.h"
-#endif
-
 #include "vector"
 
 class CAbsRecordset

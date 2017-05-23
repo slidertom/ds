@@ -28,7 +28,7 @@ public:
 
 	virtual bool Execute(const wchar_t *lpszSQL) override; 
 	virtual void Close() override; 
-	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) override;
+	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
 
 	virtual dsDBType GetType() override;
 

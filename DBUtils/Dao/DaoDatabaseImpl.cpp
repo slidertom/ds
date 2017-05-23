@@ -7,6 +7,8 @@
 
 #include "afxdao.h"
 
+#include "string"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -144,17 +146,17 @@ void CDaoDatabaseImpl::Close()
 	}
 }
 
-bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) 
+bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) 
 {
 	m_bReadOnly = bReadOnly;
 
-	CStdString sConnect;
+	CString sConnect;
 	if ( _tcslen(szPsw) > 0 ) {
 		sConnect.Format(_T(";PWD=%s;"), szPsw);
 	}
 
 	try {
-		m_pDatabase->Open(sPath, FALSE, bReadOnly, sConnect.c_str());
+		m_pDatabase->Open(sPath, FALSE, bReadOnly, sConnect);
 	}
 	catch (CDaoException *e)
     {
@@ -243,8 +245,7 @@ void CDaoDatabaseImpl::CommitDatabase()
     m_pDatabase->Close(); // we do not close locker
     delete m_pDatabase;
     m_pDatabase = new CDaoDatabase;
-	bool bNetwork = false;
-	this->OpenDB(sName.c_str(), bReadOnly, _T(""), bNetwork);
+	this->OpenDB(sName.c_str(), bReadOnly, _T(""));
 }
 
 bool CDaoDatabaseImpl::CompactDatabase()
@@ -255,7 +256,7 @@ bool CDaoDatabaseImpl::CompactDatabase()
     try
     {
         // Make sure you're passing the address of a path to a different target file than the one you're compacting. 
-        CStdString sTemp = sName.c_str();
+        std::wstring sTemp = sName.c_str();
 		sTemp += _T("-temp");
         if ( inernal_dao_file_utils::DoesFileExist(sTemp.c_str()) ) {
 		    inernal_dao_file_utils::RemoveFile(sTemp.c_str()); // just in case remove any garbage
@@ -269,8 +270,10 @@ bool CDaoDatabaseImpl::CompactDatabase()
 
         if ( !inernal_dao_file_utils::CopyFile(sTemp.c_str(), sName.c_str()) ) {
 			ASSERT(FALSE);
-            CStdString sError;
-            sError.Format(_T("inernal_dao_file_utils::CopyFile failed. From: %s to %s."), sTemp.c_str(), sName.c_str());
+            std::wstring sError  = L"inernal_dao_file_utils::CopyFile failed. From: ";
+                         sError += sTemp.c_str();
+                         sError += L" to ";
+                         sError += sName.c_str();
             m_pErrorHandler->OnError(sError.c_str(), _T("CDaoDatabaseImpl::CompactDatabase()"));
 			return false;
 		}
@@ -278,8 +281,7 @@ bool CDaoDatabaseImpl::CompactDatabase()
         inernal_dao_file_utils::RemoveFile(sTemp.c_str());
 
         m_pDatabase = new CDaoDatabase;
-		bool bNetwork = false;
-	    this->OpenDB(sName.c_str(), bReadOnly, _T(""), bNetwork);
+	    this->OpenDB(sName.c_str(), bReadOnly, _T(""));
     }
     catch (CDaoException *e)
     {
@@ -345,8 +347,9 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo
 
     if ( !tableInfo.IsOpen() ) 
     {
-        CStdString sError;
-        sError.Format(_T("GetTableFieldInfo failed. Table %s."), sTable);
+        std::wstring sError = L"GetTableFieldInfo failed. Table ";
+        sError += sTable;
+        sError += L".";
         m_pErrorHandler->OnError(sError.c_str(), _T("CDaoDatabaseImpl::GetTableFieldInfo"));
         return false;
     }
@@ -400,15 +403,16 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo
             break;
         default:
             {
-                CStdString sError;
-                sError.Format(_T("Field type: %d is undefined."), nType);
-                m_pErrorHandler->OnError(sError.c_str(), _T("CDaoDatabaseImpl::GetTableFieldInfo()"));
+                std::wstring sError  = L"Field type: ";
+                             sError += std::to_wstring(nType);
+                             sError += L" is undefined.";
+                m_pErrorHandler->OnError(sError.c_str(), L"CDaoDatabaseImpl::GetTableFieldInfo()");
                 ASSERT(FALSE);
             }
             break;
         }
 
-        CStdString sName = fieldInfo.m_strName;
+        std::wstring sName = fieldInfo.m_strName;
         info[sName] = field_type;
     }
 

@@ -60,7 +60,7 @@ void CAdoDotNetDatabaseImpl::Close()
     m_sConnString = _T("");
 }
 
-bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw, bool bMultiUser) 
+bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) 
 {
     m_sConnString = sPath;
 

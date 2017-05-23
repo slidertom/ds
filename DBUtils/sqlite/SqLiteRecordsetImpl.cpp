@@ -640,8 +640,12 @@ bool CSqLiteRecordsetImpl::DoUpdate()
     if ( rc != SQLITE_DONE ) 
     {
         const std::string sErrorValues = save_data_to_error_values_string(m_pSaveData);
-        CStdStringA sError;
-        sError.Format("SQL statement: UPDATE %s SET %s WHERE ROWID = %d", m_sTable.c_str(), sErrorValues.c_str(), m_nEditRowId);     
+        std::string sError  = "SQL statement: UPDATE ";
+                    sError += m_sTable.c_str();
+                    sError += " SET ";
+                    sError += sErrorValues.c_str();
+                    sError += " WHERE ROWID = ";
+                    sError += std::to_string(m_nEditRowId);
         m_pErrorHandler->OnErrorCode(rc, sError.c_str(), "CSqLiteRecordsetImpl::DoUpdate()(sqlite3_finalize)");
         return false;
     }
@@ -652,7 +656,7 @@ bool CSqLiteRecordsetImpl::DoUpdate()
 bool CSqLiteRecordsetImpl::Update()
 {
     ASSERT(m_pSaveData);
-    //ASSERT(m_pDB->m_bTransMode);
+    ASSERT(m_pDB->m_bTransMode);
 
     const bool bRetVal = DoUpdate();
 
@@ -794,10 +798,16 @@ bool CSqLiteRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sV
     // http://zetcode.com/db/sqlitec/ -> could be done optimization -> 
     // do use prepared statements and bind operations
     // do map all prepared statements
-    CStdStringA sFind;
+    std::string sFind  = "SELECT ROWID,* FROM ";
+                sFind += m_sTable.c_str();
+                sFind += " WHERE ";
+                sFind += sIndexUTF8.c_str();
+                sFind += " = '";
+                sFind += sValueUTF8.c_str();
+                sFind += "' COLLATE NOCASE";
 	//sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s'", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
     // NOCASE as "DB BROWSER" does not care about NOCASE attributes inside CREATE statement
-    sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s' COLLATE NOCASE", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
+    //sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s' COLLATE NOCASE", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
 
     if ( OpenImpl(sFind.c_str()) ) {
         if ( MoveFirstImpl() ) {
@@ -822,8 +832,13 @@ bool CSqLiteRecordsetImpl::SeekByLongUTF8(const char *sIndexUTF8, long nValue)
     // http://zetcode.com/db/sqlitec/ -> could be done optimization -> 
     // do use prepared statements and bind operations
     // do map all prepared statements
-    CStdStringA sFind;
-	sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%d'", m_sTable.c_str(), sIndexUTF8, nValue);
+    std::string sFind = "SELECT ROWID,* FROM ";
+                sFind += m_sTable.c_str();
+                sFind += " WHERE ";
+                sFind += sIndexUTF8;
+                sFind += " = '";
+                sFind += std::to_string(nValue);
+                sFind += "'";
 
     if ( OpenImpl(sFind.c_str()) ) {
         if ( MoveFirstImpl() ) {
@@ -979,8 +994,9 @@ bool CSqLiteRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
 
 int CSqLiteRecordsetImpl::FindColumnIndex(const wchar_t *sFieldName)
 {
-    CStdString sName = sFieldName;
-    sName.MakeLower();
+    std::wstring sName = sFieldName;
+    ds_str_conv::MakeLower(sName);
+    
     auto found = m_name_to_index.find(sName);
     if ( found == m_name_to_index.end() ) {
         return -1;
@@ -1079,8 +1095,8 @@ bool CSqLiteRecordsetImpl::OpenImpl(const char *sql)
     for (int nIndex = 0; nIndex < nColCnt; ++nIndex)
     {
         const char *sName = sqlite3_column_name(m_stmt, nIndex);
-        CStdString sColName = ds_str_conv::ConvertFromUTF8(sName);
-        sColName.MakeLower();
+        std::wstring sColName = ds_str_conv::ConvertFromUTF8(sName);
+        ds_str_conv::MakeLower(sColName);
         m_name_to_index[sColName] = nIndex;
     } 
 

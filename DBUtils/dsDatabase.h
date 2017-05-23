@@ -14,10 +14,6 @@
 	#include "dsDatabaseListener.h"
 #endif
 
-#ifndef STDSTRING_H
-    #include "Collections/StdString.h"
-#endif
-
 #ifndef __DATABASE_TYPE_H__
 	#include "DatabaseType.h"
 #endif

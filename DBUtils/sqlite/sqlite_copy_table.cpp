@@ -60,7 +60,7 @@ namespace sqlite_util
                     {
                     case dsFieldType_Text:
                         {
-                            const CStdString sValue = src_table.GetFieldString(sFieldName);
+                            const std::wstring sValue = src_table.GetFieldString(sFieldName);
                             dst_table.SetFieldString(sFieldName, sValue.c_str());
                         }
                         break;
@@ -133,8 +133,13 @@ namespace sqlite_util
     {
         ASSERT(pDstDB->GetType() == dsType_SqLite);
 
-        CStdStringA sSQL;
-        sSQL.Format("INSERT INTO %s SELECT * FROM SrcDB.%s;", sTableNameDst, sTableNameSrc);
+        // INSERT INTO sTableNameDst SELECT * FROM SrcDB.sTableNameSrc;"
+        std::string sSQL  = "INSERT INTO ";
+                    sSQL += sTableNameDst;
+                    sSQL += " SELECT * FROM SrcDB.";
+                    sSQL += sTableNameSrc;
+                    sSQL += ";";
+
         if ( !pDstDB->ExecuteUTF8(sSQL.c_str()) ) {
             return false;
         }

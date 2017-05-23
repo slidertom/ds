@@ -1,9 +1,12 @@
 #include "StdAfx.h"
 #include "dsStrConv.h"
 
+#include "vector"
 #include "sstream"
 #include "iomanip"
 #include "limits"
+#include "algorithm"
+#include "functional"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -86,5 +89,41 @@ namespace ds_str_conv
         strstream >> dValue;
         return dValue;
     }
+
+    void MakeLower(std::wstring &str)
+    {
+        const std::locale &loc = std::locale();
+        std::transform(str.begin(), str.end(), str.begin(),
+                       std::bind1st(std::mem_fun(&std::ctype<wchar_t>::tolower), &std::use_facet<std::ctype<wchar_t>>(loc)));
+    }
+
+    void MakeUpper(std::wstring &str)
+    {
+        const std::locale &loc = std::locale();
+        std::transform(str.begin(), str.end(), str.begin(),
+                       std::bind1st(std::mem_fun(&std::ctype<wchar_t>::toupper), &std::use_facet<std::ctype<wchar_t>>(loc)));
+    }
+    /*
+    void MakeUpper(std::string &str)
+    {
+        const std::locale &loc = std::locale();
+        std::transform(str.begin(), str.end(), str.begin(),
+                       std::bind1st(std::mem_fun(&std::ctype<char>::toupper), &std::use_facet<std::ctype<char>>(loc)));
+    }
+    */
+    /*
+    std::wstring FormatStr(LPCTSTR pszFormat, ...)
+    {
+        va_list arglist;
+	    va_start(arglist, pszFormat);
+            const int sz = std::swprintf(nullptr, 0, pszFormat, arglist);
+            std::vector<wchar_t> buf(sz + 1); // note +1 for null terminator
+            std::swprintf(&buf[0], buf.size(), pszFormat, arglist);
+            std::wstring sTemp(buf.begin(), buf.end());
+	    va_end(arglist);
+
+	    return sTemp;
+    }
+    */
 };
  

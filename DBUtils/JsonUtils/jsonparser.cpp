@@ -62,12 +62,12 @@ namespace ds_jsonparser
 	void object::SetStringArray(const char *sField, const std::vector<std::wstring> &array)
 	{
 		ds_jsonparser::json_array array_json;
-		for ( const auto &it : array ) {
+		for (const auto &it : array) {
 			array_json.AddString(it.c_str());
 		}
 		_impl::set_field_array(m_impl, sField, array_json.m_impl);
 	}
-    void object::SetObject(const char *sField, const object &obj) {
+    void object::SetJsonObject(const char *sField, const object &obj) {
         _impl::set_field_object(m_impl, sField, obj.m_impl);
     }
     void object::SetDateTime(const char* sField, time_t value) {
@@ -112,6 +112,9 @@ namespace ds_jsonparser
             return 0;
         }
         return nValue;
+    }
+    bool object::GetJsonObject(const char *sField, object &obj) const {
+        return _impl::get_field_object(m_impl, sField, obj.m_impl);
     }
     time_t object::GetDateTime(const char *sField) const {
         time_t nValue = 0;

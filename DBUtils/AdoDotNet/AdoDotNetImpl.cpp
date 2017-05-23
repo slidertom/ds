@@ -292,9 +292,9 @@ public:
 
 			for (int i=0;i<nCount;i++)
 			{
-				const CString sColName = reader->GetName(i);sColName;
+				const CString sColName = reader->GetName(i);
 				const dsFieldType field_type = GetFieldType(reader->GetFieldType(i));
-				info[CStdString(sColName)] = field_type;
+				info[std::wstring(sColName)] = field_type;
 			}
 		}
 		catch (ArgumentException ^aex)

@@ -2,6 +2,7 @@
 #include "LogImpl.h"
 
 #include "../dsConfig.h"
+#include "../dsStrConv.h"
 
 #include "mutex"
 
@@ -38,7 +39,7 @@ namespace internal
 static std::mutex g_log_mutex; // just in case do allow only one thread to log data
                                // dao single threaded
 
-void CLogImpl::Log(LPCTSTR sMsg)
+void CLogImpl::Log(const wchar_t *sMsg)
 {
     std::lock_guard<std::mutex> lock(g_log_mutex);
 
@@ -50,14 +51,13 @@ void CLogImpl::Log(LPCTSTR sMsg)
     time(&rawtime);
     timeinfo = localtime(&rawtime);
     const char *sTime = internal::asctime_impl(timeinfo);
-    CStdString sTimeUnicode = sTime;
 
-    std::wstring sMsgImpl;
-    sMsgImpl += _T("[");
-    sMsgImpl += sTimeUnicode.c_str();
-    sMsgImpl += _T("] ");
-    sMsgImpl += sMsg;
-    sMsgImpl += _T("\n");
+    std::string sMsgImpl;
+    sMsgImpl += "[";
+    sMsgImpl += sTime;
+    sMsgImpl += "] ";
+    sMsgImpl += ds_str_conv::ConvertToUTF8(sMsg).c_str();
+    sMsgImpl += "\n";
 
     TRACE(sMsgImpl.c_str());
     FILE *pFile = _tfopen(sFilePath.c_str(), _T("a"));    
@@ -65,6 +65,6 @@ void CLogImpl::Log(LPCTSTR sMsg)
         ASSERT(FALSE);
         return;
     }
-    _ftprintf(pFile, _T("%s"), sMsgImpl.c_str());
+    fprintf(pFile, "%s", sMsgImpl.c_str());
     fclose(pFile);
 }

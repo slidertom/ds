@@ -7,7 +7,7 @@ class CLogImpl
 {
 // Static operations
 public:
-    static void Log(LPCTSTR sMsg);
+    static void Log(const wchar_t *sMsg);
 };
 
 #endif
