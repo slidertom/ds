@@ -221,11 +221,11 @@
     <ClInclude Include="Dao\DaoRecordsetImpl.h" />
     <ClInclude Include="AbsDatabase.h" />
     <ClInclude Include="AbsRecordset.h" />
-    <ClInclude Include="DatabaseType.h" />
     <ClInclude Include="DBUtilsImpl.h" />
     <ClInclude Include="dsConfig.h" />
     <ClInclude Include="dsCopyTableData.h" />
     <ClInclude Include="dsStrConv.h" />
+    <ClInclude Include="dsTypes.h" />
     <ClInclude Include="JsonUtils\jsonparser.h" />
     <ClInclude Include="JsonUtils\jsonparser_rgb.h" />
     <ClInclude Include="JsonUtils\RapidJson\allocators.h" />

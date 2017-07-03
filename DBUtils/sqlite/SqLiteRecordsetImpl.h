@@ -32,13 +32,16 @@ public:
 	virtual bool OpenView(const wchar_t *sViewName) override;
 
     virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) override;
-	virtual bool SeekByLong(const wchar_t *sIndex, long nValue) override;
+	virtual bool SeekByLong(const wchar_t *sIndex, int nValue) override;
     bool SeekByLongUTF8(const char *sIndexUTF8, long nValue);
 
 	virtual bool MoveNext() override;
 	virtual bool MoveFirst() override;
 
-	virtual long GetRecordCount() override;
+	virtual int GetRecordCount() const override;
+    virtual int GetColumnCount() const override;
+    virtual std::wstring GetColumnName(int nCol) const override;
+    virtual dsFieldType GetColumnType(int nCol) const override;
 
 	virtual bool Delete() override;
 	virtual void AddNew() override;
@@ -59,8 +62,8 @@ public:
     virtual std::string GetFieldStringUTF8(const char *sFieldName) override;
 	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) override;
 
-	virtual long GetFieldLong(const wchar_t *sFieldName) override;
-	virtual void SetFieldLong(const wchar_t *sFieldName, long lValue) override;
+	virtual int  GetFieldLong(const wchar_t *sFieldName) override;
+	virtual void SetFieldLong(const wchar_t *sFieldName, int lValue) override;
 
 	virtual double GetFieldDouble(const wchar_t *sFieldName) override;
 	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
@@ -74,8 +77,8 @@ public:
 
     virtual void Flush() override;
     virtual bool DeleteAllByStringValue(const wchar_t *sField, const wchar_t *sValue) override;
-    virtual bool DeleteAllByLongValue(const wchar_t *sField, long nValue) override;
-    virtual bool DeleteByLongValue(const wchar_t *sField, long nValue) override;
+    virtual bool DeleteAllByLongValue(const wchar_t *sField, int nValue) override;
+    virtual bool DeleteByLongValue(const wchar_t *sField, int nValue) override;
     virtual bool DeleteByStringValue(const wchar_t *sField, const wchar_t *sValue) override;
 
     void PrepareInsert();
@@ -97,7 +100,7 @@ private:
     CSqLiteErrorHandler *m_pErrorHandler;
     std::string m_sTable;
    
-    sqlite3_stmt *m_stmt;    
+    sqlite3_stmt *m_stmt;  // main statement
     sqlite3_stmt *m_insert_stmt;
     sqlite3_stmt *m_update_stmt;
     std::string m_sUpdateValues;

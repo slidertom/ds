@@ -146,6 +146,9 @@ namespace ds_jsonparser
     void json_array::AddObject(const object &obj) {
         _impl::add_array_object(m_impl, obj.m_impl);
     }
+    void json_array::SetObject(int i, const object &obj) {
+        _impl::set_array_object(m_impl, i, obj.m_impl);
+    }
     void json_array::AddString(const char *str) {
         _impl::add_array_string(m_impl, str);
     }

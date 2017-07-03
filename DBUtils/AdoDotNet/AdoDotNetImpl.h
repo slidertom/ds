@@ -43,7 +43,7 @@ public:
 
 	virtual bool MoveNext() = 0;
 
-	virtual CString GetFieldString(const wchar_t *sFieldName) = 0;
+	virtual std::wstring GetFieldString(const wchar_t *sFieldName) = 0;
 	virtual void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) = 0;
 	
 	virtual long GetFieldLong(const wchar_t *sFieldName) = 0;

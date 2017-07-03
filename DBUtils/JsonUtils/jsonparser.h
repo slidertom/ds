@@ -62,6 +62,7 @@ namespace ds_jsonparser
     // Operations
     public:
         void AddObject(const object &obj);
+        void SetObject(int i, const object &obj);
         void AddString(const char *str);
         void AddString(const wchar_t *str);
 		void AddInt(int nValue);

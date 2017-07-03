@@ -412,11 +412,6 @@ namespace ds_jsonparser
             rapidjson::Value value(doc_obj->GetType());
             value.CopyFrom(*doc_obj, allocator);
             doc->PushBack(value, allocator);
-
-            // Alternative convert to string:
-            //std::string sJson;
-            //internal::obj2str(doc_obj, sJson);
-            //add_array_string(impl, sJson.c_str());
         }
 
         int get_array_size(const void *impl) 
@@ -447,12 +442,23 @@ namespace ds_jsonparser
 			
 			return 0;
 		}
+        
+        void set_array_object(void *impl, int i, const void *obj)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            ASSERT(doc->IsArray());
+            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
 
+            rapidjson::Value &value = (*doc)[i];    
+            rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
+            value.CopyFrom(*doc_obj, allocator);
+        }
+        
         void get_array_object(const void *impl, int i, void *obj) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
-            
-            const rapidjson::Value &value = (*doc)[i];
+
+            const rapidjson::Value &value = (*doc)[i];           
             if ( value.IsString() ) {
                 str2obj(value.GetString(), obj);
             }
@@ -460,10 +466,6 @@ namespace ds_jsonparser
             {
                 rapidjson::Document *obj_doc = (rapidjson::Document *)obj;
                 obj_doc->CopyFrom(value, obj_doc->GetAllocator());
-                
-                //std::string sJson;
-                //internal::value2str(value, sJson);
-                //str2obj(sJson.c_str(), obj);       
             }
             else {
                 std::string sJson;

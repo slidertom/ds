@@ -2,22 +2,11 @@
 #define __ABS_DATABASE_H__
 #pragma once
 
-#ifndef __DATABASE_TYPE_H__
-	#include "DatabaseType.h"
+#ifndef __DS_TYPES_H__
+	#include "dsTypes.h"
 #endif
 
 #include "unordered_map"
-
-enum dsFieldType
-{
-    dsFieldType_Undefined = -1,
-    dsFieldType_Text = 0,
-    dsFieldType_Long,
-    dsFieldType_Double,
-    dsFieldType_DateTime,
-    dsFieldType_Binary
-};
-
 class dsTableFieldInfo : public std::unordered_map<std::wstring, dsFieldType, std::hash<std::basic_string<wchar_t> > > { };
 
 class CAbsRecordset;

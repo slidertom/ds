@@ -2,6 +2,10 @@
 #define __SQLITE_TABLE_INFO_H__
 #pragma once
 
+#ifndef __DS_TYPES_H__
+    #include "../dsTypes.h"
+#endif
+
 #include "unordered_map"
 
 class CSqLiteDatabaseImpl;
@@ -9,19 +13,11 @@ class CSqLiteErrorHandler;
 
 namespace sqlite_util
 {
-    enum eFieldType {
-        eFieldType_Undefined = -1,
-        eFieldType_Text = 0,
-        eFieldType_Long,
-        eFieldType_Double,
-        eFieldType_Binary
-    };
-    
     class CFieldInfo
     {
     // Attributes
     public:
-        eFieldType GetFieldType() const;
+        dsFieldType GetFieldType() const;
 
         bool m_bPrimary;
         bool m_bAutoIncrement;

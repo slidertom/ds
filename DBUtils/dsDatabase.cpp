@@ -144,9 +144,8 @@ dsDBType dsDatabase::GetType()
 
 void dsDatabase::Close() 
 {
-	auto end_it = m_listners.end();
-	for (auto it = m_listners.begin(); it != end_it; ++it) {
-		(*it)->OnDatabaseClose();
+	for (dsDatabaseListener *pListener : m_listners) {
+		pListener->OnDatabaseClose();
 	}
 
 	if ( m_pDatabase ) 

@@ -27,9 +27,9 @@ void CAdoDotNetRecordsetImpl::OpenImpl()
 		return;
 	}
 
-	CString sFind;
-	sFind.Format(_T("SELECT * FROM %s"), m_sTable);
-	m_pSet->Open(sFind);
+	std::wstring sFind = L"SELECT * FROM ";
+	sFind += m_sTable;
+	m_pSet->Open(sFind.c_str());
 }
 
 bool CAdoDotNetRecordsetImpl::MoveFirst() 
@@ -111,17 +111,18 @@ bool CAdoDotNetRecordsetImpl::Update()
 	return false;
 }
 
-long CAdoDotNetRecordsetImpl::GetRecordCount()
+int CAdoDotNetRecordsetImpl::GetRecordCount() const
 {
-	CString sCountSQL;
-	sCountSQL.Format(_T("SELECT COUNT(*) AS RecordCount FROM %s"), m_sTable);
-	m_pSet->Open(sCountSQL);
-
-	const int nCount = GetFieldLong(_T("RecordCount"));
-
+    ASSERT(FALSE);
+    /*
+	std::wstring sCountSQL = L"SELECT COUNT(*) AS RecordCount FROM ";
+	sCountSQL += m_sTable;
+	m_pSet->Open(sCountSQL.c_str());
+	const int nCount = GetFieldLong(L"RecordCount"); // const cast
 	m_pSet->Close();
-
 	return nCount;
+    */
+    return -1;
 }
 
 void CAdoDotNetRecordsetImpl::SetFieldValueNull(const wchar_t *lpszName)
@@ -141,7 +142,7 @@ bool CAdoDotNetRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t 
 		return false;
 	}
 
-	if ( m_sTable.IsEmpty() ) {
+	if ( m_sTable.empty() ) {
 		ASSERT(FALSE);
 		return false;
 	}
@@ -150,24 +151,27 @@ bool CAdoDotNetRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t 
 		m_pSet->Close();
 	}
 
-	CString sFind;
-	sFind.Format(_T("SELECT * FROM %s WHERE %s = "), m_sTable, sIndex);
+	std::wstring sFind = L"SELECT * FROM ";
+	sFind += m_sTable;
+	sFind += L" WHERE ";
+	sFind += sIndex;
+	sFind += L" = ";
 
-	if ( !m_pSet->SeekByString(sFind, sValue) ) {
+	if ( !m_pSet->SeekByString(sFind.c_str(), sValue) ) {
 		return false;
 	}
 
 	return !m_pSet->IsEmpty();
 }
 
-bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, long nValue)
+bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, int nValue)
 {
 	if ( _tcslen(sIndex) <= 0 ) {
 		ASSERT(FALSE);
 		return false;
 	}
 
-	if ( m_sTable.IsEmpty() ) {
+	if ( m_sTable.empty() ) {
 		ASSERT(FALSE);
 		return false;
 	}
@@ -177,10 +181,14 @@ bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, long nValue)
 		m_pSet->Close();
 	}
 
-	CString sFind;
-	sFind.Format(_T("SELECT * FROM %s WHERE %s = %d"), m_sTable, sIndex, nValue);
-	
-	if ( !m_pSet->Open(sFind) ) {
+	std::wstring sFind = L"SELECT * FROM ";
+	sFind += m_sTable;
+	sFind += L" WHERE ";
+	sFind += sIndex;
+	sFind += L" = ";
+	sFind += std::to_wstring(nValue);
+
+	if ( !m_pSet->Open(sFind.c_str()) ) {
 		return false;
 	}
 
@@ -189,15 +197,15 @@ bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, long nValue)
 
 std::wstring CAdoDotNetRecordsetImpl::GetFieldString(const wchar_t *sFieldName)
 {
-	return (const wchar_t *)m_pSet->GetFieldString(sFieldName);
+	return m_pSet->GetFieldString(sFieldName);
 }
 
-long CAdoDotNetRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
+int CAdoDotNetRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 {
 	return m_pSet->GetFieldLong(sFieldName);
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, long lValue)
+void CAdoDotNetRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, int lValue)
 {
 	m_pSet->SetFieldLong(sFieldName, lValue);
 }
@@ -241,4 +249,22 @@ std::string CAdoDotNetRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
 void CAdoDotNetRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
 {
     SetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), ds_str_conv::ConvertFromUTF8(sValue).c_str());
+}
+
+int CAdoDotNetRecordsetImpl::GetColumnCount() const 
+{
+    ASSERT(FALSE);
+    return -1;
+}
+
+std::wstring CAdoDotNetRecordsetImpl::GetColumnName(int nCol) const 
+{
+    ASSERT(FALSE);
+    return L"";
+}
+
+dsFieldType CAdoDotNetRecordsetImpl::GetColumnType(int nCol) const
+{
+    ASSERT(FALSE);
+    return dsFieldType_Undefined;
 }

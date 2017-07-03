@@ -101,7 +101,7 @@ bool dsTable::SeekIndex(const wchar_t *sIndex, const wchar_t *sValue)
 	return m_pSet->SeekByString(sIndex, sValue);
 }
 
-bool dsTable::SeekIndex(const wchar_t *sIndex, long nValue)
+bool dsTable::SeekIndex(const wchar_t *sIndex, int nValue)
 {
 	VERIFY(Open());
 	return m_pSet->SeekByLong(sIndex, nValue);
@@ -122,12 +122,12 @@ void dsTable::SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue)
 	m_pSet->SetFieldString(sFieldName, sValue);
 }
 
-long dsTable::GetFieldLong(const wchar_t *sFieldName) const 
+int dsTable::GetFieldLong(const wchar_t *sFieldName) const 
 {
 	return m_pSet->GetFieldLong(sFieldName);
 }
 
-void dsTable::SetFieldLong(const wchar_t *sFieldName, long nValue) 
+void dsTable::SetFieldLong(const wchar_t *sFieldName, int nValue) 
 {
 	m_pSet->SetFieldLong(sFieldName, nValue);
 }
@@ -188,10 +188,28 @@ bool dsTable::Update()
     return m_pSet->Update();         
 }
 
-long dsTable::GetRecordCount()
+int dsTable::GetColumnCount()
+{
+    VERIFY(Open());
+    return m_pSet->GetColumnCount(); 
+}
+
+int dsTable::GetRecordCount()
 { 
     VERIFY(Open());
     return m_pSet->GetRecordCount(); 
+}
+
+std::wstring dsTable::GetColumnName(int nCol)
+{
+    VERIFY(Open());
+    return m_pSet->GetColumnName(nCol); 
+}
+
+dsFieldType dsTable::GetColumnType(int nCol)
+{
+    VERIFY(Open());
+    return m_pSet->GetColumnType(nCol); 
 }
 
 bool dsTable::DoesFieldExist(const wchar_t *sFieldName)
@@ -237,7 +255,7 @@ bool dsTable::DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue)
     return m_pSet->DeleteAllByStringValue(sField, sValue);
 }
 
-bool dsTable::DeleteAllByIndex(const wchar_t *sField, long nValue)
+bool dsTable::DeleteAllByIndex(const wchar_t *sField, int nValue)
 {
     VERIFY(Open());
     return m_pSet->DeleteAllByLongValue(sField, nValue);
@@ -249,7 +267,7 @@ bool dsTable::DeleteByIndex(const wchar_t *sField, const wchar_t *sValue)
     return m_pSet->DeleteByStringValue(sField, sValue);
 }
 
-bool dsTable::DeleteByIndex(const wchar_t *sField, long nValue)
+bool dsTable::DeleteByIndex(const wchar_t *sField, int nValue)
 {
     VERIFY(Open());
     return m_pSet->DeleteByLongValue(sField, nValue);

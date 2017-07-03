@@ -177,10 +177,8 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wch
     //database.exec( "PRAGMA encoding = \"UTF-16\"" );
 
 	//For shared database usage. Also for multithreaded database usage.
-	if ( m_bMultiUser )
-    {
-		sqlite3_enable_shared_cache(1);
-    }
+	//participation in cache system is controled later via SQLITE_OPEN_SHAREDCACHE and SQLITE_OPEN_PRIVATECACHE flags.
+	sqlite3_enable_shared_cache(1);
 
     // http://manski.net/2012/10/sqlite-performance/
     // Read:
@@ -200,10 +198,12 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wch
 	int nFlags = bReadOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE;
 	
 	//For shared database usage. Also for multithreaded database usage.
-	if ( m_bMultiUser )
-    {
+	if ( m_bMultiUser ) {
 		nFlags |= SQLITE_OPEN_SHAREDCACHE | SQLITE_OPEN_FULLMUTEX;
     }
+	else {
+		nFlags |= SQLITE_OPEN_PRIVATECACHE;
+	}
 
     int rc = sqlite3_open_v2(localFileName.c_str(), &m_pDB, nFlags, NULL);
     // sqlite3_open16 - UTF-16 does not allow to open in the read only mode
@@ -408,24 +408,7 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldI
     auto end_it = pFieldInfoMap->end();
     for (auto it = pFieldInfoMap->begin(); it != end_it; ++it) 
     {
-        dsFieldType field_type = dsFieldType_Undefined;
-        const sqlite_util::eFieldType type = it->second.GetFieldType();   
-        switch (type)
-        {
-        case sqlite_util::eFieldType_Text:
-            field_type = dsFieldType_Text;
-            break;
-        case sqlite_util::eFieldType_Long:
-            field_type = dsFieldType_Long;
-            break;
-        case sqlite_util::eFieldType_Double:
-            field_type = dsFieldType_Double;
-            break;
-        case sqlite_util::eFieldType_Binary:
-            field_type = dsFieldType_Binary;
-            break;
-        }
-    
+        dsFieldType field_type = it->second.GetFieldType();
         const std::wstring sColName = ds_str_conv::ConvertFromUTF8(it->first.c_str());
         info[sColName] = field_type;
     }

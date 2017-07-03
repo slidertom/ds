@@ -106,7 +106,7 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
                         dst_table.SetFieldString(sFieldName, sValue.c_str());
                     }
                     break;
-                case dsFieldType_Long:
+                case dsFieldType_Integer:
                     {
                         const int nValue = src_table.GetFieldLong(sFieldName);
                         dst_table.SetFieldLong(sFieldName, nValue);
@@ -124,7 +124,7 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
                         dst_table.SetFieldDateTime(sFieldName, nTime);
                     }
                     break;
-                case dsFieldType_Binary:
+                case dsFieldType_Blob:
                     {
                         unsigned char *pData = nullptr;
                         unsigned long nSize = 0;

@@ -123,7 +123,6 @@
     <ClInclude Include="sqlite\SqLiteErrorHandler.h">
       <Filter>SqLite</Filter>
     </ClInclude>
-    <ClInclude Include="DatabaseType.h" />
     <ClInclude Include="dsDatabaseListener.h" />
     <ClInclude Include="dsDatabase.h" />
     <ClInclude Include="dsTable.h" />
@@ -193,5 +192,6 @@
     <ClInclude Include="sqlite\sqlite_bind_util.h">
       <Filter>SqLite</Filter>
     </ClInclude>
+    <ClInclude Include="dsTypes.h" />
   </ItemGroup>
 </Project>

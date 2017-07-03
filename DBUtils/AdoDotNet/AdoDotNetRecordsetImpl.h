@@ -25,7 +25,10 @@ public:
 	virtual bool MoveNext() override;
 	virtual bool MoveFirst() override;
 
-	virtual long GetRecordCount() override;
+	virtual int GetRecordCount() const override;
+    virtual int GetColumnCount() const override;
+    virtual std::wstring GetColumnName(int nCol) const override;
+    virtual dsFieldType GetColumnType(int nCol) const override;
 
 	virtual bool Delete() override;
 	virtual void AddNew() override;
@@ -46,8 +49,8 @@ public:
     virtual std::string GetFieldStringUTF8(const char *sFieldName) override;
 	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) override;
 
-	virtual long GetFieldLong(const wchar_t *sFieldName) override;
-	virtual void SetFieldLong(const wchar_t *sFieldName, long lValue) override;
+	virtual int  GetFieldLong(const wchar_t *sFieldName) override;
+	virtual void SetFieldLong(const wchar_t *sFieldName, int lValue) override;
 
 	virtual double GetFieldDouble(const wchar_t *sFieldName) override;
 	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
@@ -59,7 +62,7 @@ public:
 	virtual bool DoesFieldExist(const wchar_t *sFieldName) override;
 
 	virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) override;
-	virtual bool SeekByLong(const wchar_t *sIndex, long nValue) override;
+	virtual bool SeekByLong(const wchar_t *sIndex, int nValue) override;
 
 private:
 	void OpenImpl();
@@ -67,7 +70,7 @@ private:
 
 // Attributes
 private:
-	CString m_sTable;
+	std::wstring m_sTable;
 
 private:
 	CDotNetRecordSetAbs *m_pSet;

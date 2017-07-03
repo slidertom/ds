@@ -14,8 +14,8 @@
 	#include "dsDatabaseListener.h"
 #endif
 
-#ifndef __DATABASE_TYPE_H__
-	#include "DatabaseType.h"
+#ifndef __DS_TYPES_H__
+	#include "dsTypes.h"
 #endif
 
 #include "vector"

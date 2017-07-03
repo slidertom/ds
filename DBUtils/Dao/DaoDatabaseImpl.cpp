@@ -150,13 +150,15 @@ bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_
 {
 	m_bReadOnly = bReadOnly;
 
-	CString sConnect;
+	std::wstring sConnect;
 	if ( _tcslen(szPsw) > 0 ) {
-		sConnect.Format(_T(";PWD=%s;"), szPsw);
+		sConnect = L";PWD=";
+		sConnect += szPsw;
+		sConnect += L";";
 	}
 
 	try {
-		m_pDatabase->Open(sPath, FALSE, bReadOnly, sConnect);
+		m_pDatabase->Open(sPath, FALSE, bReadOnly, sConnect.c_str());
 	}
 	catch (CDaoException *e)
     {
@@ -361,57 +363,17 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo
     {
         tableInfo.GetFieldInfo(i, fieldInfo);
         const short nType = fieldInfo.m_nType;
-        dsFieldType field_type = dsFieldType_Undefined;
+        const dsFieldType field_type = CDaoRecordsetImpl::DaoTypeToDs(nType);
 
-        switch (nType) 
+        if ( field_type == dsFieldType_Undefined )
         {
-        case dbBoolean:
-            field_type = dsFieldType_Long;
-            break;
-        case dbByte:
-            field_type = dsFieldType_Long;
-            break;
-        case dbInteger:
-            field_type = dsFieldType_Long;
-            break;
-        case dbLong:
-            field_type = dsFieldType_Long;
-            break;
-        case dbCurrency:
-            field_type = dsFieldType_Double;
-            break;
-        case dbSingle:
-            field_type = dsFieldType_Double; // Single-precision floating-point data
-            break;
-        case dbDouble:
-            field_type = dsFieldType_Double;
-            break;
-        case dbDate:
-            field_type = dsFieldType_DateTime;
-            break;
-        case dbText:
-            field_type = dsFieldType_Text;
-            break;
-        case dbLongBinary:
-            field_type = dsFieldType_Binary;
-            break;
-        case dbMemo:
-            field_type = dsFieldType_Text;
-            break;
-        case dbGUID:
-            field_type = dsFieldType_Text;
-            break;
-        default:
-            {
-                std::wstring sError  = L"Field type: ";
-                             sError += std::to_wstring(nType);
-                             sError += L" is undefined.";
-                m_pErrorHandler->OnError(sError.c_str(), L"CDaoDatabaseImpl::GetTableFieldInfo()");
-                ASSERT(FALSE);
-            }
-            break;
+            std::wstring sError  = L"Field type: ";
+                            sError += std::to_wstring(nType);
+                            sError += L" is undefined.";
+            m_pErrorHandler->OnError(sError.c_str(), L"CDaoDatabaseImpl::GetTableFieldInfo()");
+            ASSERT(FALSE);
         }
-
+         
         std::wstring sName = fieldInfo.m_strName;
         info[sName] = field_type;
     }

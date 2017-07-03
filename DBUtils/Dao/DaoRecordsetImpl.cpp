@@ -362,10 +362,10 @@ bool CDaoRecordsetImpl::Update()
 	return true;
 }
 
-long CDaoRecordsetImpl::GetRecordCount()
+int CDaoRecordsetImpl::GetRecordCount() const
 {
     try {
-	    return m_pSet->GetRecordCount();
+        return m_pSet->GetRecordCount();
     }
     catch (CDaoException *e) {
 		std::wstring sMsg = L"CDaoRecordsetImpl::GetRecordCount Table='";
@@ -445,12 +445,12 @@ bool CDaoRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValu
 	return false;
 }
 
-bool CDaoRecordsetImpl::SeekByLong(const wchar_t *sIndex, long nValue)
+bool CDaoRecordsetImpl::SeekByLong(const wchar_t *sIndex, int nValue)
 {
 	SetIndex(sIndex);
 
 	try {
-		return m_pSet->Seek(_T("="), &COleVariant(nValue)) != FALSE;
+		return m_pSet->Seek(_T("="), &COleVariant((long)nValue)) != FALSE;
 	}
 	catch (CDaoException *e) {
 		std::wstring sMsg = L"CDaoRecordsetImpl::SeekByLong(index='";
@@ -510,7 +510,7 @@ void CDaoRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar_t 
 	}
 }
 
-long CDaoRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
+int CDaoRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 {
 	try {
 		COleVariant var;
@@ -531,10 +531,10 @@ long CDaoRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 	return 0;
 }
 
-void CDaoRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, long lValue)
+void CDaoRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, int lValue)
 {
 	try {
-		m_pSet->SetFieldValue(sFieldName, lValue);
+		m_pSet->SetFieldValue(sFieldName, (long)lValue);
 	}
 	catch (CDaoException *e) {
 		std::wstring sMsg = L"CDaoRecordsetImpl::SetFieldLong(field='";
@@ -672,7 +672,7 @@ bool CDaoRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
     return true;
 }
 
-void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, const wchar_t *sFunction)
+void CDaoRecordsetImpl::DoOnDaoException(CDaoException *e, const wchar_t *sFunction) const
 {
     ASSERT(m_pErrorHandler);
     std::wstring sMsg = sFunction;
@@ -691,3 +691,110 @@ void CDaoRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *s
 {
     SetFieldString(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), ds_str_conv::ConvertFromUTF8(sValue).c_str());
 }
+
+int CDaoRecordsetImpl::GetColumnCount() const
+{
+    try {
+        ASSERT(m_pSet);
+        return m_pSet->GetFieldCount();
+    }
+    catch (CDaoException *e) {
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldCount(";
+		sMsg += L"Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
+        DoOnDaoException(e, sMsg.c_str());
+        ASSERT(FALSE);
+        e->Delete();
+    }
+    return -1;
+}
+
+std::wstring CDaoRecordsetImpl::GetColumnName(int nCol) const
+{
+    ASSERT(m_pSet);
+    try {
+        CDaoFieldInfo fi;
+        m_pSet->GetFieldInfo(nCol, fi);
+        return (LPCTSTR)fi.m_strName;
+    }
+    catch (CDaoException *e) {
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetColumnName(";
+		sMsg += L"Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
+        DoOnDaoException(e, sMsg.c_str());
+        ASSERT(FALSE);
+        e->Delete();
+    }
+    return L"";
+}
+
+dsFieldType CDaoRecordsetImpl::GetColumnType(int nCol) const
+{
+    ASSERT(m_pSet);
+    try {
+        CDaoFieldInfo fi;
+        m_pSet->GetFieldInfo(nCol, fi);
+        const short nType = fi.m_nType;
+        const dsFieldType field_type = CDaoRecordsetImpl::DaoTypeToDs(nType);
+        return field_type;
+    }
+    catch (CDaoException *e) {
+		std::wstring sMsg = L"CDaoRecordsetImpl::GetColumnName(";
+		sMsg += L"Table='";
+		sMsg += m_sCurTable;
+		sMsg += L"'";
+        DoOnDaoException(e, sMsg.c_str());
+        ASSERT(FALSE);
+        e->Delete();
+    }
+
+    return dsFieldType_Undefined;
+}
+
+dsFieldType CDaoRecordsetImpl::DaoTypeToDs(const short nType)
+{
+    switch (nType) 
+    {
+    case dbBoolean:
+        return dsFieldType_Integer;
+        break;
+    case dbByte:
+        return dsFieldType_Integer;
+        break;
+    case dbInteger:
+        return dsFieldType_Integer;
+        break;
+    case dbLong:
+        return dsFieldType_Integer;
+        break;
+    case dbCurrency:
+        return dsFieldType_Double;
+        break;
+    case dbSingle:
+        return dsFieldType_Double; // Single-precision floating-point data
+        break;
+    case dbDouble:
+        return dsFieldType_Double;
+        break;
+    case dbDate:
+        return dsFieldType_DateTime;
+        break;
+    case dbText:
+        return dsFieldType_Text;
+        break;
+    case dbLongBinary:
+        return dsFieldType_Blob;
+        break;
+    case dbMemo:
+        return dsFieldType_Text;
+        break;
+    case dbGUID:
+        return dsFieldType_Text;
+        break;
+    }
+
+    ASSERT(FALSE);
+    return dsFieldType_Undefined;
+};

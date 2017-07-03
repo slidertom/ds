@@ -24,17 +24,92 @@ namespace sqlite_util
 
     int sqlite_bind_statements(CFieldDataMap &data_map, sqlite3_stmt *pStmt)
     {
-        auto end_it = data_map.end();
-        auto beg_it = data_map.begin();
-
         int nIndex = 1;
-        for (auto it = beg_it; it != end_it; ++it) {
-            if ( it->second->Bind(pStmt, nIndex) != SQLITE_OK ) {
+        for (auto &elem : data_map) {
+            if ( elem.second->Bind(pStmt, nIndex) != SQLITE_OK ) {
                 ASSERT(FALSE);
             }
             ++nIndex;
         }
         return nIndex;
+    }
+
+    std::string save_data_to_update_values_string(sqlite_util::CFieldDataMap *pSaveData)
+    {
+        ASSERT(pSaveData);
+
+        std::string sValues;
+        for (auto &elem : *pSaveData) {
+            if ( sValues.empty() ) {
+                sValues += elem.first;
+                sValues += "=?";
+            }
+            else {
+                sValues += ",";
+                sValues += elem.first;
+                sValues += "=?";
+            }
+        }
+        return sValues;
+    }
+
+    std::string save_data_to_insert_columns_string(sqlite_util::CFieldDataMap *pSaveData)
+    {
+        ASSERT(pSaveData);
+
+        std::string sValues;
+        auto end_it = pSaveData->end();
+        auto beg_it = pSaveData->begin();
+        for (auto it = beg_it; it != end_it; ++it) {
+            if ( sValues.empty() ) {
+                sValues += it->first;
+            }
+            else {
+                sValues += ",";
+                sValues += it->first;
+            }
+        }
+        return sValues;
+    }
+
+    std::string save_data_to_insert_values_string(sqlite_util::CFieldDataMap *pSaveData)
+    {
+        ASSERT(pSaveData);
+
+        std::string sValues;
+        auto end_it = pSaveData->end();
+        auto beg_it = pSaveData->begin();
+        for (auto it = beg_it; it != end_it; ++it) {
+            if ( sValues.empty() ) {
+                sValues += "?";
+            }
+            else {
+                sValues += ",";
+                sValues += "?";
+            }
+        }
+        return sValues;
+    }
+
+    std::string save_data_to_error_values_string(sqlite_util::CFieldDataMap *pSaveData)
+    {
+        ASSERT(pSaveData);
+
+        std::string sValues;
+        for (auto &elem : *pSaveData) {
+            if ( sValues.empty() ) {
+                sValues += elem.first;
+                sValues += "=";
+                sValues += elem.second->GetValueAsString();
+            }
+            else {
+                sValues += ",";
+                sValues += elem.first;
+                sValues += "=";
+                sValues += elem.second->GetValueAsString();
+            }
+        }
+        return sValues;
     }
 
     CFieldDataBinary::CFieldDataBinary(unsigned char *pData, unsigned long nSize) 
@@ -75,13 +150,13 @@ namespace sqlite_util
         return sqlite3_bind_null(pStmt, nIndex);
     }
 
-    std::string CFieldDataLong::GetValueAsString() {
+    std::string CFieldDataLong::GetValueAsString() const {
         return std::to_string(m_nValue);
     }
-    std::string CFieldDataDouble::GetValueAsString() {
+    std::string CFieldDataDouble::GetValueAsString() const {
         return ds_str_conv::double_to_string(m_dValue);
     }
-    std::string CFieldDataDateTime::GetValueAsString() {
+    std::string CFieldDataDateTime::GetValueAsString() const {
         return std::to_string(m_time);
     }
 };

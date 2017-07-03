@@ -18,10 +18,19 @@ namespace dao_extensions
 	{
 		static void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *pszTableNameSrc, const wchar_t *pszTableNameDst, const wchar_t *pszColumnName, CDaoErrorHandler *pErrorHandler)
 		{
-            CString strFormat;
-			strFormat.Format(_T("INSERT INTO %s IN '%s' SELECT %s FROM %s;"), pszTableNameDst, pDbDst->GetName(), pszColumnName, pszTableNameSrc);
+            //std::wstring strFormat = ::FormatStr(_T("INSERT INTO %s IN '%s' SELECT %s FROM %s;"), pszTableNameDst, pDbDst->GetName(), pszColumnName, pszTableNameSrc);
+			std::wstring strFormat = L"INSERT INTO ";
+			strFormat += pszTableNameDst;
+			strFormat += L" IN '";
+			strFormat += pDbDst->GetName();
+			strFormat += L"' SELECT ";
+			strFormat += pszColumnName;
+			strFormat += L" FROM ";
+			strFormat += pszTableNameSrc;
+			strFormat += L";";
+
             try {
-			    pDbSrc->Execute(strFormat);
+			    pDbSrc->Execute(strFormat.c_str());
             }
             catch (CDaoException *e) {
                 ASSERT(FALSE);
@@ -32,7 +41,7 @@ namespace dao_extensions
                              sMsg += pszTableNameDst;
                              sMsg += L".";
                 pErrorHandler->OnError(sMsg.c_str(), L"CDaoDatabaseImpl::CopyTableData");
-                pErrorHandler->OnError(strFormat, L"CDaoDatabaseImpl::CopyTableData");
+                pErrorHandler->OnError(strFormat.c_str(), L"CDaoDatabaseImpl::CopyTableData");
 		        e->Delete();
             }
 		}
@@ -119,7 +128,7 @@ namespace dao_extensions
                     strColumns += _T(",");
                 }
 
-                strColumns += CString(sTableNameSrc) + _T(".[") + str + _T("]");
+                strColumns += std::wstring(sTableNameSrc) + _T(".[") + std::wstring(str) + _T("]");
             }
 
             internal::CopyTableData(pDbSrc, pDbDst, sTableNameSrc, sTableNameDst, strColumns.c_str(), pErrorHandler);

@@ -14,9 +14,7 @@ static char THIS_FILE[] = __FILE__;
 // Data Source=SQL-SERVER;Initial Catalog=catalog_name;Integrated Security=False;User ID=sa;Password=passsword
 bool CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(const wchar_t *sPath)
 {
-	if (_tcsstr(sPath, _T("Data Source")) ||
-	    _tcsstr(sPath, _T("Server")))
-	{
+	if (_tcsstr(sPath, L"Data Source=")) {
 		return true;
 	}
 

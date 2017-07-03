@@ -44,15 +44,15 @@ public:
 	bool OpenView(const wchar_t *sViewName); // returns true if open succeeds
 
 	bool SeekIndex(const wchar_t *sIndex, const wchar_t *sValue);          
-	bool SeekIndex(const wchar_t *sIndex, long nValue);             
+	bool SeekIndex(const wchar_t *sIndex, int nValue);             
 
 	std::wstring GetFieldString(const wchar_t *sFieldName) const;     
     void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue); 
     std::string GetFieldStringUTF8(const char *sFieldName) const;     
     void SetFieldStringUTF8(const char *sFieldName, const char *sValue); 
 
-	long GetFieldLong(const wchar_t *sFieldName) const;             
-    void SetFieldLong(const wchar_t *sFieldName, long nValue);      
+	int  GetFieldLong(const wchar_t *sFieldName) const;             
+    void SetFieldLong(const wchar_t *sFieldName, int nValue);      
 
 	double GetFieldDouble(const wchar_t *sFieldName) const;         
     void SetFieldDouble(const wchar_t *sFieldName, double dValue);  
@@ -77,9 +77,9 @@ public:
 	// Deletes all records with given value 
 	// Returns true if any record was deleted
 	bool DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue); // returns false in case of error 
-	bool DeleteAllByIndex(const wchar_t *sField, long nValue);           // returns false in case of error 
+	bool DeleteAllByIndex(const wchar_t *sField, int nValue);           // returns false in case of error 
     bool DeleteByIndex(const wchar_t *sField, const wchar_t *sValue);
-    bool DeleteByIndex(const wchar_t *sField, long nValue);
+    bool DeleteByIndex(const wchar_t *sField, int nValue);
 
     void Flush();  // Deletes all records in table
 	bool Delete(); // returns false in case of error 
@@ -88,7 +88,10 @@ public:
 	void Edit();
 	bool Update(); 
 
-	long GetRecordCount(); 
+	int GetRecordCount(); 
+    int GetColumnCount();
+    std::wstring GetColumnName(int nCol);
+    dsFieldType GetColumnType(int nCol);
 
 	const wchar_t *GetTableName() const;
 
@@ -126,7 +129,7 @@ private:
 	void Set##name##UTF8(const char *sValue) { SetFieldStringUTF8(realname_utf8, sValue); } \
 	
 #define FIELD_LONG(name, realname) \
-	long Get##name() const      { return GetFieldLong(realname);  } \
+	int  Get##name() const      { return GetFieldLong(realname);  } \
 	void Set##name(long nValue) { SetFieldLong(realname, nValue); } \
 	FIELD_INDICATORS(name, realname)
 
@@ -166,15 +169,15 @@ private:
     FIELD_TEXT(name, realname)
 	
 #define KEY_LONG(name, realname) \
-	bool SeekBy##name(long nValue)      { return SeekIndex(realname, nValue); } \
-	bool DeleteAllBy##name(long nValue) { return DeleteAllByIndex(realname, nValue); } \
-	bool DeleteBy##name(long nValue)    { return DeleteByIndex(realname, nValue); } \
+	bool SeekBy##name(int nValue)      { return SeekIndex(realname, nValue); } \
+	bool DeleteAllBy##name(int nValue) { return DeleteAllByIndex(realname, nValue); } \
+	bool DeleteBy##name(int nValue)    { return DeleteByIndex(realname, nValue); } \
     FIELD_LONG(name, realname)
 
 #define KEY_BOOL(name, realname) \
-	bool SeekBy##name(long nValue)      { return SeekIndex(realname, nValue); } \
-	bool DeleteAllBy##name(long nValue) { return DeleteAllByIndex(realname, nValue); } \
-	bool DeleteBy##name(long nValue)    { return DeleteByIndex(realname, nValue); } \
+	bool SeekBy##name(int nValue)      { return SeekIndex(realname, nValue); } \
+	bool DeleteAllBy##name(int nValue) { return DeleteAllByIndex(realname, nValue); } \
+	bool DeleteBy##name(int nValue)    { return DeleteByIndex(realname, nValue); } \
     FIELD_BOOL(name, realname)
 
 #endif

@@ -231,6 +231,9 @@ void CSqLiteRecordsetImpl::CloseStatement()
 
 bool CSqLiteRecordsetImpl::Open(const wchar_t *sTableName)
 {
+    if ( m_bSQLOpened ) {
+        return true;
+    }
 	m_sTable = ds_str_conv::ConvertToUTF8(sTableName);
     return true;
 }
@@ -248,9 +251,9 @@ bool CSqLiteRecordsetImpl::OpenSQLUTF8(const char *sSQL)
 	CloseStatement();
 
     if ( OpenImpl(sSQL) ) {
+        m_sTable = sSQL;
         return true;
     }
-
     return false;
 }
 
@@ -547,56 +550,12 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
     m_nEditRowId = ::sqlite3_last_insert_rowid(pDB);
 }
 
-static inline std::string save_data_to_update_values_string(sqlite_util::CFieldDataMap *pSaveData)
-{
-    ASSERT(pSaveData);
-
-    std::string sValues;
-    auto end_it = pSaveData->end();
-    auto beg_it = pSaveData->begin();
-    for (auto it = beg_it; it != end_it; ++it) {
-        if ( sValues.empty() ) {
-            sValues += it->first;
-            sValues += "=?";
-        }
-        else {
-            sValues += ",";
-            sValues += it->first;
-            sValues += "=?";
-        }
-    }
-    return sValues;
-}
-
-static inline std::string save_data_to_error_values_string(sqlite_util::CFieldDataMap *pSaveData)
-{
-    ASSERT(pSaveData);
-
-    std::string sValues;
-    auto end_it = pSaveData->end();
-    auto beg_it = pSaveData->begin();
-    for (auto it = beg_it; it != end_it; ++it) {
-        if ( sValues.empty() ) {
-            sValues += it->first;
-            sValues += "=";
-            sValues += it->second->GetValueAsString();
-        }
-        else {
-            sValues += ",";
-            sValues += it->first;
-            sValues += "=";
-            sValues += it->second->GetValueAsString();
-        }
-    }
-    return sValues;
-}
-
 bool CSqLiteRecordsetImpl::DoUpdate()
 {
     //sqlite3_finalize(m_update_stmt);
     //m_update_stmt = nullptr;
 
-    const std::string sValues = save_data_to_update_values_string(m_pSaveData);
+    const std::string sValues = sqlite_util::save_data_to_update_values_string(m_pSaveData);
     if ( m_sUpdateValues != sValues ) 
     {
         m_sUpdateValues = sValues;
@@ -639,7 +598,7 @@ bool CSqLiteRecordsetImpl::DoUpdate()
    
     if ( rc != SQLITE_DONE ) 
     {
-        const std::string sErrorValues = save_data_to_error_values_string(m_pSaveData);
+        const std::string sErrorValues = sqlite_util::save_data_to_error_values_string(m_pSaveData);
         std::string sError  = "SQL statement: UPDATE ";
                     sError += m_sTable.c_str();
                     sError += " SET ";
@@ -668,52 +627,14 @@ bool CSqLiteRecordsetImpl::Update()
 	return bRetVal;
 }
 
-static inline std::string save_data_to_insert_columns_string(sqlite_util::CFieldDataMap *pSaveData)
-{
-    ASSERT(pSaveData);
-
-    std::string sValues;
-    auto end_it = pSaveData->end();
-    auto beg_it = pSaveData->begin();
-    for (auto it = beg_it; it != end_it; ++it) {
-        if ( sValues.empty() ) {
-            sValues += it->first;
-        }
-        else {
-            sValues += ",";
-            sValues += it->first;
-        }
-    }
-    return sValues;
-}
-
-static inline std::string save_data_to_insert_values_string(sqlite_util::CFieldDataMap *pSaveData)
-{
-    ASSERT(pSaveData);
-
-    std::string sValues;
-    auto end_it = pSaveData->end();
-    auto beg_it = pSaveData->begin();
-    for (auto it = beg_it; it != end_it; ++it) {
-        if ( sValues.empty() ) {
-            sValues += "?";
-        }
-        else {
-            sValues += ",";
-            sValues += "?";
-        }
-    }
-    return sValues;
-}
-
 void CSqLiteRecordsetImpl::CommitInsert()
 {
     ASSERT(m_pSaveData);
     // TODO: save/update/insert/add_new operations should be extracted from CSqLiteRecordsetImpl
     // CSqLiteRecordsetImpl should delegate only calls for the extracted operations
 
-    const std::string sColumns = save_data_to_insert_columns_string(m_pSaveData);
-    const std::string sValues  = save_data_to_insert_values_string(m_pSaveData);
+    const std::string sColumns = sqlite_util::save_data_to_insert_columns_string(m_pSaveData);
+    const std::string sValues  = sqlite_util::save_data_to_insert_values_string(m_pSaveData);
 
     std::string sSql  = "INSERT INTO ";
                 sSql += m_sTable.c_str();
@@ -756,10 +677,20 @@ void CSqLiteRecordsetImpl::OnErrorCode(int rc, const char *sFunctionName)
     m_pErrorHandler->OnErrorCode(rc, pDB, sFunctionName);
 }
 
-long CSqLiteRecordsetImpl::GetRecordCount()
+int CSqLiteRecordsetImpl::GetRecordCount() const
 {
-    std::string sSQL = "SELECT COUNT(*) FROM ";
-                sSQL += m_sTable.c_str();
+    std::string sSQL;
+    if ( m_bSQLOpened )
+    {
+        sSQL  = "SELECT COUNT(*) FROM (";
+        sSQL += m_sTable.c_str();
+        sSQL += ")";
+    }
+    else
+    {
+        sSQL  = "SELECT COUNT(*) FROM ";
+        sSQL += m_sTable.c_str();
+    }
 
     CSqLiteRecordsetImpl loader(m_pDB, m_pErrorHandler);
     if ( !loader.OpenSQLUTF8(sSQL.c_str()) ) {
@@ -818,7 +749,7 @@ bool CSqLiteRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sV
     return false;
 }
 
-bool CSqLiteRecordsetImpl::SeekByLong(const wchar_t *sIndex, long nValue)
+bool CSqLiteRecordsetImpl::SeekByLong(const wchar_t *sIndex, int nValue)
 {
     const std::string sIndexUTF8 = ds_str_conv::ConvertToUTF8(sIndex);
     return SeekByLongUTF8(sIndexUTF8.c_str(), nValue);
@@ -906,7 +837,7 @@ void CSqLiteRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar
     SetFieldStringUTF8(ds_str_conv::ConvertToUTF8(sFieldName).c_str(), ds_str_conv::ConvertToUTF8(sValue).c_str());
 }
 
-long CSqLiteRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
+int CSqLiteRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 {
     ASSERT(m_stmt);
     const int nColumnIndex = FindColumnIndex(sFieldName);
@@ -919,7 +850,7 @@ long CSqLiteRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 	return sqlite3_column_int(m_stmt, nColumnIndex);
 }
 
-void CSqLiteRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, long lValue)
+void CSqLiteRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, int lValue)
 {
     ASSERT(m_pSaveData);
     const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
@@ -1125,7 +1056,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByStringValue(const wchar_t *sField, const w
     return false;
 }
 
-bool CSqLiteRecordsetImpl::DeleteAllByLongValue(const wchar_t *sField, long nValue)
+bool CSqLiteRecordsetImpl::DeleteAllByLongValue(const wchar_t *sField, int nValue)
 {
     ASSERT(!m_sTable.empty());
 
@@ -1155,7 +1086,7 @@ void CSqLiteRecordsetImpl::Flush()
     m_pDB->ExecuteUTF8(sSQL.c_str());
 }
 
-bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, long nValue)
+bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, int nValue)
 {   
     const std::string sFieldUTF8 = ds_str_conv::ConvertToUTF8(sField);
     const std::string sValueUTF8 = std::to_string(nValue);
@@ -1209,4 +1140,47 @@ bool CSqLiteRecordsetImpl::DeleteByStringValue(const wchar_t *sField, const wcha
         return false;
     }
     return true;
+}
+
+int CSqLiteRecordsetImpl::GetColumnCount() const
+{
+    ASSERT(m_stmt);
+    return sqlite3_column_count(m_stmt);
+}
+
+std::wstring CSqLiteRecordsetImpl::GetColumnName(int nCol) const
+{
+    ASSERT(m_stmt);
+    const std::string sColName = sqlite3_column_name(m_stmt, nCol);
+    // we do out own conversion: (sqlite3_column_name16 unused)
+    return ds_str_conv::ConvertFromUTF8(sColName.c_str());
+}
+
+dsFieldType CSqLiteRecordsetImpl::GetColumnType(int nCol) const
+{
+    // https://sqlite.org/c3ref/column_blob.html
+    // The returned value is one of SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL. 
+    // The value returned by sqlite3_column_type() is only meaningful if no type conversions have occurred as described below. 
+    // After a type conversion, the value returned by sqlite3_column_type() is undefined. 
+    // Future versions of SQLite may change the behavior of sqlite3_column_type() following a type conversion.
+
+    ASSERT(m_stmt);
+    int nType = sqlite3_column_type(m_stmt, nCol);
+    switch (nType)
+    {
+    case SQLITE_INTEGER:
+        return dsFieldType_Integer;
+        break;
+    case SQLITE_FLOAT:
+        return dsFieldType_Double;
+        break;
+    case SQLITE_TEXT:
+        return dsFieldType_Text;
+        break;
+    case SQLITE_BLOB:
+        return dsFieldType_Blob;
+        break;
+    };
+
+    return dsFieldType_Undefined;
 }

@@ -60,11 +60,12 @@ namespace sqlite_util
                     {
                     case dsFieldType_Text:
                         {
-                            const std::wstring sValue = src_table.GetFieldString(sFieldName);
-                            dst_table.SetFieldString(sFieldName, sValue.c_str());
+                            const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
+                            const std::string sValue = src_table.GetFieldStringUTF8(sFieldNameUTF8.c_str());
+                            dst_table.SetFieldStringUTF8(sFieldNameUTF8.c_str(), sValue.c_str());
                         }
                         break;
-                    case dsFieldType_Long:
+                    case dsFieldType_Integer:
                         {
                             const int nValue = src_table.GetFieldLong(sFieldName);
                             dst_table.SetFieldLong(sFieldName, nValue);
@@ -82,7 +83,7 @@ namespace sqlite_util
                             dst_table.SetFieldDateTime(sFieldName, nTime);
                         }
                         break;
-                    case dsFieldType_Binary:
+                    case dsFieldType_Blob:
                         {
                             unsigned char *pData = nullptr;
                             unsigned long nSize = 0;

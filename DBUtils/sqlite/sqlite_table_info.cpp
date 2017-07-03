@@ -15,111 +15,111 @@ static char THIS_FILE[] = __FILE__;
 
 namespace sqlite_util
 {
-    eFieldType CFieldInfo::GetFieldType() const
+    dsFieldType CFieldInfo::GetFieldType() const
     {
         std::string sType = m_sType;
         std::transform(sType.begin(), sType.end(), sType.begin(), ::toupper); // do use ANSI based -> check out if statements
 
         if ( sType == "INTEGER" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
 
         if ( sType == "TEXT" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
 
         if ( sType == "REAL" ) {
-            return eFieldType_Double;
+            return dsFieldType_Double;
         }
 
         if ( sType == "BLOB" ) {
-            return eFieldType_Binary;
+            return dsFieldType_Blob;
         }
 
         if ( sType == "DATE" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "DATETIME" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         // If the declared type contains the string "INT" then it is assigned INTEGER affinity.
         if ( sType == "INT" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "INTEGER" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "TINYINT" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "SMALLINT" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "MEDIUMINT" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "BIGINT" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "UNSIGNED BIG INT" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "INT2" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         if ( sType == "INT8" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
 
         // If the declared type of the column contains any of the strings "CHAR", "CLOB", or "TEXT" 
         // then that column has TEXT affinity. Notice that the type VARCHAR contains the string "CHAR" and is thus assigned TEXT affinity.
         if ( sType == "CHARACTER" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         if ( sType == "VARCHAR" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         if ( sType == "VARYING CHARACTER" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         if ( sType == "NCHAR" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         if ( sType == "NATIVE CHARACTER" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         if ( sType == "NVARCHAR" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         if ( sType == "CHAR" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         if ( sType == "CLOB" ) {
-            return eFieldType_Text;
+            return dsFieldType_Text;
         }
         //SQLite does not have a separate Boolean storage class. Instead, Boolean values are stored as integers 0 (false) and 1 (true).
         if ( sType == "BOOLEAN" ) {
-            return eFieldType_Long;
+            return dsFieldType_Integer;
         }
         // If the declared type for a column contains any of the strings "REAL", "FLOA", or "DOUB" then the column has REAL affinity
         if ( sType == "NUMERIC" ) {
-            return eFieldType_Double;
+            return dsFieldType_Double;
         }
         if ( sType == "DECIMAL" ) {
-            return eFieldType_Double;
+            return dsFieldType_Double;
         }
         if ( sType == "FLOAT" ) {
-            return eFieldType_Double;
+            return dsFieldType_Double;
         }
         if ( sType == "DOUBLE" ) {
-            return eFieldType_Double;
+            return dsFieldType_Double;
         }
         if ( sType == "DOUBLE PRECISION" ) {
-            return eFieldType_Double;
+            return dsFieldType_Double;
         }
 
         ASSERT(FALSE);
-        return eFieldType_Undefined;
+        return dsFieldType_Undefined;
     }
 
     bool sqlite_get_table_fields_info(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, CFieldInfoMap &map)
@@ -168,10 +168,10 @@ namespace sqlite_util
         {
             CFieldInfo field_info;
             const std::string sColumn = loader.GetFieldStringUTF8("name");
-            field_info.m_sType    = loader.GetFieldStringUTF8("type");
-            field_info.m_bNotNull = loader.GetFieldLong(_T("notnull")) == 1;
-            field_info.m_sDefault = loader.GetFieldStringUTF8("dflt_value");
-            field_info.m_bPrimary = loader.GetFieldLong(_T("pk")) == 1;
+            field_info.m_sType        = loader.GetFieldStringUTF8("type");
+            field_info.m_bNotNull     = loader.GetFieldLong(_T("notnull")) == 1;
+            field_info.m_sDefault     = loader.GetFieldStringUTF8("dflt_value");
+            field_info.m_bPrimary     = loader.GetFieldLong(_T("pk")) == 1;
             if ( field_info.m_bPrimary ) {
                 field_info.m_bAutoIncrement = bAutoIncrement;
             } else {

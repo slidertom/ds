@@ -18,10 +18,10 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) = 0;
-        virtual std::string GetValueAsString() = 0;
+        virtual std::string GetValueAsString() const = 0;
     };
 
-    class CFieldDataMap : public std::unordered_map<std::string, CFieldData *> 
+    class CFieldDataMap : public std::unordered_map<std::string, CFieldData *>  // vector has to be used?
     {
     public:
         ~CFieldDataMap() {
@@ -32,8 +32,13 @@ namespace sqlite_util
     public:
         void clear();
     };
-    int sqlite_bind_statements(CFieldDataMap &data_map, sqlite3_stmt *pStmt);
 
+    int sqlite_bind_statements(CFieldDataMap &data_map, sqlite3_stmt *pStmt);
+    std::string save_data_to_update_values_string(sqlite_util::CFieldDataMap *pSaveData);
+    std::string save_data_to_insert_values_string(sqlite_util::CFieldDataMap *pSaveData);
+    std::string save_data_to_insert_columns_string(sqlite_util::CFieldDataMap *pSaveData);
+    std::string save_data_to_error_values_string(sqlite_util::CFieldDataMap *pSaveData);
+    
     class CFieldDataBinary : public CFieldData 
     {
     // Construction/Destruction
@@ -44,7 +49,7 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
-        virtual std::string GetValueAsString() override { return "?"; } // TODO: do update: Base64 should be returned?
+        virtual std::string GetValueAsString() const override { return "?"; } // TODO: do update: Base64 should be returned?
 
     // Attributes
     private:
@@ -62,7 +67,7 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
-        virtual std::string GetValueAsString() override { return m_sText; }
+        virtual std::string GetValueAsString() const override { return m_sText; }
 
     // Attributes
     private:
@@ -79,7 +84,7 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
-        virtual std::string GetValueAsString() override;
+        virtual std::string GetValueAsString() const override;
 
     // Attributes
     private:
@@ -96,7 +101,7 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
-        virtual std::string GetValueAsString() override;
+        virtual std::string GetValueAsString() const override;
 
     // Attributes
     private:
@@ -113,7 +118,7 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
-        virtual std::string GetValueAsString() override;
+        virtual std::string GetValueAsString() const override;
 
     // Attributes
     private:
@@ -130,7 +135,7 @@ namespace sqlite_util
     // Overrides
     public:
         virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
-        virtual std::string GetValueAsString() override { return "null"; }
+        virtual std::string GetValueAsString() const override { return "null"; }
     };
 };
 
