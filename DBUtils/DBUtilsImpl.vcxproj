@@ -222,7 +222,6 @@
     <ClInclude Include="AbsDatabase.h" />
     <ClInclude Include="AbsRecordset.h" />
     <ClInclude Include="DBUtilsImpl.h" />
-    <ClInclude Include="dsConfig.h" />
     <ClInclude Include="dsCopyTableData.h" />
     <ClInclude Include="dsStrConv.h" />
     <ClInclude Include="dsTypes.h" />

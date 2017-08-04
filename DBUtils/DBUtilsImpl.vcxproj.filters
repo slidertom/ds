@@ -126,7 +126,6 @@
     <ClInclude Include="dsDatabaseListener.h" />
     <ClInclude Include="dsDatabase.h" />
     <ClInclude Include="dsTable.h" />
-    <ClInclude Include="dsConfig.h" />
     <ClInclude Include="sqlite\sqlite_include.h">
       <Filter>SqLite</Filter>
     </ClInclude>

@@ -24,17 +24,17 @@ dsTable::~dsTable()
 	delete m_pSet;
 }
 
-bool dsTable::Open()
+bool dsTable::Open() noexcept
 {
 	return m_pSet->Open(m_sTableName.c_str());
 }
 
-void dsTable::OpenSQL(const wchar_t *sSQL)
+void dsTable::OpenSQL(const wchar_t *sSQL) noexcept
 {
 	m_pSet->OpenSQL(sSQL);
 }
 
-bool dsTable::OpenView(const wchar_t *sViewName)
+bool dsTable::OpenView(const wchar_t *sViewName) noexcept
 {
     m_sTableName = sViewName; // view and table name indicated as same
                               // related with the ::Open realization
@@ -42,7 +42,7 @@ bool dsTable::OpenView(const wchar_t *sViewName)
 	return m_pSet->OpenView(sViewName);
 }
 
-void dsTable::Flush()
+void dsTable::Flush() noexcept
 {
     if ( !Open() ) {
 		return;
@@ -51,174 +51,174 @@ void dsTable::Flush()
     m_pSet->Flush();
 }
 
-void dsTable::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)
+void dsTable::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize) noexcept
 {
 	m_pSet->SetFieldBinary(sFieldName, pData, nSize);
 }
 
-void dsTable::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) const
+void dsTable::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize) const noexcept
 {
 	m_pSet->GetFieldBinary(sFieldName, pData, nSize);
 }
 
-void dsTable::FreeBinary(unsigned char *pData)
+void dsTable::FreeBinary(unsigned char *pData) noexcept
 {
 	m_pSet->FreeBinary(pData);
 }
 
-bool dsTable::IsEOF() const	
+bool dsTable::IsEOF() const	noexcept 
 { 
 	return m_pSet->IsEOF();
 }
 
-void dsTable::MoveNext()  
+void dsTable::MoveNext() noexcept  
 { 
 	m_pSet->MoveNext();                        
 }
 
-bool dsTable::MoveFirst() 
+bool dsTable::MoveFirst() noexcept 
 { 
 	VERIFY(Open());
 	return m_pSet->MoveFirst(); 
 }
 
-COLORREF dsTable::GetFieldRGB(const wchar_t *sFieldName) const
+COLORREF dsTable::GetFieldRGB(const wchar_t *sFieldName) const noexcept
 {
 	const std::wstring sRGB = GetFieldString(sFieldName);
 	COLORREF color = _ttol(sRGB.c_str());
 	return color;
 }
 
-void dsTable::SetFieldRGB(const wchar_t *sFieldName, COLORREF color)
+void dsTable::SetFieldRGB(const wchar_t *sFieldName, COLORREF color) noexcept
 {
 	const std::wstring sRGB = std::to_wstring(color);
 	m_pSet->SetFieldString(sFieldName, sRGB.c_str());
 }
 
-bool dsTable::SeekIndex(const wchar_t *sIndex, const wchar_t *sValue)
+bool dsTable::SeekIndex(const wchar_t *sIndex, const wchar_t *sValue) noexcept
 {
 	VERIFY(Open());
 	return m_pSet->SeekByString(sIndex, sValue);
 }
 
-bool dsTable::SeekIndex(const wchar_t *sIndex, int nValue)
+bool dsTable::SeekIndex(const wchar_t *sIndex, int nValue) noexcept
 {
 	VERIFY(Open());
 	return m_pSet->SeekByLong(sIndex, nValue);
 }
 
-bool dsTable::IsFieldValueNull(const wchar_t *sFieldName) const
+bool dsTable::IsFieldValueNull(const wchar_t *sFieldName) const noexcept
 {
 	return m_pSet->IsFieldValueNull(sFieldName);
 }
 
-std::wstring dsTable::GetFieldString(const wchar_t *sFieldName) const 
+std::wstring dsTable::GetFieldString(const wchar_t *sFieldName) const noexcept
 {
 	return m_pSet->GetFieldString(sFieldName);
 }
 
-void dsTable::SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) 
+void dsTable::SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) noexcept 
 {
 	m_pSet->SetFieldString(sFieldName, sValue);
 }
 
-int dsTable::GetFieldLong(const wchar_t *sFieldName) const 
+int dsTable::GetFieldLong(const wchar_t *sFieldName) const noexcept
 {
 	return m_pSet->GetFieldLong(sFieldName);
 }
 
-void dsTable::SetFieldLong(const wchar_t *sFieldName, int nValue) 
+void dsTable::SetFieldLong(const wchar_t *sFieldName, int nValue) noexcept
 {
 	m_pSet->SetFieldLong(sFieldName, nValue);
 }
 
-double dsTable::GetFieldDouble(const wchar_t *sFieldName) const 
+double dsTable::GetFieldDouble(const wchar_t *sFieldName) const noexcept
 {
 	return m_pSet->GetFieldDouble(sFieldName);
 }
 
-void dsTable::SetFieldDouble(const wchar_t *sFieldName, double dValue)
+void dsTable::SetFieldDouble(const wchar_t *sFieldName, double dValue) noexcept
 {
 	m_pSet->SetFieldDouble(sFieldName, dValue);
 }
 
-bool dsTable::GetFieldBool(const wchar_t *sFieldName) const 
+bool dsTable::GetFieldBool(const wchar_t *sFieldName) const noexcept
 {
 	return m_pSet->GetFieldLong(sFieldName) != 0;
 }
 
-void dsTable::SetFieldBool(const wchar_t *sFieldName, bool bValue) 
+void dsTable::SetFieldBool(const wchar_t *sFieldName, bool bValue) noexcept
 {
 	m_pSet->SetFieldLong(sFieldName, bValue ? 1 : 0);
 }
 
-time_t dsTable::GetFieldDateTime(const wchar_t *sFieldName) const 
+time_t dsTable::GetFieldDateTime(const wchar_t *sFieldName) const noexcept
 {
 	return m_pSet->GetFieldDateTime(sFieldName);
 }
 
-void dsTable::SetFieldDateTime(const wchar_t *sFieldName, time_t nValue)
+void dsTable::SetFieldDateTime(const wchar_t *sFieldName, time_t nValue) noexcept
 {
 	m_pSet->SetFieldDateTime(sFieldName, nValue);
 }
 
-void dsTable::SetFieldNull(const wchar_t *sFieldName) 
+void dsTable::SetFieldNull(const wchar_t *sFieldName) noexcept
 {
 	m_pSet->SetFieldValueNull(sFieldName);
 }
 
-bool dsTable::Delete()	        
+bool dsTable::Delete() noexcept	        
 { 
     return m_pSet->Delete();         
 }
 
-void dsTable::AddNew()
+void dsTable::AddNew() noexcept
 { 
 	VERIFY(Open());
 	m_pSet->AddNew();
 }
 
-void dsTable::Edit()		    
+void dsTable::Edit() noexcept		    
 { 
     m_pSet->Edit();	               
 }
 
-bool dsTable::Update()	      
+bool dsTable::Update() noexcept	       
 { 
     return m_pSet->Update();         
 }
 
-int dsTable::GetColumnCount()
+int dsTable::GetColumnCount() noexcept
 {
     VERIFY(Open());
     return m_pSet->GetColumnCount(); 
 }
 
-int dsTable::GetRecordCount()
+int dsTable::GetRecordCount() noexcept
 { 
     VERIFY(Open());
     return m_pSet->GetRecordCount(); 
 }
 
-std::wstring dsTable::GetColumnName(int nCol)
+std::wstring dsTable::GetColumnName(int nCol) noexcept
 {
     VERIFY(Open());
     return m_pSet->GetColumnName(nCol); 
 }
 
-dsFieldType dsTable::GetColumnType(int nCol)
+dsFieldType dsTable::GetColumnType(int nCol) noexcept
 {
     VERIFY(Open());
     return m_pSet->GetColumnType(nCol); 
 }
 
-bool dsTable::DoesFieldExist(const wchar_t *sFieldName)
+bool dsTable::DoesFieldExist(const wchar_t *sFieldName) noexcept
 {
     VERIFY(Open());
 	return m_pSet->DoesFieldExist(sFieldName);
 }
 
-std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const wchar_t *sPrefix, int width)
+std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const wchar_t *sPrefix, int width) noexcept
 {
 	VERIFY(Open());
 	
@@ -244,46 +244,46 @@ std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const w
     return _T("");
 }
 
-dsDatabase *dsTable::GetDatabase() const  
+dsDatabase *dsTable::GetDatabase() const noexcept
 {
     return m_pDatabase; 
 }
 
-bool dsTable::DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue)
+bool dsTable::DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue) noexcept
 {
     VERIFY(Open());
     return m_pSet->DeleteAllByStringValue(sField, sValue);
 }
 
-bool dsTable::DeleteAllByIndex(const wchar_t *sField, int nValue)
+bool dsTable::DeleteAllByIndex(const wchar_t *sField, int nValue) noexcept
 {
     VERIFY(Open());
     return m_pSet->DeleteAllByLongValue(sField, nValue);
 }
 
-bool dsTable::DeleteByIndex(const wchar_t *sField, const wchar_t *sValue)
+bool dsTable::DeleteByIndex(const wchar_t *sField, const wchar_t *sValue) noexcept
 {
     VERIFY(Open());
     return m_pSet->DeleteByStringValue(sField, sValue);
 }
 
-bool dsTable::DeleteByIndex(const wchar_t *sField, int nValue)
+bool dsTable::DeleteByIndex(const wchar_t *sField, int nValue) noexcept
 {
     VERIFY(Open());
     return m_pSet->DeleteByLongValue(sField, nValue);
 }
 
-const wchar_t *dsTable::GetTableName() const
+const wchar_t *dsTable::GetTableName() const noexcept
 {
     return m_sTableName.c_str();
 }
 
-std::string dsTable::GetFieldStringUTF8(const char *sFieldName) const
+std::string dsTable::GetFieldStringUTF8(const char *sFieldName) const noexcept
 {
     return m_pSet->GetFieldStringUTF8(sFieldName);
 }
 
-void dsTable::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
+void dsTable::SetFieldStringUTF8(const char *sFieldName, const char *sValue) noexcept
 {
     return m_pSet->SetFieldStringUTF8(sFieldName, sValue);
 }

@@ -26,7 +26,8 @@ class CAbsDatabase;
 // if any error info is required, should be created separate interface:
 // global or local function to handle error messages and/or throw app specific exceptions
 
-// CRoleCore used to connect any object to the database (e.g.: cache objects)
+// CRoleCore used to connect any object to the database (e.g.: data cache based objects as roles)
+
 class DB_UTILS_API dsDatabase : public CRoleCore
 {
 // Constuction/Destruction
@@ -36,28 +37,28 @@ public:
 	
 // Operations
 public:
-    void RegisterListener(dsDatabaseListener *pListner);
-    void UnregisterListener(dsDatabaseListener *pListner);
+    void RegisterListener(dsDatabaseListener *pListner) noexcept;
+    void UnregisterListener(dsDatabaseListener *pListner) noexcept;
 
 // Status functions
 public:
-	bool IsReadOnly() const;
-	bool IsOpen() const;
-	std::wstring GetName() const;
+	bool IsReadOnly() const noexcept;
+	bool IsOpen() const noexcept;
+	std::wstring GetName() const noexcept;
 	
 // Operators
 public:
-	dsDBType GetType();
+	dsDBType GetType() noexcept;
 	
 // Operations
 public:
-	void BeginTrans();  
-	void CommitTrans(); 
-	void RollbackTrans();    
+	void BeginTrans() noexcept;  
+	void CommitTrans() noexcept; 
+	void RollbackTrans() noexcept;    
 
-	bool Execute(const wchar_t *lpszSQL); 
+	bool Execute(const wchar_t *lpszSQL) noexcept; 
 	
-    void Close();
+    void Close() noexcept;
 
 	class dsParams
 	{
@@ -72,20 +73,22 @@ public:
 	};
 
     // sKey - Database encryption key.
-    bool OpenDB(const wchar_t *sPath, const dsParams &params = dsParams());
+    bool OpenDB(const wchar_t *sPath, const dsParams &params = dsParams()) noexcept;
 
     // Do call this function if you want to commit all the data from the memory to file
     // if possible do not use this function.
-    // possible => everything works with out this function call.
+    // possibly => everything works with out this function call.
     // This is DAO specific -> DAO fails to save data to file.
-    void CommitDatabase(); 
+    void CommitDatabase() noexcept; 
 
-    bool CompactDatabase(); // or VACUUM
-    static bool CompactDatabase(const wchar_t *sPath);
+    bool CompactDatabase() noexcept; // or VACUUM
+    static bool CompactDatabase(const wchar_t *sPath) noexcept;
+
+	static void SetLogPath(const wchar_t *sLogPath) noexcept;
 
 // Operations
 public:
-	void Refresh(); // Refresh database related cache items
+	void Refresh() noexcept; // Refresh database related cache items
 
 public:
 	enum
@@ -96,22 +99,22 @@ public:
 		
 // Database structure help functions
 public:
-	bool DoesTableExist(const wchar_t *sTable) const; 
-    bool DoesTableExist(const char *sTable) const; 
+	bool DoesTableExist(const wchar_t *sTable) const noexcept; 
+    bool DoesTableExist(const char *sTable) const noexcept; 
 
-	void DeleteRelation(const wchar_t *sRelation); 
+	void DeleteRelation(const wchar_t *sRelation) noexcept; 
 	bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
-						const wchar_t *sField, const wchar_t *sForeignField);
+						const wchar_t *sField, const wchar_t *sForeignField) noexcept;
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
-    dbErrorHandler SetErrorHandler(dbErrorHandler newHandler);
+    dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) noexcept;
 
 // Attributes
 private:
 	friend class dsTable;
     friend class dsCopyTableData;
 	CAbsDatabase *m_pDatabase;
-    std::vector<dsDatabaseListener *> m_listners;
+    std::vector<dsDatabaseListener *> m_listeners;
     dbErrorHandler m_pErrorHandler;
 };
 

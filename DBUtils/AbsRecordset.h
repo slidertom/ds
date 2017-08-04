@@ -38,8 +38,8 @@ public:
     virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) = 0;
 	virtual bool SeekByLong(const wchar_t *sIndex,   int nValue)            = 0;
 
-	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)   = 0;
-	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) = 0;
+	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize)   = 0;
+	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize) = 0;
     virtual void FreeBinary(unsigned char *pData) = 0;
 
 	virtual void SetFieldValueNull(const wchar_t *lpszName)  = 0;
@@ -51,7 +51,7 @@ public:
     virtual std::string GetFieldStringUTF8(const char *sFieldName)              = 0;
 	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) = 0;
 
-	virtual int  GetFieldLong(const wchar_t *sFieldName)             = 0;
+	virtual int GetFieldLong(const wchar_t *sFieldName)              = 0;
 	virtual void SetFieldLong(const wchar_t *sFieldName, int lValue) = 0;
 
 	virtual double GetFieldDouble(const wchar_t *sFieldName)              = 0;
@@ -134,6 +134,9 @@ public:
 
         return true;
     }
+
+    virtual int64_t GetFieldInt64(const wchar_t *sFieldName)              { return GetFieldLong(sFieldName);       }
+    virtual void SetFieldInt64(const wchar_t *sFieldName, int64_t lValue) { SetFieldLong(sFieldName, (int)lValue); }
 };
 
 #endif

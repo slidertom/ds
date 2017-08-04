@@ -1,7 +1,9 @@
 #include "StdAfx.h"
 #include "dsDatabase.h"
 
-#include "Dao/DaoDatabaseImpl.h"
+#ifndef __x86_64__ 
+ #include "Dao/DaoDatabaseImpl.h"
+#endif
 #include "AdoDotNet/AdoDotNetDatabaseImpl.h"
 #include "SqLite/SqLiteDatabaseImpl.h"
 #include "LogImpl/LogImpl.h"
@@ -28,34 +30,33 @@ dsDatabase::~dsDatabase()
 	delete m_pDatabase;
 }
 
-void dsDatabase::RegisterListener(dsDatabaseListener *pListner) 
+void dsDatabase::RegisterListener(dsDatabaseListener *pListner) noexcept
 {
-    ASSERT(std::find(m_listners.begin(), m_listners.end(), pListner) == m_listners.end());
-    m_listners.push_back(pListner);
+    ASSERT(std::find(m_listeners.begin(), m_listeners.end(), pListner) == m_listeners.end());
+    m_listeners.push_back(pListner);
 }
 
-void dsDatabase::UnregisterListener(dsDatabaseListener *pListner) 
+void dsDatabase::UnregisterListener(dsDatabaseListener *pListner) noexcept
 {
-    auto found = std::find(m_listners.begin(), m_listners.end(), pListner);
-    ASSERT(m_listners.end() != found);
-    m_listners.erase(found);
+    auto found = std::find(m_listeners.begin(), m_listeners.end(), pListner);
+    ASSERT(m_listeners.end() != found);
+    m_listeners.erase(found);
 }
 
-void dsDatabase::Refresh()
+void dsDatabase::Refresh() noexcept
 {
-	auto end_it = m_listners.end();
-	for (auto it = m_listners.begin(); it != end_it; ++it) {
-		(*it)->OnDatabaseClose();
+	for (auto *pListener : m_listeners) {
+		pListener->OnDatabaseClose();
 	}
 }
 
-bool dsDatabase::IsReadOnly() const
+bool dsDatabase::IsReadOnly() const noexcept
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->IsReadOnly();
 }
 
-bool dsDatabase::IsOpen() const
+bool dsDatabase::IsOpen() const noexcept
 {
 	if ( !m_pDatabase ) {
 		return false;
@@ -63,26 +64,26 @@ bool dsDatabase::IsOpen() const
 	return m_pDatabase->IsOpen();
 }
 
-std::wstring dsDatabase::GetName() const
+std::wstring dsDatabase::GetName() const noexcept
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->GetName();
 }
 
-bool dsDatabase::DoesTableExist(const char *sTable) const
+bool dsDatabase::DoesTableExist(const char *sTable) const noexcept
 {
     ASSERT(m_pDatabase);
     std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
 	return m_pDatabase->DoesTableExist(sTableUTF16.c_str());
 }
 
-bool dsDatabase::DoesTableExist(const wchar_t *sTable) const
+bool dsDatabase::DoesTableExist(const wchar_t *sTable) const noexcept
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->DoesTableExist(sTable);
 }
 
-bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params)
+bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params) noexcept
 {
 	Close(); // do auto close if opened
     
@@ -95,9 +96,11 @@ bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params)
     else if ( CSqLiteDatabaseImpl::IsSqLiteDB(sPath) ) {
         m_pDatabase = new CSqLiteDatabaseImpl(params.m_bMultiUser);
     }	
-    else if ( CDaoDatabaseImpl::IsDaoDB(sPath) ) {
+#ifndef __x86_64__ 
+	else if ( CDaoDatabaseImpl::IsDaoDB(sPath) ) {
 		m_pDatabase = new CDaoDatabaseImpl;
 	} 
+#endif
     else {
         return false;
     }
@@ -112,66 +115,62 @@ bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params)
     return true;
 }
 
-void dsDatabase::BeginTrans()
+void dsDatabase::BeginTrans() noexcept
 {
 	ASSERT(m_pDatabase);
 	m_pDatabase->BeginTrans();
 }
 
-void dsDatabase::CommitTrans()
+void dsDatabase::CommitTrans() noexcept
 {
 	ASSERT(m_pDatabase);
 	m_pDatabase->CommitTrans();
 }
 
-void dsDatabase::RollbackTrans()
+void dsDatabase::RollbackTrans() noexcept
 {
 	ASSERT(m_pDatabase);
 	m_pDatabase->Rollback();
 }
 
-bool dsDatabase::Execute(const wchar_t *lpszSQL)
+bool dsDatabase::Execute(const wchar_t *lpszSQL) noexcept
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->Execute(lpszSQL);
 }
 
-dsDBType dsDatabase::GetType()
+dsDBType dsDatabase::GetType() noexcept
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->GetType();
 }
 
-void dsDatabase::Close() 
+void dsDatabase::Close() noexcept
 {
-	for (dsDatabaseListener *pListener : m_listners) {
+	for (dsDatabaseListener *pListener : m_listeners) {
 		pListener->OnDatabaseClose();
 	}
 
 	if ( m_pDatabase ) 
     {
-		if ( m_pDatabase->IsOpen() ) {
-			m_pDatabase->Close(); 
-		}
-
 		delete m_pDatabase;
 		m_pDatabase = nullptr;
 	}
 }
 
-void dsDatabase::CommitDatabase()
+void dsDatabase::CommitDatabase() noexcept
 {
    ASSERT(m_pDatabase);
    m_pDatabase->CommitDatabase();
 }
 
-bool dsDatabase::CompactDatabase()
+bool dsDatabase::CompactDatabase() noexcept
 {
     ASSERT(m_pDatabase);
     return m_pDatabase->CompactDatabase();
 }
 
-bool dsDatabase::CompactDatabase(const wchar_t *sPath)
+bool dsDatabase::CompactDatabase(const wchar_t *sPath) noexcept
 {
     dsDatabase database;
     if ( !database.OpenDB(sPath) ) {
@@ -180,7 +179,7 @@ bool dsDatabase::CompactDatabase(const wchar_t *sPath)
     return database.CompactDatabase();
 }
 
-dsDatabase::dbErrorHandler dsDatabase::SetErrorHandler(dsDatabase::dbErrorHandler newHandler)
+dsDatabase::dbErrorHandler dsDatabase::SetErrorHandler(dsDatabase::dbErrorHandler newHandler) noexcept
 {
     dbErrorHandler prevHandler = m_pErrorHandler;
     m_pErrorHandler = newHandler;
@@ -190,15 +189,20 @@ dsDatabase::dbErrorHandler dsDatabase::SetErrorHandler(dsDatabase::dbErrorHandle
     return prevHandler;
 }
 
-void dsDatabase::DeleteRelation(const wchar_t *sRelation)
+void dsDatabase::DeleteRelation(const wchar_t *sRelation) noexcept
 {
 	ASSERT(m_pDatabase);
     return m_pDatabase->DeleteRelation(sRelation);
 }
 
 bool dsDatabase::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
-						        const wchar_t *sField, const wchar_t *sForeignField)
+						        const wchar_t *sField, const wchar_t *sForeignField) noexcept
 {
 	ASSERT(m_pDatabase);
 	return m_pDatabase->CreateRelation(sName, sTable, sForeignTable, lAttr, sField, sForeignField);
+}
+
+void dsDatabase::SetLogPath(const wchar_t *sLogPath) noexcept
+{
+	CLogImpl::SetLogPath(sLogPath);
 }

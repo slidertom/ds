@@ -4,7 +4,9 @@
 #include "dsDatabase.h"
 #include "dsTable.h"
 
-#include "Dao/DaoDatabaseImpl.h"
+#ifndef __x86_64__ 
+	#include "Dao/DaoDatabaseImpl.h"
+#endif
 
 #include "SqLite/sqlite_copy_table.h"
 #include "SqLite/SqLiteDatabaseImpl.h"
@@ -31,7 +33,7 @@ dsCopyTableData::~dsCopyTableData()
     EndCopy(); // do deattach database by default 
 }
 
-bool dsCopyTableData::BeginCopy()
+bool dsCopyTableData::BeginCopy() noexcept
 {
     ASSERT(!m_bAttached); // do call EndCopy
     const dsDBType nSrcTyle = m_pSrcDB->GetType();
@@ -57,7 +59,7 @@ bool dsCopyTableData::BeginCopy()
     return true;
 }
 
-bool dsCopyTableData::EndCopy()
+bool dsCopyTableData::EndCopy() noexcept
 {
     if ( m_bAttached ) 
     {
@@ -78,7 +80,7 @@ bool dsCopyTableData::EndCopy()
     return true;
 }
 
-bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, const dsTableFieldInfo &union_info)
+bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, const dsTableFieldInfo &union_info) noexcept
 {
     if ( !src_table.MoveFirst() ) {
         return true; // empty table
@@ -127,7 +129,7 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
                 case dsFieldType_Blob:
                     {
                         unsigned char *pData = nullptr;
-                        unsigned long nSize = 0;
+                        size_t nSize = 0;
                         src_table.GetFieldBinary(sFieldName, &pData, nSize);        
                         dst_table.SetFieldBinary(sFieldName, pData, nSize);
                     }
@@ -142,12 +144,12 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
     return true;
 }
 
-bool dsCopyTableData::CopyTableData(const wchar_t *sTableName)
+bool dsCopyTableData::CopyTableData(const wchar_t *sTableName) noexcept
 {
     return CopyTableData(sTableName, sTableName);
 }
 
-bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst)
+bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst) noexcept
 {
     ASSERT(m_pSrcDB);
 	ASSERT(m_pDstDB);
@@ -155,12 +157,14 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
     const dsDBType nSrcType = m_pSrcDB->GetType();
     const dsDBType nDstType = m_pDstDB->GetType();
 
+#ifndef __x86_64__ 
     if ( nDstType == dsType_Dao && nSrcType == dsType_Dao )
     {
         CDaoDatabaseImpl *pDstDao = dynamic_cast<CDaoDatabaseImpl *>(m_pDstDB->m_pDatabase);
         CDaoDatabaseImpl *pSrcDao = dynamic_cast<CDaoDatabaseImpl *>(m_pSrcDB->m_pDatabase);
         return CDaoDatabaseImpl::CopyTableData(pSrcDao, pDstDao, sTableNameSrc, sTableNameDst);
     }
+#endif
 
     dsTableFieldInfo union_info;
 
@@ -178,7 +182,7 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
         if ( dst_info.size() == 0 ) {
             std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
             std::string sError = "Destination table ";
-                        sError += sTableNameDstUTF8.c_str(); 
+                        sError += sTableNameDstUTF8; 
                         sError += " there are no fields defined. ";
             pDstDBImpl->OnError(sError.c_str(), "sqlite_util::ImportTableData");
             return false;
@@ -208,7 +212,7 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
     return dsCopyTableData::CopyTableData(src_table, dst_table, union_info);
 }
 
-bool dsCopyTableData::CopyTableDataEx(const wchar_t *sTableName)
+bool dsCopyTableData::CopyTableDataEx(const wchar_t *sTableName) noexcept
 {
     ASSERT(m_pSrcDB);
 	ASSERT(m_pDstDB);
@@ -228,13 +232,13 @@ bool dsCopyTableData::CopyTableDataEx(const wchar_t *sTableName)
     return dsCopyTableData::CopyTableData(src_table, dst_table, union_info);
 }
 
-dsDatabase *dsCopyTableData::GetSrcDB()
+dsDatabase *dsCopyTableData::GetSrcDB() noexcept
 {
     ASSERT(m_pSrcDB);
     return m_pSrcDB;
 }
 
-dsDatabase *dsCopyTableData::GetDstDB()
+dsDatabase *dsCopyTableData::GetDstDB() noexcept
 {
     ASSERT(m_pDstDB);
     return m_pDstDB;
