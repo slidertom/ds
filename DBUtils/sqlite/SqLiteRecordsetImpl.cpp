@@ -265,13 +265,13 @@ bool CSqLiteRecordsetImpl::OpenView(const wchar_t *sViewName)
     return true;
 }
 
-void CSqLiteRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)
+void CSqLiteRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize)
 {
     sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataBinary(pData, nSize);
     (*m_pSaveData)[ds_str_conv::ConvertToUTF8(sFieldName)] = pFieldData;
 }
 
-void CSqLiteRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize)
+void CSqLiteRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize)
 {
     const int nColumnIndex = FindColumnIndex(sFieldName);
     if ( nColumnIndex == -1 ) {
@@ -510,9 +510,9 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
             }
         }
     
-        std::string sSql = "INSERT INTO ";
+        std::string sSql = "INSERT INTO `";
         sSql += m_sTable.c_str();
-        sSql += " (";
+        sSql += "` (";
         sSql += sColumns.c_str();
         sSql += ")";
         sSql += " VALUES (";
@@ -572,9 +572,9 @@ bool CSqLiteRecordsetImpl::DoUpdate()
     if ( !m_update_stmt )
     {
         const char* pTail = nullptr;
-        std::string sSql  = "UPDATE ";
+        std::string sSql  = "UPDATE `";
                     sSql += m_sTable.c_str();
-                    sSql += " SET ";
+                    sSql += "` SET ";
                     sSql += sValues.c_str();
                     sSql += " WHERE ROWID = ?";
         rc = ::sqlite3_blocking_prepare_v2(pDB, sSql.c_str(), -1, &m_update_stmt, &pTail);
@@ -637,12 +637,12 @@ void CSqLiteRecordsetImpl::CommitInsert()
     const std::string sValues  = sqlite_util::save_data_to_insert_values_string(m_pSaveData);
 
     std::string sSql  = "INSERT INTO ";
-                sSql += m_sTable.c_str();
+                sSql += m_sTable;
                 sSql += " (";
-                sSql += sColumns.c_str();
+                sSql += sColumns;
                 sSql += ")";
                 sSql += " VALUES (";
-                sSql += sValues.c_str();
+                sSql += sValues;
                 sSql += ")";
 
     sqlite3 *pDB = m_pDB->GetSqLiteDB();
@@ -701,7 +701,7 @@ int CSqLiteRecordsetImpl::GetRecordCount() const
         return false;
     }
     
-    const long nCount = loader.GetFieldLong(_T("COUNT(*)"));
+    const int nCount = loader.GetFieldLong(_T("COUNT(*)"));
     return nCount;
 }
 
@@ -730,11 +730,11 @@ bool CSqLiteRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sV
     // do use prepared statements and bind operations
     // do map all prepared statements
     std::string sFind  = "SELECT ROWID,* FROM ";
-                sFind += m_sTable.c_str();
+                sFind += m_sTable;
                 sFind += " WHERE ";
-                sFind += sIndexUTF8.c_str();
+                sFind += sIndexUTF8;
                 sFind += " = '";
-                sFind += sValueUTF8.c_str();
+                sFind += sValueUTF8;
                 sFind += "' COLLATE NOCASE";
 	//sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s'", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
     // NOCASE as "DB BROWSER" does not care about NOCASE attributes inside CREATE statement
@@ -763,9 +763,9 @@ bool CSqLiteRecordsetImpl::SeekByLongUTF8(const char *sIndexUTF8, long nValue)
     // http://zetcode.com/db/sqlitec/ -> could be done optimization -> 
     // do use prepared statements and bind operations
     // do map all prepared statements
-    std::string sFind = "SELECT ROWID,* FROM ";
+    std::string sFind = "SELECT ROWID,* FROM `";
                 sFind += m_sTable.c_str();
-                sFind += " WHERE ";
+                sFind += "` WHERE ";
                 sFind += sIndexUTF8;
                 sFind += " = '";
                 sFind += std::to_string(nValue);
@@ -837,6 +837,19 @@ void CSqLiteRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar
     SetFieldStringUTF8(ds_str_conv::ConvertToUTF8(sFieldName).c_str(), ds_str_conv::ConvertToUTF8(sValue).c_str());
 }
 
+int64_t CSqLiteRecordsetImpl::GetFieldInt64(const wchar_t *sFieldName)
+{
+    ASSERT(m_stmt);
+    const int nColumnIndex = FindColumnIndex(sFieldName);
+    if ( nColumnIndex == -1 ) {
+        const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
+        const std::string sPathUTF8 = ds_str_conv::ConvertToUTF8(m_pDB->GetName().c_str());
+        OnColumnIndexFailed(m_pErrorHandler, sFieldNameUTF8.c_str(), "CSqLiteRecordsetImpl::GetFieldLong", m_sTable.c_str(), sPathUTF8.c_str());
+        return 0;
+    }
+	return sqlite3_column_int64(m_stmt, nColumnIndex);
+}
+
 int CSqLiteRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 {
     ASSERT(m_stmt);
@@ -857,6 +870,16 @@ void CSqLiteRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, int lValue)
     ASSERT(m_pSaveData->find(sFieldNameUTF8) == m_pSaveData->end()); // should be called only once for the one sFieldName 
 
     sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataLong(lValue);
+    (*m_pSaveData)[sFieldNameUTF8] = pFieldData;
+}
+
+void CSqLiteRecordsetImpl::SetFieldInt64(const wchar_t *sFieldName, int64_t lValue)
+{
+    ASSERT(m_pSaveData);
+    const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
+    ASSERT(m_pSaveData->find(sFieldNameUTF8) == m_pSaveData->end()); // should be called only once for the one sFieldName 
+
+    sqlite_util::CFieldDataInt64 *pFieldData = new sqlite_util::CFieldDataInt64(lValue);
     (*m_pSaveData)[sFieldNameUTF8] = pFieldData;
 }
 
@@ -973,7 +996,7 @@ bool CSqLiteRecordsetImpl::MoveFirst()
 
 		ASSERT(!m_sTable.empty());
 		std::string sSQL  = "SELECT ROWID,* FROM ";
-					sSQL += m_sTable.c_str();
+					sSQL += m_sTable;
 		if ( !OpenImpl(sSQL.c_str()) ) {
             return false;
         }

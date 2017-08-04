@@ -112,7 +112,7 @@ namespace sqlite_util
         return sValues;
     }
 
-    CFieldDataBinary::CFieldDataBinary(unsigned char *pData, unsigned long nSize) 
+    CFieldDataBinary::CFieldDataBinary(unsigned char *pData, size_t nSize) 
     {
         m_pData = new unsigned char[nSize];
         memcpy(m_pData, pData, nSize);
@@ -125,17 +125,32 @@ namespace sqlite_util
     }
 
     int CFieldDataBinary::Bind(sqlite3_stmt *pStmt, int nIndex) {
+        #ifndef __x86_64__
         return ::sqlite3_bind_blob(pStmt, nIndex, m_pData, m_nSize, SQLITE_STATIC);   
+        #else
+        return ::sqlite3_bind_blob64(pStmt, nIndex, m_pData, m_nSize, SQLITE_STATIC);   
+        #endif
     }
 
     int CFieldDataText::Bind(sqlite3_stmt *pStmt, int nIndex)
     {
-        // if text length is negative, then the length of the string is the number of bytes up to the first zero terminator.
+        // If the fourth parameter to sqlite3_bind_text() or sqlite3_bind_text16() is negative, 
+        // then the length of the string is the number of bytes up to the first zero terminator. 
+        // If the fifth argument is the special value SQLITE_STATIC, then SQLite assumes that 
+        // the information is in static, unmanaged space and does not need to be freed. 
         return ::sqlite3_bind_text(pStmt, nIndex, m_sText.c_str(), -1, SQLITE_STATIC);                            
     }
 
     int CFieldDataLong::Bind(sqlite3_stmt *pStmt, int nIndex) {
         return ::sqlite3_bind_int(pStmt, nIndex, m_nValue);                            
+    }
+
+    int CFieldDataInt64::Bind(sqlite3_stmt *pStmt, int nIndex) {
+        return ::sqlite3_bind_int64(pStmt, nIndex, m_nValue);                            
+    }
+
+    std::string CFieldDataInt64::GetValueAsString() const  {
+        return std::to_string(m_nValue);
     }
 
     int CFieldDataDouble::Bind(sqlite3_stmt *pStmt, int nIndex) {

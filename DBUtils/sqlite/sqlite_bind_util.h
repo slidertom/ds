@@ -43,7 +43,7 @@ namespace sqlite_util
     {
     // Construction/Destruction
     public:
-        CFieldDataBinary(unsigned char *pData, unsigned long nSize);
+        CFieldDataBinary(unsigned char *pData, size_t nSize);
         virtual ~CFieldDataBinary();
 
     // Overrides
@@ -54,7 +54,7 @@ namespace sqlite_util
     // Attributes
     private:
         unsigned char *m_pData;
-        unsigned long m_nSize;
+        size_t m_nSize;
     };
 
     class CFieldDataText : public CFieldData 
@@ -89,6 +89,23 @@ namespace sqlite_util
     // Attributes
     private:
         int m_nValue;
+    };
+
+    class CFieldDataInt64 : public CFieldData 
+    {
+    // Construction/Destruction
+    public:
+        CFieldDataInt64(int64_t nValue) : m_nValue(nValue) { }
+        virtual ~CFieldDataInt64() { }
+
+    // Overrides
+    public:
+        virtual int Bind(sqlite3_stmt *pStmt, int nIndex) override;
+        virtual std::string GetValueAsString() const override;
+
+    // Attributes
+    private:
+        int64_t m_nValue;
     };
 
     class CFieldDataDouble : public CFieldData 

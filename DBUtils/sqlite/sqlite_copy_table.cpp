@@ -26,7 +26,7 @@ namespace sqlite_util
         if ( union_info.size() == 0 ) {
             const std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
             std::string sError = "There are no fields to import in the table: ";
-                       sError += sTableNameDstUTF8.c_str();
+                       sError += sTableNameDstUTF8;
                        sError += ".";
             pDstDB->GetErrorHandler()->OnError(sError.c_str(), "sqlite_util::ImportTableData");
             return false;
@@ -86,7 +86,7 @@ namespace sqlite_util
                     case dsFieldType_Blob:
                         {
                             unsigned char *pData = nullptr;
-                            unsigned long nSize = 0;
+                            size_t nSize = 0;
                             src_table.GetFieldBinary(sFieldName, &pData, nSize);        
                             dst_table.SetFieldBinary(sFieldName, pData, nSize);
                         }

@@ -42,7 +42,7 @@ bool CSqLiteDatabaseImpl::IsSqLiteDB(const wchar_t *sPath)
 
     bool bSqLite = false;
     char buffer[6];
-    int nRead = fread(buffer, 1, 6, pFile);
+    size_t nRead = fread(buffer, 1, 6, pFile);
     if ( nRead > 5 && 
          buffer[0] == 'S' && 
          buffer[1] == 'Q' && 
@@ -122,10 +122,9 @@ void CSqLiteDatabaseImpl::Close()
     }
     m_table_field_info_map.clear();
 }
-/**
- * Exec an sql statement in values[0] against
- * the database in pData.
- */
+
+// Exec an sql statement in values[0] against
+// the database in pData.
 int process_ddl_row(void * pData, int nColumns, 
         char **values, char **columns)
 {
@@ -137,10 +136,9 @@ int process_ddl_row(void * pData, int nColumns,
 
         return 0;
 }
-/**
- * Insert from a table named by backup.{values[0]}
- * into main.{values[0]} in database pData.
- */
+
+// Insert from a table named by backup.{values[0]}
+// into main.{values[0]} in database pData.
 int process_dml_row(void *pData, int nColumns, 
         char **values, char **columns)
 {
@@ -332,7 +330,7 @@ bool CSqLiteDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sT
 	return true;
 }
 
-#define SQLTM_COUNT 100  /** -> SQLTM_COUNT*SQLTM_TIME = ms timeout **/
+#define SQLTM_COUNT 100 // -> SQLTM_COUNT*SQLTM_TIME = ms timeout 
 #define SQLTM_TIME  50
 
 bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)

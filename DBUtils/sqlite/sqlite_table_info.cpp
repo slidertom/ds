@@ -150,9 +150,9 @@ namespace sqlite_util
         }
      
         std::string sPragma; 
-        sPragma = "PRAGMA table_info ("; 
+        sPragma = "PRAGMA table_info (`"; 
         sPragma += sTableName;
-        sPragma += ")";
+        sPragma += "`)";
 
         CSqLiteRecordsetImpl loader(pDB, pErrorHandler);
 

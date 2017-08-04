@@ -50,8 +50,8 @@ public:
 
 	virtual bool IsEOF() override;
 
-	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize) override;
-	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) override;
+	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize) override;
+	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize) override;
 	virtual void FreeBinary(unsigned char *pData);
 
 	virtual void SetFieldValueNull(const wchar_t *lpszName) override;
@@ -62,9 +62,11 @@ public:
     virtual std::string GetFieldStringUTF8(const char *sFieldName) override;
 	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) override;
 
-	virtual int  GetFieldLong(const wchar_t *sFieldName) override;
-	virtual void SetFieldLong(const wchar_t *sFieldName, int lValue) override;
-
+	virtual int     GetFieldLong(const wchar_t *sFieldName) override;
+    virtual int64_t GetFieldInt64(const wchar_t *sFieldName) override;
+	virtual void    SetFieldLong(const wchar_t *sFieldName, int lValue) override;
+    virtual void    SetFieldInt64(const wchar_t *sFieldName, int64_t lValue) override;
+    
 	virtual double GetFieldDouble(const wchar_t *sFieldName) override;
 	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
 
@@ -107,7 +109,7 @@ private:
     bool m_bEOF;
 	bool m_bSQLOpened;
     
-    __int64 m_nEditRowId;
+    int64_t m_nEditRowId;
     std::unordered_map<std::wstring, int, std::hash<std::basic_string<wchar_t>>> m_name_to_index;
 
     sqlite_util::CFieldDataMap *m_pSaveData;

@@ -30,7 +30,6 @@ public:
 	virtual bool Execute(const wchar_t *lpszSQL) override; 
     bool ExecuteUTF8(const char *sqlUTF8);
 
-	virtual void Close() override; 
 	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
 
 	virtual dsDBType GetType() override;
@@ -62,6 +61,9 @@ public:
     void OnError(const char *sError, const char *sFunctionName);
     const sqlite_util::CFieldInfoMap *GetTableFieldInfoImpl(const char *sTableNameUTF8);
     bool IsTransMode() const { return m_bTransMode; }
+
+private:
+    void Close(); 
 
 // Attributes
 private:

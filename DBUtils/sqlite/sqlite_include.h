@@ -5,7 +5,11 @@
 #ifndef _SQLITE3_H_
     #include "sqlite3.h"
     // TODO: do add MSVC based defines to support gcc 
-    #pragma comment(lib, "sqlite3.lib")  
+	#ifdef __x86_64__ 
+		#pragma comment(lib, "sqlite3_x64.lib")  
+	#else
+	#pragma comment(lib, "sqlite3.lib")  
+	#endif
 #endif
 
 #endif 
