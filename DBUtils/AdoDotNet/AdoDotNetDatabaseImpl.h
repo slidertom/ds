@@ -25,8 +25,7 @@ public:
 	virtual bool CommitTrans() override; 
 	virtual bool Rollback() override;    
 
-	virtual bool Execute(const wchar_t *lpszSQL) override; 
-	virtual void Close() override; 
+	virtual bool Execute(const wchar_t *lpszSQL) override;
 	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
 
 	virtual dsDBType GetType() override;
@@ -51,6 +50,9 @@ public:
     virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) override;
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
+
+private:
+    void Close(); 
 
 // Attributes
 private:

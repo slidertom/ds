@@ -11,7 +11,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-CAdoDotNetRecordsetImpl::CAdoDotNetRecordsetImpl(CDotNetDatabaseAbs *pDatabase) 
+CAdoDotNetRecordsetImpl::CAdoDotNetRecordsetImpl(CDotNetDatabaseAbs *pDatabase)
+	:m_pDB(pDatabase)
 {
 	m_pSet = CAdoDotNetUtils::CreateRecordSet(pDatabase);
 }
@@ -74,12 +75,12 @@ bool CAdoDotNetRecordsetImpl::IsOpen() const
 	return m_pSet->IsOpen();
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)
+void CAdoDotNetRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize)
 {
 	ASSERT(FALSE);
 }
 
-void CAdoDotNetRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize)
+void CAdoDotNetRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize)
 {
 	ASSERT(FALSE);
 }
@@ -113,15 +114,21 @@ bool CAdoDotNetRecordsetImpl::Update()
 
 int CAdoDotNetRecordsetImpl::GetRecordCount() const
 {
-    ASSERT(FALSE);
-    /*
+ 	CAdoDotNetRecordsetImpl loader(m_pDB);
 	std::wstring sCountSQL = L"SELECT COUNT(*) AS RecordCount FROM ";
 	sCountSQL += m_sTable;
-	m_pSet->Open(sCountSQL.c_str());
-	const int nCount = GetFieldLong(L"RecordCount"); // const cast
-	m_pSet->Close();
-	return nCount;
-    */
+
+    if ( !loader.OpenSQL(sCountSQL.c_str()) ) {
+        return -1;
+    }
+
+    if ( !loader.MoveFirst() ) {
+        return false;
+    }
+    
+    const long nCount = loader.GetFieldLong(L"RecordCount");
+    return nCount;
+ 
     return -1;
 }
 

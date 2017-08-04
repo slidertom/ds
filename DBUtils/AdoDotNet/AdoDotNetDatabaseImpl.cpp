@@ -29,6 +29,9 @@ CAdoDotNetDatabaseImpl::CAdoDotNetDatabaseImpl()
 
 CAdoDotNetDatabaseImpl::~CAdoDotNetDatabaseImpl()
 {
+    if ( IsOpen() ) {
+        Close();
+    }
 	CAdoDotNetUtils::DeleteDatabase(m_pDatabase);
 }
 

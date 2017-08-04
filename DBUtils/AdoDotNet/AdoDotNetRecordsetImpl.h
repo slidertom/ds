@@ -37,8 +37,8 @@ public:
 
 	virtual bool IsEOF() override;
 
-	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize) override;
-	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize) override;
+	virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize) override;
+	virtual void GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize) override;
     virtual void FreeBinary(unsigned char *pData) override;
 
 	virtual void SetFieldValueNull(const wchar_t *lpszName) override;
@@ -74,6 +74,7 @@ private:
 
 private:
 	CDotNetRecordSetAbs *m_pSet;
+	CDotNetDatabaseAbs *m_pDB;
 };
 
 #endif 
