@@ -27,7 +27,6 @@ public:
 	virtual bool Rollback() override;
 
 	virtual bool Execute(const wchar_t *lpszSQL) override; 
-	virtual void Close() override; 
 	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
 
 	virtual dsDBType GetType() override;
@@ -59,6 +58,9 @@ public:
 
 public:
     CDaoDatabase *GetDaoDB() { return m_pDatabase; }
+
+private:
+    void Close();
 
 // Attributes
 private:

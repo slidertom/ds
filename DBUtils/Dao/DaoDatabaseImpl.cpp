@@ -33,12 +33,21 @@ namespace inernal_dao_file_utils
 CDaoDatabaseImpl::CDaoDatabaseImpl() 
 : m_bReadOnly(false)
 {
-    m_pDatabase = new CDaoDatabase;
+    m_pDatabase     = new CDaoDatabase;
     m_pErrorHandler = new CDaoErrorHandler;
 }
 
 CDaoDatabaseImpl::~CDaoDatabaseImpl()
 {
+    // CDaoDatabase::~CDaoDatabase()
+    // does this:
+    // if (IsOpen())
+	//		Close();
+    // custom implementation to avoid exceptions:
+    if ( IsOpen() ) {
+        Close();
+    }
+
     delete m_pDatabase;
     delete m_pErrorHandler;
 }

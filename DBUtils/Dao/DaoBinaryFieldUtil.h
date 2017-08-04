@@ -5,7 +5,7 @@
 namespace dao_binary_field_util
 {
     template <class TOleVariant>
-	inline bool PutBinaryIntoVariant(TOleVariant *ovData, byte *pBuf, unsigned long cBufLen)
+	inline bool PutBinaryIntoVariant(TOleVariant *ovData, byte *pBuf, size_t cBufLen)
 	{
 		 bool fRetVal = false;
 
@@ -46,7 +46,7 @@ namespace dao_binary_field_util
 	}
 
 	template <class TOleVariant>
-	inline bool GetBinaryFromVariant(TOleVariant &ovData, byte **ppBuf, unsigned long *pcBufLen)
+	inline bool GetBinaryFromVariant(TOleVariant &ovData, byte **ppBuf, size_t *pcBufLen)
 	{
 		 bool fRetVal = false;
 

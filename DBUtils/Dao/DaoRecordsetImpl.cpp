@@ -144,7 +144,7 @@ bool CDaoRecordsetImpl::Open(const wchar_t *sTableName)
 	catch (CDaoException *e) {
         std::wstring sDBName = m_pDatabase->GetName();
 		std::wstring sMsg = L"CDaoRecordsetImpl::Open. Database: ";
-		sMsg += sDBName.c_str();
+		sMsg += sDBName;
 		sMsg += L". Table='";
 		sMsg += sTableName;
 		sMsg += L"'";
@@ -242,7 +242,7 @@ bool CDaoRecordsetImpl::IsOpen() const
 	return m_pSet->IsOpen() != FALSE;
 }
 
-void CDaoRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, unsigned long nSize)
+void CDaoRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize)
 {
 	try {
 		COleVariant var;
@@ -266,7 +266,7 @@ void CDaoRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char 
 	}
 }
 
-void CDaoRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, unsigned long &nSize)
+void CDaoRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize)
 {
 	try {
 		*pData = NULL;
