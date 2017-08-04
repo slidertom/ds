@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "LogImpl.h"
 
-#include "../dsConfig.h"
 #include "../dsStrConv.h"
 
 #include "mutex"
@@ -39,11 +38,14 @@ namespace internal
 static std::mutex g_log_mutex; // just in case do allow only one thread to log data
                                // dao single threaded
 
+static std::wstring g_sLogPath = L"";
+
 void CLogImpl::Log(const wchar_t *sMsg)
 {
     std::lock_guard<std::mutex> lock(g_log_mutex);
 
-    const std::wstring sFilePath = ds_log_file_path::GetDefaultPath();
+	const std::wstring sFilePath = g_sLogPath;
+	ASSERT(!sFilePath.empty());
 
     time_t rawtime;
     struct tm *timeinfo;
@@ -59,7 +61,6 @@ void CLogImpl::Log(const wchar_t *sMsg)
     sMsgImpl += ds_str_conv::ConvertToUTF8(sMsg).c_str();
     sMsgImpl += "\n";
 
-    TRACE(sMsgImpl.c_str());
     FILE *pFile = _tfopen(sFilePath.c_str(), _T("a"));    
     if ( !pFile ) {
         ASSERT(FALSE);
@@ -67,4 +68,9 @@ void CLogImpl::Log(const wchar_t *sMsg)
     }
     fprintf(pFile, "%s", sMsgImpl.c_str());
     fclose(pFile);
+}
+
+void CLogImpl::SetLogPath(const wchar_t *sLogPath)
+{
+	g_sLogPath = sLogPath;
 }
