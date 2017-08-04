@@ -3,9 +3,6 @@
 #pragma once
 
 //No STDAFX because off /clr option
-#ifndef __PRAGMA_SET_H__
-	#include "Collections/PragmaSet.h"
-#endif
 
 #ifndef __AFXWIN_H__
 	#include "afx.h"
