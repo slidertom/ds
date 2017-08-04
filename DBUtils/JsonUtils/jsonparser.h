@@ -67,11 +67,11 @@ namespace ds_jsonparser
         void AddString(const wchar_t *str);
 		void AddInt(int nValue);
 
-        int GetSize() const;
-        std::string GetStringUTF8(int i) const;
-        std::wstring GetString(int i) const;
-		int GetInt(int i) const;
-        void GetJsonObject(int i, object &obj) const; // prefix json used as GetObject quite general function and can be defined
+        size_t GetSize() const;
+        std::string GetStringUTF8(size_t i) const;
+        std::wstring GetString(size_t i) const;
+		int GetInt(size_t i) const;
+        void GetJsonObject(size_t i, object &obj) const; // prefix json used as GetObject quite general function and can be defined
 
     private:
         json_array(json_array &x);
@@ -94,16 +94,16 @@ namespace ds_jsonparser
     static void SetNull##name(ds_jsonparser::object &obj)      { obj.SetNull(realname); }                                                                                 \
 
 #define JSON_LONG(name, realname) \
-	static long Get##name(const ds_jsonparser::object &obj)        { return obj.GetInteger(realname); }  \
+	static long Get##name(const ds_jsonparser::object &obj)        { return obj.GetInteger(realname);  } \
 	static void Set##name(ds_jsonparser::object &obj, long nValue) { obj.SetInteger(realname, nValue); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)     { return obj.IsNull(realname); }      \
-    static void SetNull##name(ds_jsonparser::object &obj)          { obj.SetNull(realname); }            \
+    static bool IsNull##name(const ds_jsonparser::object &obj)     { return obj.IsNull(realname);      } \
+    static void SetNull##name(ds_jsonparser::object &obj)          { obj.SetNull(realname);            } \
 
 #define JSON_DOUBLE(name, realname) \
-	static double Get##name(const ds_jsonparser::object &obj)        { return obj.GetDouble(realname); }  \
+	static double Get##name(const ds_jsonparser::object &obj)        { return obj.GetDouble(realname);  } \
 	static void Set##name(ds_jsonparser::object &obj, double dValue) { obj.SetDouble(realname, dValue); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)       { return obj.IsNull(realname); }     \
-    static void SetNull##name(ds_jsonparser::object &obj)            { obj.SetNull(realname); }           \
+    static bool IsNull##name(const ds_jsonparser::object &obj)       { return obj.IsNull(realname);     } \
+    static void SetNull##name(ds_jsonparser::object &obj)            { obj.SetNull(realname);           } \
 
 #define JSON_TEXT(name, realname) \
 	static std::wstring Get##name(const ds_jsonparser::object &obj)                    { return obj.GetText(realname); }              \
@@ -142,7 +142,7 @@ namespace ds_jsonparser
 #define JSON_OBJECT(name, realname) \
     static void Get##name(const ds_jsonparser::object &obj, ds_jsonparser::object &get_obj) { obj.GetJsonObject(realname, get_obj); } \
 	static void Set##name(ds_jsonparser::object &obj, const ds_jsonparser::object &set_obj) { obj.SetJsonObject(realname, set_obj); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)                              { return obj.IsNull(realname);      }     \
-    static void SetNull##name(ds_jsonparser::object &obj)                                   { obj.SetNull(realname);            }     \
+    static bool IsNull##name(const ds_jsonparser::object &obj)                              { return obj.IsNull(realname);          } \
+    static void SetNull##name(ds_jsonparser::object &obj)                                   { obj.SetNull(realname);                } \
 
 #endif

@@ -11,6 +11,11 @@
     #undef min
 #endif
 
+#ifdef __x86_64__ 
+    #define RAPIDJSON_NO_SIZETYPEDEFINE
+    namespace rapidjson { typedef ::std::size_t SizeType; }
+#endif
+
 #ifndef RAPIDJSON_DOCUMENT_H_
     #include "Rapidjson/document.h"
     #include "Rapidjson/stringbuffer.h"
@@ -414,14 +419,14 @@ namespace ds_jsonparser
             doc->PushBack(value, allocator);
         }
 
-        int get_array_size(const void *impl) 
+        size_t get_array_size(const void *impl) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             ASSERT(doc->IsArray());
             return doc->Size();
         }
         
-        void get_array_string(const void *impl, int i, std::string &sValue) 
+        void get_array_string(const void *impl, size_t i, std::string &sValue) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             const rapidjson::Value &value = (*doc)[i];
@@ -432,7 +437,7 @@ namespace ds_jsonparser
             internal::value2str(value, sValue);
         }
 
-		int get_array_int(const void *impl, int i)
+		int get_array_int(const void *impl, size_t i)
 		{
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             const rapidjson::Value &value = (*doc)[i];
@@ -443,7 +448,7 @@ namespace ds_jsonparser
 			return 0;
 		}
         
-        void set_array_object(void *impl, int i, const void *obj)
+        void set_array_object(void *impl, size_t i, const void *obj)
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             ASSERT(doc->IsArray());
@@ -454,7 +459,7 @@ namespace ds_jsonparser
             value.CopyFrom(*doc_obj, allocator);
         }
         
-        void get_array_object(const void *impl, int i, void *obj) 
+        void get_array_object(const void *impl, size_t i, void *obj) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
 

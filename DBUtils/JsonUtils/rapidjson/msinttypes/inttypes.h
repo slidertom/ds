@@ -193,7 +193,7 @@ typedef struct {
 #define SCNdMAX     "I64d"
 #define SCNiMAX     "I64i"
 
-#ifdef _WIN64 // [
+#ifdef _WIN64  // [
 #  define SCNdPTR     "I64d"
 #  define SCNiPTR     "I64i"
 #else  // _WIN64 ][
@@ -259,7 +259,7 @@ typedef struct {
 #define SCNxMAX     "I64x"
 #define SCNXMAX     "I64X"
 
-#ifdef _WIN64 // [
+#ifdef _WIN64  // [
 #  define SCNoPTR     "I64o"
 #  define SCNuPTR     "I64u"
 #  define SCNxPTR     "I64x"

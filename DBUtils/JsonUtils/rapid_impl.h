@@ -40,11 +40,11 @@ namespace ds_jsonparser
         void add_array_string(void *impl, const char *str);
 		void add_array_int(void *impl, int nValue);
         void add_array_object(void *impl, const void *obj);
-        int  get_array_size(const void *impl);
-        void get_array_string(const void *impl, int i, std::string &sValue);
-		int get_array_int(const void *impl, int i);
-        void get_array_object(const void *impl, int i, void *obj);
-        void set_array_object(void *impl, int i, const void *obj);
+        size_t get_array_size(const void *impl);
+        void get_array_string(const void *impl, size_t i, std::string &sValue);
+		int get_array_int(const void *impl, size_t i);
+        void get_array_object(const void *impl, size_t i, void *obj);
+        void set_array_object(void *impl, size_t i, const void *obj);
     }
 }
 

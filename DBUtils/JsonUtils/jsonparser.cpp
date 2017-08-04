@@ -94,8 +94,8 @@ namespace ds_jsonparser
 	{
 		json_array array_json;
 		_impl::get_field_array(m_impl, sField, array_json.m_impl);
-		const int nCnt = array_json.GetSize();
-		for (int i = 0; i < nCnt; ++i) {
+		const size_t nCnt = array_json.GetSize();
+		for (size_t i = 0; i < nCnt; ++i) {
 			array.push_back(array_json.GetString(i));
 		}	
 	}
@@ -160,23 +160,23 @@ namespace ds_jsonparser
 		_impl::add_array_int(m_impl, nValue);
 	}
 
-    int json_array::GetSize() const {
+    size_t json_array::GetSize() const {
         return _impl::get_array_size(m_impl);
     }
-    std::string json_array::GetStringUTF8(int i) const {
+    std::string json_array::GetStringUTF8(size_t i) const {
         std::string sValue;
         _impl::get_array_string(m_impl, i, sValue);
         return sValue;
     }
-    std::wstring json_array::GetString(int i) const {
+    std::wstring json_array::GetString(size_t i) const {
         const std::string sValue = GetStringUTF8(i);
         return ds_str_conv::ConvertFromUTF8(sValue.c_str());
     }
-	int json_array::GetInt(int i) const {
+	int json_array::GetInt(size_t i) const {
 		return _impl::get_array_int(m_impl, i);
 	}
     
-    void json_array::GetJsonObject(int i, object &obj) const {
+    void json_array::GetJsonObject(size_t i, object &obj) const {
         _impl::get_array_object(m_impl, i, obj.m_impl);
     }
     
