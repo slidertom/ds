@@ -15,10 +15,9 @@
 #include "../dsStrConv.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+	#define new DEBUG_NEW
 #endif
+
 // http://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
 
 //http://www.sqlite.org/cvstrac/wiki?p=SampleCode

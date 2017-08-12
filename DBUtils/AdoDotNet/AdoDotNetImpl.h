@@ -2,10 +2,13 @@
 #define __ADO_DOT_NET_IMPL_H__
 #pragma once
 
-//No STDAFX because off /clr option
-
-#ifndef __AFXWIN_H__
-	#include "afx.h"
+#ifndef __x86_64__ 
+	#ifndef _WIN32_WINNT
+		#define _WIN32_WINNT 0x0501 // Windows (VC 10 MFC requires minimal define)
+	#endif
+	#ifndef __AFXWIN_H__
+		#include "afx.h"
+	#endif
 #endif
 
 #ifndef __ABS_DATABASE_H__

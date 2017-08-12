@@ -2,7 +2,7 @@
 #include "dsDatabase.h"
 
 #ifndef __x86_64__ 
- #include "Dao/DaoDatabaseImpl.h"
+	#include "Dao/DaoDatabaseImpl.h"
 #endif
 #include "AdoDotNet/AdoDotNetDatabaseImpl.h"
 #include "SqLite/SqLiteDatabaseImpl.h"
@@ -13,9 +13,7 @@
 #include "dsStrConv.h"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+	#define new DEBUG_NEW
 #endif
 
 dsDatabase::dsDatabase() 

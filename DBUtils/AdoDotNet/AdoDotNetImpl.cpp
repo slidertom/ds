@@ -1,6 +1,12 @@
 #include "AdoDotNetImpl.h"
 //No STDAFX because off /clr option
 
+#ifdef __x86_64__ 
+	#define SS_ANSI
+	#pragma warning (disable : 4996) //disable depreciation of 'stricmp'
+	#include "Collections/DebugUtils.h"
+#endif
+
 #using <mscorlib.dll>
 #using <System.dll>
 #using <System.Data.dll>
@@ -14,9 +20,7 @@ using namespace System::Data;
 using namespace System::Data::SqlClient;
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+	#define new DEBUG_NEW
 #endif
 
 namespace dot_net_exception_format

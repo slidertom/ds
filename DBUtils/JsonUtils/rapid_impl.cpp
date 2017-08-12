@@ -42,7 +42,7 @@ namespace ds_jsonparser
                 }
                 doc->Parse<rapidjson::kParseStopWhenDoneFlag>(sJson);
                 if ( !doc->IsObject() && !doc->IsArray() ) {
-                    TRACE("RapidJson: PARSE ERROR\n");
+                    TRACE(L"RapidJson: PARSE ERROR\n");
                     return;
                 }
             }

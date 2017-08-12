@@ -4,10 +4,9 @@
 #include "AbsDatabase.h"
 #include "AbsRecordset.h"
 #include "dsStrConv.h"
+
 #ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+	#define new DEBUG_NEW
 #endif
 
 dsTable::dsTable(dsDatabase *pDatabase, const wchar_t *sTableName)

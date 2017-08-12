@@ -8,9 +8,9 @@
 	#define DB_UTILS_API __declspec(dllimport)
 
 	#ifdef _DEBUG
-        #define DB_UTILS_LIB "DBUtilsImplD.lib"
+        #define DB_UTILS_LIB "DBUtilsImplUD.lib"
 	#else
-        #define DB_UTILS_LIB "DBUtilsImpl.lib"
+        #define DB_UTILS_LIB "DBUtilsImplU.lib"
 	#endif
 
 	#pragma message("DBUtilsImpl will automatically link with " DB_UTILS_LIB)

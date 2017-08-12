@@ -9,9 +9,7 @@
 #include "functional"
 
 #ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+	#define new DEBUG_NEW
 #endif
 
 // http://stackoverflow.com/questions/215963/how-do-you-properly-use-widechartomultibyte
@@ -24,7 +22,7 @@ namespace ds_str_conv
     // return myconv.to_bytes(str);
     std::string ConvertToUTF8(const wchar_t *wstr)
     {
-        const int nLen = wcslen(wstr);
+        const int32_t nLen = (int32_t)wcslen(wstr);
         if ( nLen <= 0  ) {
             return std::string();
         }
@@ -44,7 +42,7 @@ namespace ds_str_conv
             return std::wstring();
         }
 
-        const int nLen = strlen(str);
+        const int32_t nLen = (int32_t)strlen(str);
         if ( nLen <= 0 ) {
             return std::wstring();
         }
