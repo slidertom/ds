@@ -16,9 +16,9 @@ Text field type addition: [**Json**](https://en.wikipedia.org/wiki/JSON) format 
 
 If you're a [**NoSQL**](https://en.wikipedia.org/wiki/NoSQL) type of person and SQL based database usage can not be avoided, then this might fit the bill perfectly.
 
-DS is an exception free code.
+DS is an exception free code
 
-#####Samples:
+Samples: 
 ```C++
 dsDatabase db;
 db.OpenDB(_T("database.sqlite")); // sqlite database 
