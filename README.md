@@ -1,6 +1,6 @@
-#### ds - Data Access System
+## ds - Data Access System
 
-##Sqlite (read-write), Ms DAO mdb (read-write), Ms SQL (read-only),
+Sqlite (read-write), Ms DAO mdb (read-write), Ms SQL (read-only),
 databases access system. 
 
 DS is an easy to use C++ [**SQLite3**](https://sqlite.org/), [**DAO**](https://msdn.microsoft.com/en-us/library/aa984815(v=vs.71).aspx), [**MsSQL**](https://en.wikipedia.org/wiki/Microsoft_SQL_Server) C++ based wrapper.
