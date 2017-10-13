@@ -42,9 +42,9 @@ loader.Update();
 class CCodeDescrLoader : public dsTable
 {
 public:
-	CCodeDescrLoader(dsDatabase *pDatabase, LPCTSTR sTableName)
-	: dsTable(pDatabase, sTableName) { }
-	virtual ~CCodeDescrLoader() { }
+    CCodeDescrLoader(dsDatabase *pDatabase, LPCTSTR sTableName)
+       : dsTable(pDatabase, sTableName) { }
+    virtual ~CCodeDescrLoader() { }
 
 public:
     KEY_LONG(Id,   "ID");
