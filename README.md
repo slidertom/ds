@@ -42,22 +42,29 @@ loader.Update();
 class CCodeDescrLoader : public dsTable
 {
 public:
-    CCodeDescrLoader(dsDatabase *pDatabase, LPCTSTR sTableName)
-       : dsTable(pDatabase, sTableName) { }
+    CCodeDescrLoader(dsDatabase *pDatabase)
+       : dsTable(pDatabase, L"MyTableName") { }
     virtual ~CCodeDescrLoader() { }
 
 public:
-    KEY_LONG(Id,   "ID");
-    KEY_TEXT(Code, "CODE");
+    KEY_LONG(Id,      "ID");
+    KEY_TEXT(Code,    "CODE");
     FIELD_TEXT(Descr, "DESCRIPTION");
+    FIELD_JSON(Data,  "DATA"); // Json based field
+	 JSON_TEXT(Remark,      "Remark");
+	 JSON_LONG(Order,       "Order");
 };
 
-CCodeDescrLoader loader(&db, L"Table1");
+CCodeDescrLoader loader(&db);
 loader.Flush(); // delete all records from the Table1
 loader.AddNew();
    int nNewId = loader.GetId();
    loader.SetCode(L"New");
    loader.SetDescr(L"Descr");
+   ds_json::object obj;
+   	CCodeDescrLoader::SetRemark(obj, "MyRemark");
+	CCodeDescrLoader::SetOrder(obj,  2);
+   loader.SetData(obj); // do store json field
 loader.Update();
 
 loader.DeleteById(nNewId); // do delete one record ID=nNewId
