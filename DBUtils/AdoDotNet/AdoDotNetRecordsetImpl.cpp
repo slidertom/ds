@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AdoDotNetRecordsetImpl.h"
 
 #include "AdoDotNetImpl.h"

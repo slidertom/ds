@@ -43,14 +43,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'">
-    <OutDir>.\UnicodeDebug\</OutDir>
+    <OutDir>../bin</OutDir>
     <IntDir>.\UnicodeDebug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <TargetName>DBUtilsImplD</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='UnicodeRelease|Win32'">
-    <OutDir>.\UnicodeRelease\</OutDir>
+    <OutDir>../bin</OutDir>
     <IntDir>.\UnicodeRelease\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>DBUtilsImpl</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='UnicodeDebug|Win32'">
     <ClCompile>

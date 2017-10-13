@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "dsTable.h"
 
 #include "AbsDatabase.h"
@@ -240,7 +240,7 @@ std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const w
 	}	
 
     ASSERT(FALSE);
-    return _T("");
+    return L"";
 }
 
 dsDatabase *dsTable::GetDatabase() const noexcept

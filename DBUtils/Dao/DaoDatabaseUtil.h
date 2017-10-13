@@ -115,24 +115,24 @@ namespace dao_database_util
             }
 	    case VT_R4:
             {
-                const std::wstring str = ds_str_conv::FormatStr(_T("%.6f"), double(pSrc->fltVal));
+                const std::wstring str = ds_str_conv::FormatStr(L"%.6f", double(pSrc->fltVal));
 		        return str;
             }
 	    case VT_R8:
             {
-                const std::wstring str = ds_str_conv::FormatStr(_T("%.6f"), double(pSrc->dblVal));
+                const std::wstring str = ds_str_conv::FormatStr(L"%.6f", double(pSrc->dblVal));
                 return str;
             }
 	    case VT_CY:
             {
-                const std::wstring str = ds_str_conv::FormatStr(_T("%.6f"), _tcstod(COleCurrency(varSrc).Format(), NULL));
+                const std::wstring str = ds_str_conv::FormatStr(L"%.6f", _tcstod(COleCurrency(varSrc).Format(), NULL));
                 return str;
             }
 	    case VT_BOOL:
-		    return V_BOOL(pSrc) != 0 ? _T("true") : _T("false");
+		    return V_BOOL(pSrc) != 0 ? L"true" : L"false";
 	    }
 
-	    return _T("");
+	    return L"";
     }
 };
 

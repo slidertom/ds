@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "jsonparser.h"
 
 #include "rapid_impl.h"
@@ -32,7 +32,7 @@
     #define _impl _impl_rapid
 #endif
 
-namespace ds_jsonparser
+namespace ds_json
 {
     object::object() : m_impl(nullptr) {
         _impl::create(m_impl);
@@ -59,7 +59,7 @@ namespace ds_jsonparser
     }
 	void object::SetStringArray(const char *sField, const std::vector<std::wstring> &array)
 	{
-		ds_jsonparser::json_array array_json;
+		ds_json::json_array array_json;
 		for (const auto &it : array) {
 			array_json.AddString(it.c_str());
 		}

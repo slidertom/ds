@@ -8,7 +8,7 @@
 
 #include "vector"
 
-namespace ds_jsonparser
+namespace ds_json
 {
     class json_array;
 
@@ -86,63 +86,63 @@ namespace ds_jsonparser
 };
 
 #define FIELD_JSON(name, realname) \
-	void Get##name(ds_jsonparser::object &object) const        { ds_jsonparser::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
-	void Set##name(const ds_jsonparser::json_array &object)    { std::string sJson; ds_jsonparser::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
-    void Get##name(ds_jsonparser::json_array &object) const    { ds_jsonparser::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
-	void Set##name(const ds_jsonparser::object &object)        { std::string sJson; ds_jsonparser::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj) { return obj.IsNull(realname); }                                                                           \
-    static void SetNull##name(ds_jsonparser::object &obj)      { obj.SetNull(realname); }                                                                                 \
+	void Get##name(ds_json::object &object) const        { ds_json::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
+	void Set##name(const ds_json::json_array &object)    { std::string sJson; ds_json::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
+    void Get##name(ds_json::json_array &object) const    { ds_json::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
+	void Set##name(const ds_json::object &object)        { std::string sJson; ds_json::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
+    static bool IsNull##name(const ds_json::object &obj) { return obj.IsNull(realname); }                                                                           \
+    static void SetNull##name(ds_json::object &obj)      { obj.SetNull(realname); }                                                                                 \
 
 #define JSON_LONG(name, realname) \
-	static long Get##name(const ds_jsonparser::object &obj)        { return obj.GetInteger(realname);  } \
-	static void Set##name(ds_jsonparser::object &obj, long nValue) { obj.SetInteger(realname, nValue); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)     { return obj.IsNull(realname);      } \
-    static void SetNull##name(ds_jsonparser::object &obj)          { obj.SetNull(realname);            } \
+	static long Get##name(const ds_json::object &obj)        { return obj.GetInteger(realname);  } \
+	static void Set##name(ds_json::object &obj, long nValue) { obj.SetInteger(realname, nValue); } \
+    static bool IsNull##name(const ds_json::object &obj)     { return obj.IsNull(realname);      } \
+    static void SetNull##name(ds_json::object &obj)          { obj.SetNull(realname);            } \
 
 #define JSON_DOUBLE(name, realname) \
-	static double Get##name(const ds_jsonparser::object &obj)        { return obj.GetDouble(realname);  } \
-	static void Set##name(ds_jsonparser::object &obj, double dValue) { obj.SetDouble(realname, dValue); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)       { return obj.IsNull(realname);     } \
-    static void SetNull##name(ds_jsonparser::object &obj)            { obj.SetNull(realname);           } \
+	static double Get##name(const ds_json::object &obj)        { return obj.GetDouble(realname);  } \
+	static void Set##name(ds_json::object &obj, double dValue) { obj.SetDouble(realname, dValue); } \
+    static bool IsNull##name(const ds_json::object &obj)       { return obj.IsNull(realname);     } \
+    static void SetNull##name(ds_json::object &obj)            { obj.SetNull(realname);           } \
 
 #define JSON_TEXT(name, realname) \
-	static std::wstring Get##name(const ds_jsonparser::object &obj)                    { return obj.GetText(realname); }              \
-	static void Set##name(ds_jsonparser::object &obj, const wchar_t *sValue)           { obj.SetText(realname, sValue); }             \
-    static void Set##name(ds_jsonparser::object &obj, const std::wstring &sValue)      { obj.SetText(realname, sValue.c_str()); }     \
-    static std::string Get##name##UTF8(const ds_jsonparser::object &obj)               { return obj.GetTextUTF8(realname); }          \
-    static void Set##name##UTF8(ds_jsonparser::object &obj, const char *sValue)        { obj.SetTextUTF8(realname, sValue); }         \
-    static void Set##name##UTF8(ds_jsonparser::object &obj, const std::string &sValue) { obj.SetTextUTF8(realname, sValue.c_str()); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)                         { return obj.IsNull(realname); }               \
-    static void SetNull##name(ds_jsonparser::object &obj)                              { obj.SetNull(realname); }                     \
+	static std::wstring Get##name(const ds_json::object &obj)                    { return obj.GetText(realname); }              \
+	static void Set##name(ds_json::object &obj, const wchar_t *sValue)           { obj.SetText(realname, sValue); }             \
+    static void Set##name(ds_json::object &obj, const std::wstring &sValue)      { obj.SetText(realname, sValue.c_str()); }     \
+    static std::string Get##name##UTF8(const ds_json::object &obj)               { return obj.GetTextUTF8(realname); }          \
+    static void Set##name##UTF8(ds_json::object &obj, const char *sValue)        { obj.SetTextUTF8(realname, sValue); }         \
+    static void Set##name##UTF8(ds_json::object &obj, const std::string &sValue) { obj.SetTextUTF8(realname, sValue.c_str()); } \
+    static bool IsNull##name(const ds_json::object &obj)                         { return obj.IsNull(realname); }               \
+    static void SetNull##name(ds_json::object &obj)                              { obj.SetNull(realname); }                     \
 
 #define JSON_BOOL(name, realname) \
-	static bool Get##name(const ds_jsonparser::object &obj)        { return obj.GetBool(realname); }  \
-	static void Set##name(ds_jsonparser::object &obj, bool bValue) { obj.SetBool(realname, bValue); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)     { return obj.IsNull(realname); }   \
-    static void SetNull##name(ds_jsonparser::object &obj)          { obj.SetNull(realname); }         \
+	static bool Get##name(const ds_json::object &obj)        { return obj.GetBool(realname); }  \
+	static void Set##name(ds_json::object &obj, bool bValue) { obj.SetBool(realname, bValue); } \
+    static bool IsNull##name(const ds_json::object &obj)     { return obj.IsNull(realname); }   \
+    static void SetNull##name(ds_json::object &obj)          { obj.SetNull(realname); }         \
 
 #define JSON_ARRAY(name, realname) \
-	static void Get##name(const ds_jsonparser::object &obj, ds_jsonparser::json_array &array) { obj.GetArray(realname, array); } \
-	static void Set##name(ds_jsonparser::object &obj, const ds_jsonparser::json_array &array) { obj.SetArray(realname, array); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)                                { return obj.IsNull(realname); }   \
-    static void SetNull##name(ds_jsonparser::object &obj)                                     { obj.SetNull(realname); }         \
+	static void Get##name(const ds_json::object &obj, ds_json::json_array &array) { obj.GetArray(realname, array); } \
+	static void Set##name(ds_json::object &obj, const ds_json::json_array &array) { obj.SetArray(realname, array); } \
+    static bool IsNull##name(const ds_json::object &obj)                                { return obj.IsNull(realname); }   \
+    static void SetNull##name(ds_json::object &obj)                                     { obj.SetNull(realname); }         \
 
 #define JSON_STRING_ARRAY(name, realname) \
-	static void Get##name(const ds_jsonparser::object &obj, std::vector<std::wstring> &array) { obj.GetStringArray(realname, array); } \
-	static void Set##name(ds_jsonparser::object &obj, const std::vector<std::wstring> &array) { obj.SetStringArray(realname, array); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)                                { return obj.IsNull(realname);         } \
-    static void SetNull##name(ds_jsonparser::object &obj)                                     { obj.SetNull(realname);               } \
+	static void Get##name(const ds_json::object &obj, std::vector<std::wstring> &array) { obj.GetStringArray(realname, array); } \
+	static void Set##name(ds_json::object &obj, const std::vector<std::wstring> &array) { obj.SetStringArray(realname, array); } \
+    static bool IsNull##name(const ds_json::object &obj)                                { return obj.IsNull(realname);         } \
+    static void SetNull##name(ds_json::object &obj)                                     { obj.SetNull(realname);               } \
 
 #define JSON_DATE(name, realname) \
-	static time_t Get##name(const ds_jsonparser::object &obj)        { return obj.GetDateTime(realname); }  \
-	static void Set##name(ds_jsonparser::object &obj, time_t nValue) { obj.SetDateTime(realname, nValue); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)       { return obj.IsNull(realname); }       \
-    static void SetNull##name(ds_jsonparser::object &obj)            { obj.SetNull(realname); }             \
+	static time_t Get##name(const ds_json::object &obj)        { return obj.GetDateTime(realname); }  \
+	static void Set##name(ds_json::object &obj, time_t nValue) { obj.SetDateTime(realname, nValue); } \
+    static bool IsNull##name(const ds_json::object &obj)       { return obj.IsNull(realname); }       \
+    static void SetNull##name(ds_json::object &obj)            { obj.SetNull(realname); }             \
 
 #define JSON_OBJECT(name, realname) \
-    static void Get##name(const ds_jsonparser::object &obj, ds_jsonparser::object &get_obj) { obj.GetJsonObject(realname, get_obj); } \
-	static void Set##name(ds_jsonparser::object &obj, const ds_jsonparser::object &set_obj) { obj.SetJsonObject(realname, set_obj); } \
-    static bool IsNull##name(const ds_jsonparser::object &obj)                              { return obj.IsNull(realname);          } \
-    static void SetNull##name(ds_jsonparser::object &obj)                                   { obj.SetNull(realname);                } \
+    static void Get##name(const ds_json::object &obj, ds_json::object &get_obj) { obj.GetJsonObject(realname, get_obj); } \
+	static void Set##name(ds_json::object &obj, const ds_json::object &set_obj) { obj.SetJsonObject(realname, set_obj); } \
+    static bool IsNull##name(const ds_json::object &obj)                              { return obj.IsNull(realname);          } \
+    static void SetNull##name(ds_json::object &obj)                                   { obj.SetNull(realname);                } \
 
 #endif

@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "SqLiteRecordsetImpl.h"
 
 #include "sqlite_copy_table.h"
@@ -208,7 +208,7 @@ CSqLiteRecordsetImpl::CSqLiteRecordsetImpl(CSqLiteDatabaseImpl *pDatabase, CSqLi
 : m_pDB(pDatabase), m_pErrorHandler(pErrorHandler), m_bEOF(true), m_stmt(nullptr), m_nEditRowId(-1), 
   m_pSaveData(nullptr), m_pFieldInfoData(nullptr), m_insert_stmt(nullptr), m_bSQLOpened(false), m_update_stmt(nullptr)
 {
-    
+ 
 }
 
 CSqLiteRecordsetImpl::~CSqLiteRecordsetImpl() 
@@ -935,6 +935,7 @@ void CSqLiteRecordsetImpl::SetFieldDateTime(const wchar_t *sFieldName, const tim
 
 bool CSqLiteRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
 {
+	// The sqlite3_stricmp() and sqlite3_strnicmp() APIs allow applications and extensions to compare the contents of two buffers containing UTF-8 strings in a case-independent fashion, using the same definition of "case independence" that SQLite uses internally when comparing identifiers. 
     const int nColumnIndex = FindColumnIndex(sFieldName);
     if ( nColumnIndex == -1 ) {
         const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);

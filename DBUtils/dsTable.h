@@ -18,8 +18,8 @@ class CAbsRecordset;
 // Expected AddNew/INSERT usage:
 // dsTable loader(pDB, _T("Table_Name");
 //  loader.AddNew();
-//      int nId = loader.GetFieldLong(_T("ID")); // after AddNew you can always retrieved new record key
-//      loader.SetFieldString(_T("Code"), _T("My_Code"));
+//      int nId = loader.GetFieldLong(L"ID"); // after AddNew you can always retrieved new record key
+//      loader.SetFieldString(L"Code", L"My_Code");
 //  loader.Update();
 class DB_UTILS_API dsTable
 {
@@ -101,83 +101,77 @@ public:
 private:
 	std::wstring m_sTableName;
 	CAbsRecordset *m_pSet;
-	dsDatabase  *m_pDatabase;
+	dsDatabase *m_pDatabase;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 //  macroses to define indexes and fields
 //
-			
+#define DS_WIDEN(quote) DS_WIDEN2(quote)
+#define DS_WIDEN2(quote) L##quote	
 // fields
 
 // Helper macros
 #define FIELD_INDICATORS(name, realname) \
-	bool IsNull##name()const noexcept { return IsFieldValueNull(realname); } \
-	bool DoesExist##name()   noexcept { return DoesFieldExist(realname);   } \
-    void SetNull##name()     noexcept { SetFieldNull(realname); }
+	bool IsNull##name()const noexcept { return IsFieldValueNull(DS_WIDEN(realname)); } \
+	bool DoesExist##name()   noexcept { return DoesFieldExist(DS_WIDEN(realname));   } \
+    void SetNull##name()     noexcept { SetFieldNull(DS_WIDEN(realname)); }
 		
 // Field macros with renaming
 
 #define FIELD_TEXT(name, realname) \
-	std::wstring Get##name() const             noexcept { return GetFieldString(realname);  } \
-	void Set##name(const wchar_t *sValue)      noexcept { SetFieldString(realname, sValue); } \
-    void Set##name(const std::wstring &sValue) noexcept { SetFieldString(realname, sValue.c_str()); } \
+	std::wstring Get##name() const             noexcept { return GetFieldString(DS_WIDEN(realname));  }         \
+	void Set##name(const wchar_t *sValue)      noexcept { SetFieldString(DS_WIDEN(realname), sValue); }         \
+    void Set##name(const std::wstring &sValue) noexcept { SetFieldString(DS_WIDEN(realname), sValue.c_str()); } \
+    std::string Get##name##UTF8() const        noexcept { return GetFieldStringUTF8(realname);  }				\
+	void Set##name##UTF8(const char *sValue)   noexcept { SetFieldStringUTF8(realname, sValue); }				\
 	FIELD_INDICATORS(name, realname)
-
-#define FIELD_TEXT_UTF8(name, realname_utf8) \
-    std::string Get##name##UTF8() const      noexcept { return GetFieldStringUTF8(realname_utf8);  } \
-	void Set##name##UTF8(const char *sValue) noexcept { SetFieldStringUTF8(realname_utf8, sValue); } \
 	
 #define FIELD_LONG(name, realname) \
-	int  Get##name() const      noexcept { return GetFieldLong(realname);  } \
-	void Set##name(long nValue) noexcept { SetFieldLong(realname, nValue); } \
+	int32_t Get##name() const         noexcept { return GetFieldLong(DS_WIDEN(realname));  } \
+	void    Set##name(int32_t nValue) noexcept { SetFieldLong(DS_WIDEN(realname), nValue); } \
 	FIELD_INDICATORS(name, realname)
 
 #define FIELD_DOUBLE(name, realname) \
-	double Get##name() const      noexcept { return GetFieldDouble(realname);  } \
-	void Set##name(double dValue) noexcept { SetFieldDouble(realname, dValue); } \
+	double Get##name() const      noexcept { return GetFieldDouble(DS_WIDEN(realname));  } \
+	void Set##name(double dValue) noexcept { SetFieldDouble(DS_WIDEN(realname), dValue); } \
 	FIELD_INDICATORS(name, realname)
 
 #define FIELD_BOOL(name, realname) \
-	bool Get##name() const      noexcept { return GetFieldBool(realname);  } \
-	void Set##name(bool bValue) noexcept { SetFieldBool(realname, bValue); } \
+	bool Get##name() const      noexcept { return GetFieldBool(DS_WIDEN(realname));  } \
+	void Set##name(bool bValue) noexcept { SetFieldBool(DS_WIDEN(realname), bValue); } \
 	FIELD_INDICATORS(name, realname)
 
 #define FIELD_BINARY(name, realname) \
-	void Get##name(unsigned char **pData, size_t &nSize) const noexcept { GetFieldBinary(realname, pData, nSize); } \
-	void Set##name(unsigned char *pData, size_t nSize)         noexcept { SetFieldBinary(realname, pData, nSize); } \
+	void Get##name(unsigned char **pData, size_t &nSize) const noexcept { GetFieldBinary(DS_WIDEN(realname), pData, nSize); } \
+	void Set##name(unsigned char *pData, size_t nSize)         noexcept { SetFieldBinary(DS_WIDEN(realname), pData, nSize); } \
 	FIELD_INDICATORS(name, realname)
 
 #define FIELD_RGB(name, realname) \
-	COLORREF Get##name() const     noexcept { return GetFieldRGB(realname); } \
-	void Set##name(COLORREF value) noexcept { SetFieldRGB(realname, value); } \
+	COLORREF Get##name() const     noexcept { return GetFieldRGB(DS_WIDEN(realname)); } \
+	void Set##name(COLORREF value) noexcept { SetFieldRGB(DS_WIDEN(realname), value); } \
 	FIELD_INDICATORS(name, realname)
 
 #define FIELD_DATE(name, realname) \
-	time_t Get##name() const      noexcept { return GetFieldDateTime(realname); } \
-	void Set##name(time_t nValue) noexcept { SetFieldDateTime(realname, nValue); } \
+	time_t Get##name() const      noexcept { return GetFieldDateTime(DS_WIDEN(realname)); } \
+	void Set##name(time_t nValue) noexcept { SetFieldDateTime(DS_WIDEN(realname), nValue); } \
 	FIELD_INDICATORS(name, realname)
 
 // indexes
 #define KEY_TEXT(name, realname) \
-	bool SeekBy##name(const wchar_t *sValue)           noexcept { return SeekIndex(realname, sValue);                }  \
-    bool SeekBy##name(const std::wstring &sValue)      noexcept { return SeekIndex(realname, sValue.c_str());        }  \
-	bool DeleteAllBy##name(const wchar_t *sValue)      noexcept { return DeleteAllByIndex(realname, sValue);         }  \
-    bool DeleteAllBy##name(const std::wstring &sValue) noexcept { return DeleteAllByIndex(realname, sValue.c_str()); }  \
-	bool DeleteBy##name(const wchar_t *sValue)         noexcept { return DeleteByIndex(realname, sValue);            }  \
-    bool DeleteBy##name(const std::wstring &sValue)    noexcept { return DeleteByIndex(realname, sValue.c_str());    }  \
+	bool SeekBy##name(const wchar_t *sValue)           noexcept { return SeekIndex(DS_WIDEN(realname), sValue);                }  \
+    bool SeekBy##name(const std::wstring &sValue)      noexcept { return SeekIndex(DS_WIDEN(realname), sValue.c_str());        }  \
+	bool DeleteAllBy##name(const wchar_t *sValue)      noexcept { return DeleteAllByIndex(DS_WIDEN(realname), sValue);         }  \
+    bool DeleteAllBy##name(const std::wstring &sValue) noexcept { return DeleteAllByIndex(DS_WIDEN(realname), sValue.c_str()); }  \
+	bool DeleteBy##name(const wchar_t *sValue)         noexcept { return DeleteByIndex(DS_WIDEN(realname), sValue);            }  \
+    bool DeleteBy##name(const std::wstring &sValue)    noexcept { return DeleteByIndex(DS_WIDEN(realname), sValue.c_str());    }  \
+	std::wstring GetUnique##name(const wchar_t *sPrefix, int32_t width) noexcept { return GetUniqueTextFieldValue(DS_WIDEN(realname), sPrefix, width); } \
     FIELD_TEXT(name, realname)
 	
 #define KEY_LONG(name, realname) \
-	bool SeekBy##name(int nValue)      noexcept { return SeekIndex(realname, nValue); } \
-	bool DeleteAllBy##name(int nValue) noexcept { return DeleteAllByIndex(realname, nValue); } \
-	bool DeleteBy##name(int nValue)    noexcept { return DeleteByIndex(realname, nValue); } \
+	bool SeekBy##name(int32_t nValue)      noexcept { return SeekIndex(DS_WIDEN(realname), nValue);        } \
+	bool DeleteAllBy##name(int32_t nValue) noexcept { return DeleteAllByIndex(DS_WIDEN(realname), nValue); } \
+	bool DeleteBy##name(int32_t nValue)    noexcept { return DeleteByIndex(DS_WIDEN(realname), nValue);    } \
     FIELD_LONG(name, realname)
-
-#define KEY_BOOL(name, realname) \
-	bool SeekBy##name(int nValue)      noexcept { return SeekIndex(realname, nValue); } \
-	bool DeleteAllBy##name(int nValue) noexcept { return DeleteAllByIndex(realname, nValue); } \
-	bool DeleteBy##name(int nValue)    noexcept { return DeleteByIndex(realname, nValue); } \
-    FIELD_BOOL(name, realname)
 
 #endif

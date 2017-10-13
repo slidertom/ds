@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "DBUtilsImpl.h"
 
 #ifdef _DEBUG
@@ -15,11 +15,12 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 	{
     case DLL_PROCESS_ATTACH:
         {
-		    TRACE(_T("DBUtilsImpl.DLL Initializing!\n"));
+		    TRACE(L"DBUtilsImpl.DLL Initializing!\n");
+            ::DisableThreadLibraryCalls(hInstance);
         }
         break;
     case DLL_PROCESS_DETACH:
-        TRACE(_T("DBUtilsImpl.DLL Terminating!\n"));
+        TRACE(L"DBUtilsImpl.DLL Terminating!\n");
         break;
 	}
 	

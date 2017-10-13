@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "AdoDotNetDatabaseImpl.h"
 
 #include "AdoDotNetImpl.h"
@@ -56,7 +56,7 @@ bool CAdoDotNetDatabaseImpl::Execute(const wchar_t *lpszSQL)
 void CAdoDotNetDatabaseImpl::Close() 
 {
 	m_pDatabase->Close();
-    m_sConnString = _T("");
+    m_sConnString = L"";
 }
 
 bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) 

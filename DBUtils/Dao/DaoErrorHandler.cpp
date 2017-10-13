@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "DaoErrorHandler.h"
 
 #include "afxdao.h"
@@ -23,9 +23,9 @@ namespace dao_exception_format
         }
 
         std::wstring sFormatted;
-        sFormatted = _T("DAO Exception [");
+        sFormatted = L"DAO Exception [";
         sFormatted += sFunctionName;
-        sFormatted += _T("] - ");
+        sFormatted += L"] - ";
         sFormatted += sErrorCode.c_str();
         sFormatted += szCause;
 

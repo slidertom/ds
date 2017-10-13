@@ -72,8 +72,8 @@ inline void _free_dbg2(
 	return _free_dbg(_Block, _BlockUse);
 }
 
-namespace std
-{
+namespace std 
+{   // rapid json uses: std::malloc 
 	inline void* _malloc_dbg(
 		size_t      _Size,
 		int         _BlockUse,
@@ -105,7 +105,7 @@ namespace std
 };
 #endif
 	#include "Windows.h"
-	#include "Collections/DebugUtils.h"
+	#include "Collections/debug_utils.h"
 #endif
 
 #define _BUILD_DB_UTILS_IMPL

@@ -4,7 +4,7 @@
 #ifdef __x86_64__ 
 	#define SS_ANSI
 	#pragma warning (disable : 4996) //disable depreciation of 'stricmp'
-	#include "Collections/DebugUtils.h"
+	#include "Collections/debug_utils.h"
 #endif
 
 #using <mscorlib.dll>

@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "dsDatabase.h"
 
 #ifndef __x86_64__ 
@@ -203,4 +203,9 @@ bool dsDatabase::CreateRelation(const wchar_t *sName, const wchar_t *sTable, con
 void dsDatabase::SetLogPath(const wchar_t *sLogPath) noexcept
 {
 	CLogImpl::SetLogPath(sLogPath);
+}
+
+dsDatabase::dbErrorHandler dsDatabase::GetErrorHandler()
+{
+	return m_pErrorHandler;
 }

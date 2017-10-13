@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "SqLiteDatabaseImpl.h"
 
 #include "sqlite_bind_util.h"

@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "rapid_impl.h"
 
 #include "../dsStrConv.h"
@@ -22,7 +22,7 @@
     #include "Rapidjson/writer.h"
 #endif
 
-namespace ds_jsonparser
+namespace ds_json
 {
     namespace _impl_rapid
     {

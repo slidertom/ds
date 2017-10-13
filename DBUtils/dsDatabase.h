@@ -108,6 +108,7 @@ public:
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) noexcept;
+	dbErrorHandler GetErrorHandler();
 
 // Attributes
 private:

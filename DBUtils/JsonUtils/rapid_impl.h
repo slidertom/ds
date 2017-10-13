@@ -4,7 +4,7 @@
 
 #include "string"
 
-namespace ds_jsonparser
+namespace ds_json
 {
     namespace _impl_rapid
     {

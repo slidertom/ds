@@ -1,12 +1,10 @@
-#include "StdAfx.h"
+#include "stdafx.h"
 #include "DaoRecordsetImpl.h"
 
 #include "DaoDatabaseUtil.h"
 #include "DaoDatabaseImpl.h"
 #include "DaoBinaryFieldUtil.h"
 #include "DaoErrorHandler.h"
-
-#include "Collections/OleDateTimeUtil.h"
 
 #include "../dsStrConv.h"
 
@@ -597,8 +595,23 @@ static inline COleDateTime GetDateTime(const TOleVariant &varSrc) {
 		return COleDateTime(varSrc);
 	}
 	COleDateTime dt;
-	dt.SetStatus (COleDateTime::null);
+	dt.SetStatus(COleDateTime::null);
 	return dt;
+}
+
+template <class TOleDateTime>
+static inline time_t OleDateTimeToTime(const TOleDateTime &oleDt)
+{
+    struct tm tmDate;
+	memset(&tmDate, 0, sizeof(tm));
+    tmDate.tm_sec  = oleDt.GetSecond();
+    tmDate.tm_min  = oleDt.GetMinute();
+    tmDate.tm_hour = oleDt.GetHour();
+    tmDate.tm_mday = oleDt.GetDay();
+    tmDate.tm_mon  = oleDt.GetMonth() - 1;
+    tmDate.tm_year = oleDt.GetYear() - 1900;
+    tmDate.tm_isdst = -1;
+    return mktime(&tmDate);
 }
 
 time_t CDaoRecordsetImpl::GetFieldDateTime(const wchar_t *sFieldName)
@@ -607,7 +620,7 @@ time_t CDaoRecordsetImpl::GetFieldDateTime(const wchar_t *sFieldName)
 		COleVariant var;
 		m_pSet->GetFieldValue(sFieldName, var);
 		COleDateTime time = ::GetDateTime(var);
-		return ::VariantToTime(time);
+		return ::OleDateTimeToTime(time);
 	}
 	catch (CDaoException *e) {
 		std::wstring sMsg = L"CDaoRecordsetImpl::GetFieldDateTime(field='";
