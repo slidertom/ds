@@ -21,20 +21,20 @@ DS is an exception free code
 Samples: 
 ```C++
 dsDatabase db;
-db.OpenDB(_T("database.sqlite")); // sqlite database 
-//db.OpenDB(_T("database.mdb")); // MS mdb database 
+db.OpenDB(L"database.sqlite"); // sqlite database 
+//db.OpenDB(L"database.mdb"); // MS mdb database 
 
 dsTable loader(&db, _T("Table_Name");
 loader.AddNew();
     // after AddNew you can always retrieved new record key
-    int nId = loader.GetFieldLong(_T("ID")); 
-    loader.SetFieldString(_T("Code"), _T("My_Code"));
+    int nId = loader.GetFieldLong(L"ID"); 
+    loader.SetFieldString(L"Code", L"My_Code");
 loader.Update();
 
-loader.SeekIndex(_T("ID"), nId);
-loader.GetFieldString(_T("Code"));
+loader.SeekIndex(L"ID", nId);
+loader.GetFieldString(L"Code");
 loader.Edit();
-    loader.SetFieldString(_T("Code"), _T("New_Code"));
+    loader.SetFieldString(L"Code", L"New_Code");
 loader.Update();
 ```
 
@@ -47,22 +47,22 @@ public:
 	virtual ~CCodeDescrLoader() { }
 
 public:
-    KEY_LONG(Id,   _T("ID"));
-    KEY_TEXT(Code, _T("CODE"));
-    FIELD_TEXT(Descr, _T("DESCRIPTION"));
+    KEY_LONG(Id,   "ID");
+    KEY_TEXT(Code, "CODE");
+    FIELD_TEXT(Descr, "DESCRIPTION");
 };
 
-CCodeDescrLoader loader(&db, _T("Table1"));
+CCodeDescrLoader loader(&db, L"Table1");
 loader.Flush(); // delete all records from the Table1
 loader.AddNew();
    int nNewId = loader.GetId();
-   loader.SetCode(_T("New"));
-   loader.SetDescr(_T("Descr"));
+   loader.SetCode(L"New");
+   loader.SetDescr(L"Descr");
 loader.Update();
 
 loader.DeleteById(nNewId); // do delete one record ID=nNewId
 // do delete all records from the Table1 with the code value: New
-loader.DeleteAllByCode(_T("New")); 
+loader.DeleteAllByCode(L"New"); 
 
 // do iterate all Table1 records and do retrieve code values
 std::vector<std::wstring> codes;
@@ -80,7 +80,7 @@ if ( loader.MoveFirst() )
 ```C++
 void OnDatabaseError(LPCTSTR sError) 
 {
-    TRACE(sError); TRACE(_T("\n"));
+    TRACE(sError); TRACE(L"\n");
 }
 
 dsDatabase db;
