@@ -51,8 +51,8 @@ public:
     KEY_TEXT(Code,    "CODE");
     FIELD_TEXT(Descr, "DESCRIPTION");
     FIELD_JSON(Data,  "DATA"); // Json based field
-	 JSON_TEXT(Remark,      "Remark");
-	 JSON_LONG(Order,       "Order");
+	 JSON_TEXT(Remark, "Remark"); // Data.Remark
+	 JSON_LONG(Order,  "Order");  // Data.Order
 };
 
 CCodeDescrLoader loader(&db);
@@ -64,7 +64,7 @@ loader.AddNew();
    ds_json::object obj;
    	CCodeDescrLoader::SetRemark(obj, "MyRemark");
 	CCodeDescrLoader::SetOrder(obj,  2);
-   loader.SetData(obj); // do store json field
+   loader.SetData(obj); // do store json data
 loader.Update();
 
 loader.DeleteById(nNewId); // do delete one record ID=nNewId
