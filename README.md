@@ -24,7 +24,7 @@ dsDatabase db;
 db.OpenDB(L"database.sqlite"); // sqlite database 
 //db.OpenDB(L"database.mdb"); // MS mdb database 
 
-dsTable loader(&db, _T("Table_Name");
+dsTable loader(&db, L"Table_Name");
 loader.AddNew();
     // after AddNew you can always retrieved new record key
     int nId = loader.GetFieldLong(L"ID"); 
@@ -58,7 +58,7 @@ public:
 };
 
 CCodeDescrLoader loader(&db);
-loader.Flush(); // delete all records from the Table1
+loader.Flush(); // delete all records from the MyTableName
 loader.AddNew();
    int nNewId = loader.GetId();
    loader.SetCode(L"New");
