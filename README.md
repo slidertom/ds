@@ -53,6 +53,8 @@ public:
     FIELD_JSON(Data,  "DATA"); // Json based field
 	 JSON_TEXT(Remark, "Remark"); // Data.Remark
 	 JSON_LONG(Order,  "Order");  // Data.Order
+	 // NOTE: new fields can be always added, old fields can be always deleted
+	 // no changes required in the sqlite or mdb file/database structure.
 };
 
 CCodeDescrLoader loader(&db);
