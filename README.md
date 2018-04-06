@@ -16,25 +16,25 @@ Text field type addition: [**Json**](https://en.wikipedia.org/wiki/JSON) format 
 
 If you're a [**NoSQL**](https://en.wikipedia.org/wiki/NoSQL) type of person and SQL based database usage can not be avoided, then this might fit the bill perfectly.
 
-DS is an exception free code
+DS is an **exception free** code.
 
 Samples: 
 ```C++
 dsDatabase db;
-db.OpenDB(_T("database.sqlite")); // sqlite database 
-//db.OpenDB(_T("database.mdb")); // MS mdb database 
+db.OpenDB(L"database.sqlite"); // sqlite database 
+//db.OpenDB(L"database.mdb"); // MS mdb database 
 
-dsTable loader(&db, _T("Table_Name");
+dsTable loader(&db, L"Table_Name");
 loader.AddNew();
     // after AddNew you can always retrieved new record key
-    int nId = loader.GetFieldLong(_T("ID")); 
-    loader.SetFieldString(_T("Code"), _T("My_Code"));
+    int nId = loader.GetFieldLong(L"ID"); 
+    loader.SetFieldString(L"Code", L"My_Code");
 loader.Update();
 
-loader.SeekIndex(_T("ID"), nId);
-loader.GetFieldString(_T("Code"));
+loader.SeekIndex(L"ID", nId);
+loader.GetFieldString(L"Code");
 loader.Edit();
-    loader.SetFieldString(_T("Code"), _T("New_Code"));
+    loader.SetFieldString(L"Code", L"New_Code");
 loader.Update();
 ```
 
@@ -42,27 +42,36 @@ loader.Update();
 class CCodeDescrLoader : public dsTable
 {
 public:
-	CCodeDescrLoader(dsDatabase *pDatabase, LPCTSTR sTableName)
-	: dsTable(pDatabase, sTableName) { }
-	virtual ~CCodeDescrLoader() { }
+    CCodeDescrLoader(dsDatabase *pDatabase)
+       : dsTable(pDatabase, L"MyTableName") { }
+    virtual ~CCodeDescrLoader() { }
 
 public:
-    KEY_LONG(Id,   _T("ID"));
-    KEY_TEXT(Code, _T("CODE"));
-    FIELD_TEXT(Descr, _T("DESCRIPTION"));
+    KEY_LONG(Id,      "ID");
+    KEY_TEXT(Code,    "CODE");
+    FIELD_TEXT(Descr, "DESCRIPTION");
+    FIELD_JSON(Data,  "DATA"); // Json based field
+	 JSON_TEXT(Remark, "Remark"); // Data.Remark
+	 JSON_LONG(Order,  "Order");  // Data.Order
+	 // NOTE: new fields can be always added, old fields can be always deleted
+	 // no changes are required in the sqlite or mdb file/database structure.
 };
 
-CCodeDescrLoader loader(&db, _T("Table1"));
-loader.Flush(); // delete all records from the Table1
+CCodeDescrLoader loader(&db);
+loader.Flush(); // delete all records from the MyTableName
 loader.AddNew();
    int nNewId = loader.GetId();
-   loader.SetCode(_T("New"));
-   loader.SetDescr(_T("Descr"));
+   loader.SetCode(L"New");
+   loader.SetDescr(L"Descr");
+   ds_json::object obj;
+   	CCodeDescrLoader::SetRemark(obj, "MyRemark");
+	CCodeDescrLoader::SetOrder(obj,  2);
+   loader.SetData(obj); // do store json data
 loader.Update();
 
 loader.DeleteById(nNewId); // do delete one record ID=nNewId
 // do delete all records from the Table1 with the code value: New
-loader.DeleteAllByCode(_T("New")); 
+loader.DeleteAllByCode(L"New"); 
 
 // do iterate all Table1 records and do retrieve code values
 std::vector<std::wstring> codes;
@@ -80,7 +89,7 @@ if ( loader.MoveFirst() )
 ```C++
 void OnDatabaseError(LPCTSTR sError) 
 {
-    TRACE(sError); TRACE(_T("\n"));
+    TRACE(sError); TRACE(L"\n");
 }
 
 dsDatabase db;
