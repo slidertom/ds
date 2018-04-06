@@ -41,25 +41,25 @@ namespace ds_json
         _impl::destroy(m_impl);
     }
 
-    void object::SetText(const char* sField, const wchar_t *value) {
+    void object::SetText(const char *sField, const wchar_t *value) {
         const std::string value_str = ds_str_conv::ConvertToUTF8(value);
         _impl::set_field_string(m_impl, sField, value_str.c_str());
     }
-    void object::SetTextUTF8(const char* sField, const char *sVal) {
+    void object::SetTextUTF8(const char *sField, const char *sVal) {
         _impl::set_field_string(m_impl, sField, sVal);
     }
-    void object::SetDouble(const char* sField, double value) {
+    void object::SetDouble(const char *sField, double value) {
         _impl::set_field_double(m_impl, sField, value);
     }
-    void object::SetInteger(const char* sField, int value) {
+    void object::SetInteger(const char *sField, int value) {
         _impl::set_field_int(m_impl, sField, value);
     }
-    void object::SetArray(const char *sField, const json_array &array) {
+    void object::SetArray(const char *sField, const array &array) {
         _impl::set_field_array(m_impl, sField, array.m_impl);
     }
 	void object::SetStringArray(const char *sField, const std::vector<std::wstring> &array)
 	{
-		ds_json::json_array array_json;
+		ds_json::array array_json;
 		for (const auto &it : array) {
 			array_json.AddString(it.c_str());
 		}
@@ -85,12 +85,12 @@ namespace ds_json
         _impl::get_field_string(m_impl, sField, value_str);
         return value_str;
     }
-    void object::GetArray(const char *sField, json_array &array) const {
+    void object::GetArray(const char *sField, array &array) const {
         _impl::get_field_array(m_impl, sField, array.m_impl);
     }
 	void object::GetStringArray(const char *sField, std::vector<std::wstring> &array) const
 	{
-		json_array array_json;
+		ds_json::array array_json;
 		_impl::get_field_array(m_impl, sField, array_json.m_impl);
 		const size_t nCnt = array_json.GetSize();
 		for (size_t i = 0; i < nCnt; ++i) {
@@ -135,53 +135,53 @@ namespace ds_json
         _impl::obj2str(obj.m_impl, sJson);
     }
 
-    json_array::json_array() : m_impl(nullptr) {
+    array::array() : m_impl(nullptr) {
         _impl::create_array(m_impl);
     }
-    json_array::~json_array() {
+    array::~array() {
         _impl::destroy(m_impl);
     }
-    void json_array::AddObject(const object &obj) {
+    void array::AddObject(const object &obj) {
         _impl::add_array_object(m_impl, obj.m_impl);
     }
-    void json_array::SetObject(int i, const object &obj) {
+    void array::SetObject(int i, const object &obj) {
         _impl::set_array_object(m_impl, i, obj.m_impl);
     }
-    void json_array::AddString(const char *str) {
+    void array::AddString(const char *str) {
         _impl::add_array_string(m_impl, str);
     }
-    void json_array::AddString(const wchar_t *str) {
+    void array::AddString(const wchar_t *str) {
         std::string sValue = ds_str_conv::ConvertToUTF8(str);
         _impl::add_array_string(m_impl, sValue.c_str());
     }
-	void json_array::AddInt(int nValue) {
+	void array::AddInt(int nValue) {
 		_impl::add_array_int(m_impl, nValue);
 	}
 
-    size_t json_array::GetSize() const {
+    size_t array::GetSize() const {
         return _impl::get_array_size(m_impl);
     }
-    std::string json_array::GetStringUTF8(size_t i) const {
+    std::string array::GetStringUTF8(size_t i) const {
         std::string sValue;
         _impl::get_array_string(m_impl, i, sValue);
         return sValue;
     }
-    std::wstring json_array::GetString(size_t i) const {
+    std::wstring array::GetString(size_t i) const {
         const std::string sValue = GetStringUTF8(i);
         return ds_str_conv::ConvertFromUTF8(sValue.c_str());
     }
-	int json_array::GetInt(size_t i) const {
+	int array::GetInt(size_t i) const {
 		return _impl::get_array_int(m_impl, i);
 	}
     
-    void json_array::GetJsonObject(size_t i, object &obj) const {
+    void array::GetJsonObject(size_t i, object &obj) const {
         _impl::get_array_object(m_impl, i, obj.m_impl);
     }
     
-    void str2obj(const char* sJson, json_array &obj) {
+    void str2obj(const char* sJson, array &obj) {
         _impl::str2obj(sJson, obj.m_impl);
     }
-    void obj2str(const json_array &obj, std::string &sJson) {
+    void obj2str(const array &obj, std::string &sJson) {
         _impl::obj2str(obj.m_impl, sJson);
     }
 };

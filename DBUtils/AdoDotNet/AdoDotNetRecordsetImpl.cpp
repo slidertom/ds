@@ -10,7 +10,7 @@
 #endif
 
 CAdoDotNetRecordsetImpl::CAdoDotNetRecordsetImpl(CDotNetDatabaseAbs *pDatabase)
-	:m_pDB(pDatabase)
+: m_pDB(pDatabase)
 {
 	m_pSet = CAdoDotNetUtils::CreateRecordSet(pDatabase);
 }
@@ -124,10 +124,8 @@ int CAdoDotNetRecordsetImpl::GetRecordCount() const
         return false;
     }
     
-    const long nCount = loader.GetFieldLong(L"RecordCount");
+    const int32_t nCount = loader.GetFieldInt32(L"RecordCount");
     return nCount;
- 
-    return -1;
 }
 
 void CAdoDotNetRecordsetImpl::SetFieldValueNull(const wchar_t *lpszName)
@@ -138,6 +136,13 @@ void CAdoDotNetRecordsetImpl::SetFieldValueNull(const wchar_t *lpszName)
 bool CAdoDotNetRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName) 
 {
 	return m_pSet->DoesFieldExist(sFieldName);
+}
+
+bool CAdoDotNetRecordsetImpl::SeekByString(const char *sIndex, const char *sValue)
+{
+    const std::wstring sIndexW = ds_str_conv::ConvertFromUTF8(sIndex);
+    const std::wstring sValueW = ds_str_conv::ConvertFromUTF8(sValue);
+    return this->SeekByString(sIndexW.c_str(), sValueW.c_str());
 }
 
 bool CAdoDotNetRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValue)
@@ -169,7 +174,12 @@ bool CAdoDotNetRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t 
 	return !m_pSet->IsEmpty();
 }
 
-bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, int nValue)
+bool CAdoDotNetRecordsetImpl::SeekByLong(const char *sIndex, int32_t nValue)      
+{
+    return SeekByLong(ds_str_conv::ConvertFromUTF8(sIndex).c_str(), nValue);
+}
+
+bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, int32_t nValue)
 {
 	if ( _tcslen(sIndex) <= 0 ) {
 		ASSERT(FALSE);
@@ -205,12 +215,22 @@ std::wstring CAdoDotNetRecordsetImpl::GetFieldString(const wchar_t *sFieldName)
 	return m_pSet->GetFieldString(sFieldName);
 }
 
-int CAdoDotNetRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
+int32_t CAdoDotNetRecordsetImpl::GetFieldInt32(const char *sFieldName) 
+{
+    return GetFieldInt32(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+}
+
+int32_t CAdoDotNetRecordsetImpl::GetFieldInt32(const wchar_t *sFieldName)
 {
 	return m_pSet->GetFieldLong(sFieldName);
 }
 
-void CAdoDotNetRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, int lValue)
+void CAdoDotNetRecordsetImpl::SetFieldInt32(const char *sFieldName, int32_t lValue)
+{
+    SetFieldInt32(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), lValue);
+}
+
+void CAdoDotNetRecordsetImpl::SetFieldInt32(const wchar_t *sFieldName, int32_t lValue)
 {
 	m_pSet->SetFieldLong(sFieldName, lValue);
 }

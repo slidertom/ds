@@ -142,7 +142,7 @@ namespace sqlite_util
             sSQL += "'";
             if ( auto_increment_loader.OpenSQLUTF8(sSQL.c_str()) ) {
                 if ( auto_increment_loader.MoveFirstImpl() ) {
-                    bAutoIncrement = auto_increment_loader.GetFieldLong(_T("COUNT(*)")) > 0;
+                    bAutoIncrement = auto_increment_loader.GetFieldInt32(L"COUNT(*)") > 0;
                 }
             }
         }
@@ -167,9 +167,9 @@ namespace sqlite_util
             CFieldInfo field_info;
             const std::string sColumn = loader.GetFieldStringUTF8("name");
             field_info.m_sType        = loader.GetFieldStringUTF8("type");
-            field_info.m_bNotNull     = loader.GetFieldLong(_T("notnull")) == 1;
+            field_info.m_bNotNull     = loader.GetFieldInt32("notnull") == 1;
             field_info.m_sDefault     = loader.GetFieldStringUTF8("dflt_value");
-            field_info.m_bPrimary     = loader.GetFieldLong(_T("pk")) == 1;
+            field_info.m_bPrimary     = loader.GetFieldInt32("pk") == 1;
             if ( field_info.m_bPrimary ) {
                 field_info.m_bAutoIncrement = bAutoIncrement;
             } else {

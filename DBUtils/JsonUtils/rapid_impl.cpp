@@ -95,8 +95,16 @@ namespace ds_json
                 doc->AddMember(rapidjson::StringRef(sField), value, allocator);
             }
             else {
-                rapidjson::Value &value = found->value;
-                value.SetString(value_str, strlen(value_str), allocator);
+                const auto nLen = ::strlen(value_str);
+                //if (nLen == 0) {
+                // currently we can not do this: as it can break 3'rd party applications:
+                // MatrixProject and WebKozijn (php, js layers) -> both applications don't check does value exists. 
+                //    doc->EraseMember(found);
+                //}
+                //else {
+                    rapidjson::Value &value = found->value;
+                    value.SetString(value_str, nLen, allocator);
+                //}
             }
         }
 

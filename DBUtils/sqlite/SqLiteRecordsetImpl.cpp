@@ -415,7 +415,7 @@ void CSqLiteRecordsetImpl::AddNew()
                 //  AddNew()
                 //      GetFieldLong("ID"); // primary key
                 //  Update()
-    SeekByLongUTF8("ROWID", (long)m_nEditRowId); 
+    SeekByLong("ROWID", (long)m_nEditRowId); 
 }
 
 void CSqLiteRecordsetImpl::Edit()
@@ -700,7 +700,7 @@ int CSqLiteRecordsetImpl::GetRecordCount() const
         return false;
     }
     
-    const int nCount = loader.GetFieldLong(_T("COUNT(*)"));
+    const int32_t nCount = loader.GetFieldInt32("COUNT(*)");
     return nCount;
 }
 
@@ -718,12 +718,10 @@ bool CSqLiteRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName)
 	return false;
 }
 
-bool CSqLiteRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValue)
+bool CSqLiteRecordsetImpl::SeekByString(const char *sIndex, const char *sValue)
 {
     CloseStatement();
 
-    const std::string sIndexUTF8 = ds_str_conv::ConvertToUTF8(sIndex);
-    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
     // TODO:
     // http://zetcode.com/db/sqlitec/ -> could be done optimization -> 
     // do use prepared statements and bind operations
@@ -731,9 +729,9 @@ bool CSqLiteRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sV
     std::string sFind  = "SELECT ROWID,* FROM ";
                 sFind += m_sTable;
                 sFind += " WHERE ";
-                sFind += sIndexUTF8;
+                sFind += sIndex;
                 sFind += " = '";
-                sFind += sValueUTF8;
+                sFind += sValue;
                 sFind += "' COLLATE NOCASE";
 	//sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s'", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
     // NOCASE as "DB BROWSER" does not care about NOCASE attributes inside CREATE statement
@@ -748,13 +746,20 @@ bool CSqLiteRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sV
     return false;
 }
 
-bool CSqLiteRecordsetImpl::SeekByLong(const wchar_t *sIndex, int nValue)
+bool CSqLiteRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValue)
 {
     const std::string sIndexUTF8 = ds_str_conv::ConvertToUTF8(sIndex);
-    return SeekByLongUTF8(sIndexUTF8.c_str(), nValue);
+    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
+    return this->SeekByString(sIndexUTF8.c_str(), sValueUTF8.c_str());
 }
 
-bool CSqLiteRecordsetImpl::SeekByLongUTF8(const char *sIndexUTF8, long nValue)
+bool CSqLiteRecordsetImpl::SeekByLong(const wchar_t *sIndex, int32_t nValue)
+{
+    const std::string sIndexUTF8 = ds_str_conv::ConvertToUTF8(sIndex);
+    return SeekByLong(sIndexUTF8.c_str(), nValue);
+}
+
+bool CSqLiteRecordsetImpl::SeekByLong(const char *sIndexUTF8, int32_t nValue)
 {
     CloseStatement();
 
@@ -849,7 +854,13 @@ int64_t CSqLiteRecordsetImpl::GetFieldInt64(const wchar_t *sFieldName)
 	return sqlite3_column_int64(m_stmt, nColumnIndex);
 }
 
-int CSqLiteRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
+int32_t CSqLiteRecordsetImpl::GetFieldInt32(const char *sFieldName) 
+{
+    const std::wstring sFieldNameW = ds_str_conv::ConvertFromUTF8(sFieldName);
+    return GetFieldInt32(sFieldNameW.c_str());
+}
+
+int32_t CSqLiteRecordsetImpl::GetFieldInt32(const wchar_t *sFieldName)
 {
     ASSERT(m_stmt);
     const int nColumnIndex = FindColumnIndex(sFieldName);
@@ -862,7 +873,12 @@ int CSqLiteRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 	return sqlite3_column_int(m_stmt, nColumnIndex);
 }
 
-void CSqLiteRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, int lValue)
+void CSqLiteRecordsetImpl::SetFieldInt32(const char *sFieldName, int32_t lValue)
+{
+    SetFieldInt32(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), lValue);
+}
+
+void CSqLiteRecordsetImpl::SetFieldInt32(const wchar_t *sFieldName, int32_t lValue)
 {
     ASSERT(m_pSaveData);
     const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
@@ -990,18 +1006,22 @@ bool CSqLiteRecordsetImpl::MoveNext()
 
 bool CSqLiteRecordsetImpl::MoveFirst() 
 {
-	if ( !m_bSQLOpened )//already opened by OpenSQL
-	{
-		CloseStatement(); // sqlite3_reset would be enough if m_stmt and m_stmt.sql == sSQL
+	CloseStatement(); // sqlite3_reset would be enough if m_stmt and m_stmt.sql == sSQL
+	ASSERT(!m_sTable.empty());
+	std::string sSQL;
 
-		ASSERT(!m_sTable.empty());
-		std::string sSQL  = "SELECT ROWID,* FROM ";
-					sSQL += m_sTable;
-		if ( !OpenImpl(sSQL.c_str()) ) {
-            return false;
-        }
+	if ( m_bSQLOpened ) {//already opened by OpenSQL with SELECT statement
+		sSQL = m_sTable;
 	}
-    
+	else {
+		sSQL  = "SELECT ROWID,* FROM ";
+		sSQL += m_sTable;
+	}
+
+	if ( !OpenImpl(sSQL.c_str()) ) {
+            return false;
+    }
+	    
     return MoveFirstImpl();
 }
 
@@ -1057,19 +1077,16 @@ bool CSqLiteRecordsetImpl::OpenImpl(const char *sql)
     return true;
 }
 
-bool CSqLiteRecordsetImpl::DeleteAllByStringValue(const wchar_t *sField, const wchar_t *sValue)
+bool CSqLiteRecordsetImpl::DeleteAllByStringValueUTF8(const char *sField, const char *sValue)
 {
     ASSERT(!m_sTable.empty());
-
-    const std::string sFieldUTF8 = ds_str_conv::ConvertToUTF8(sField);
-    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
 
     std::string sSQL  = "DELETE FROM ";
                 sSQL += m_sTable;
                 sSQL += " WHERE ";
-                sSQL += sFieldUTF8;
+                sSQL += sField;
                 sSQL += " = '";
-                sSQL += sValueUTF8;
+                sSQL += sValue;
                 sSQL += "'";
 
     if ( m_pDB->ExecuteUTF8(sSQL.c_str()) ) {
@@ -1079,7 +1096,14 @@ bool CSqLiteRecordsetImpl::DeleteAllByStringValue(const wchar_t *sField, const w
     return false;
 }
 
-bool CSqLiteRecordsetImpl::DeleteAllByLongValue(const wchar_t *sField, int nValue)
+bool CSqLiteRecordsetImpl::DeleteAllByStringValue(const wchar_t *sField, const wchar_t *sValue)
+{
+    const std::string sFieldUTF8 = ds_str_conv::ConvertToUTF8(sField);
+    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
+    return DeleteAllByStringValueUTF8(sFieldUTF8.c_str(), sValueUTF8.c_str());
+}
+
+bool CSqLiteRecordsetImpl::DeleteAllByLongValue(const wchar_t *sField, int32_t nValue)
 {
     ASSERT(!m_sTable.empty());
 
@@ -1109,7 +1133,7 @@ void CSqLiteRecordsetImpl::Flush()
     m_pDB->ExecuteUTF8(sSQL.c_str());
 }
 
-bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, int nValue)
+bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, int32_t nValue)
 {   
     const std::string sFieldUTF8 = ds_str_conv::ConvertToUTF8(sField);
     const std::string sValueUTF8 = std::to_string(nValue);
@@ -1137,11 +1161,8 @@ bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, int nValue)
     return true;
 }
 
-bool CSqLiteRecordsetImpl::DeleteByStringValue(const wchar_t *sField, const wchar_t *sValue)
+bool CSqLiteRecordsetImpl::DeleteByStringValueUTF8(const char *sField, const char *sValue)
 {
-    const std::string sFieldUTF8 = ds_str_conv::ConvertToUTF8(sField);
-    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
-
     // https://groups.google.com/forum/#!topic/android-developers/rrmbsKyKRCE
     // Unfortunately SQLite does not support the LIMIT clause in DELETE statements. But I think you could get around with something else:
     // DELETE FROM MyTable WHERE _id IN (SELECT _id FROM MyTable WHERE XYZ ORDER BY Col LIMIT 5);
@@ -1152,9 +1173,9 @@ bool CSqLiteRecordsetImpl::DeleteByStringValue(const wchar_t *sField, const wcha
     sDelete += " WHERE RowId IN (SELECT RowId FROM ";
     sDelete += m_sTable;
     sDelete += " WHERE ";
-    sDelete += sFieldUTF8;
+    sDelete += sField;
     sDelete += " = '";
-    sDelete += sValueUTF8;
+    sDelete += sValue;
     sDelete += "' LIMIT 1)";
 
     const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
@@ -1163,6 +1184,13 @@ bool CSqLiteRecordsetImpl::DeleteByStringValue(const wchar_t *sField, const wcha
         return false;
     }
     return true;
+}
+
+bool CSqLiteRecordsetImpl::DeleteByStringValue(const wchar_t *sField, const wchar_t *sValue)
+{
+    const std::string sFieldUTF8 = ds_str_conv::ConvertToUTF8(sField);
+    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
+    return DeleteByStringValueUTF8(sFieldUTF8.c_str(), sValueUTF8.c_str());
 }
 
 int CSqLiteRecordsetImpl::GetColumnCount() const

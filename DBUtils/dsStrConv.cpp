@@ -7,7 +7,7 @@
 #include "limits"
 #include "algorithm"
 #include "functional"
-
+//#include "codecvt"
 #ifdef _DEBUG
 	#define new DEBUG_NEW
 #endif
@@ -26,13 +26,16 @@ namespace ds_str_conv
         if ( nLen <= 0  ) {
             return std::string();
         }
-
+        
         const int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], nLen, NULL, 0, NULL, NULL);
-
         std::string strTo(size_needed, 0);
+        // Win32's UTF8 transcode since Vista uses SSE internally to great effect
         WideCharToMultiByte(CP_UTF8, 0, &wstr[0], nLen, &strTo[0], size_needed, NULL, NULL);
-
         return strTo;
+        // https://stackoverflow.com/questions/26196686/utf8-utf16-codecvt-poor-performance
+        //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter_utf8_utf16;
+        //const std::string str_utf8 = converter_utf8_utf16.to_bytes(wstr);
+        //return str_utf8;
     }
 
     // Convert an UTF8 string to a wide Unicode String
@@ -46,13 +49,17 @@ namespace ds_str_conv
         if ( nLen <= 0 ) {
             return std::wstring();
         }
-
+        
         int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], nLen, NULL, 0);
-
         std::wstring wstrTo(size_needed, 0);
+        // Win32's UTF8 transcode since Vista uses SSE internally to great effect
         MultiByteToWideChar(CP_UTF8, 0, &str[0], nLen, &wstrTo[0], size_needed);
-
         return wstrTo;
+
+        // https://stackoverflow.com/questions/26196686/utf8-utf16-codecvt-poor-performance
+        //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter_utf8_utf16;
+        //const std::wstring str_utf16 = converter_utf8_utf16.from_bytes(str);
+        //return str_utf16;      
     }
 
     long string_to_long(const char *sValue)

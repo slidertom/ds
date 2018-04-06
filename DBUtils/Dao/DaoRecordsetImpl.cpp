@@ -418,12 +418,20 @@ static inline COleVariant MakeVariant(const wchar_t *strSrc) {
 		return COleVariant(strSrc, VT_BSTRT);
     }
 }
+
+bool CDaoRecordsetImpl::SeekByString(const char *sIndex, const char *sValue)
+{
+    const std::wstring sIndexW = ds_str_conv::ConvertFromUTF8(sIndex);
+    const std::wstring sValueW = ds_str_conv::ConvertFromUTF8(sValue);
+    return this->SeekByString(sIndexW.c_str(), sValueW.c_str());
+}
+
 bool CDaoRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValue)
 {
 	SetIndex(sIndex);
 
 	try {
-		return m_pSet->Seek(_T("="), &MakeVariant(sValue)) != FALSE;
+		return m_pSet->Seek(L"=", &MakeVariant(sValue)) != FALSE;
 	}
 	catch (CDaoException *e) {
 		std::wstring sMsg = L"CDaoRecordsetImpl::SeekByString(index='";
@@ -441,7 +449,12 @@ bool CDaoRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValu
 	return false;
 }
 
-bool CDaoRecordsetImpl::SeekByLong(const wchar_t *sIndex, int nValue)
+bool CDaoRecordsetImpl::SeekByLong(const char *sIndex, int32_t nValue)      
+{
+    return SeekByLong(ds_str_conv::ConvertFromUTF8(sIndex).c_str(), nValue);
+}
+
+bool CDaoRecordsetImpl::SeekByLong(const wchar_t *sIndex, int32_t nValue)
 {
 	SetIndex(sIndex);
 
@@ -506,7 +519,17 @@ void CDaoRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar_t 
 	}
 }
 
-int CDaoRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
+int32_t CDaoRecordsetImpl::GetFieldInt32(const char *sFieldName) 
+{
+    return GetFieldInt32(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+}
+
+void CDaoRecordsetImpl::SetFieldInt32(const char *sFieldName, int32_t lValue)
+{
+    SetFieldInt32(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), lValue);
+}
+
+int32_t CDaoRecordsetImpl::GetFieldInt32(const wchar_t *sFieldName)
 {
 	try {
 		COleVariant var;
@@ -527,7 +550,7 @@ int CDaoRecordsetImpl::GetFieldLong(const wchar_t *sFieldName)
 	return 0;
 }
 
-void CDaoRecordsetImpl::SetFieldLong(const wchar_t *sFieldName, int lValue)
+void CDaoRecordsetImpl::SetFieldInt32(const wchar_t *sFieldName, int32_t lValue)
 {
 	try {
 		m_pSet->SetFieldValue(sFieldName, (long)lValue);

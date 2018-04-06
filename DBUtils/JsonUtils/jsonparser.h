@@ -10,7 +10,7 @@
 
 namespace ds_json
 {
-    class json_array;
+    class array;
 
     class DB_UTILS_API object
     {
@@ -26,7 +26,7 @@ namespace ds_json
         void SetDateTime(const char* sField, time_t value);
         void SetBool(const char *sField, bool bValue) { SetInteger(sField, bValue ? 1 : 0); }
         void SetJsonObject(const char *sField, const object &obj); // json prefix applied to avoid conflicts with the general funcion name  SetObject
-        void SetArray(const char *sField, const json_array &array);
+        void SetArray(const char *sField, const array &array);
 		void SetStringArray(const char *sField, const std::vector<std::wstring> &array);
         void SetNull(const char *sField);
 
@@ -35,7 +35,7 @@ namespace ds_json
         double       GetDouble(const char *sField) const;
         int          GetInteger(const char *sField) const;
         bool         GetBool(const char *sField) const { return GetInteger(sField) != 0; }
-        void         GetArray(const char *sField, json_array &array) const;
+        void         GetArray(const char *sField, array &array) const;
 		void         GetStringArray(const char *sField, std::vector<std::wstring> &array) const;
         time_t       GetDateTime(const char *sField) const;
         bool         GetJsonObject(const char *sField, object &obj) const; // json prefix applied to avoid conflicts with the general funcion name GetObject
@@ -52,12 +52,12 @@ namespace ds_json
     void DB_UTILS_API obj2str(const object &obj, std::string &sJson);
 
     // json array support
-    class DB_UTILS_API json_array
+    class DB_UTILS_API array
     {
     // Construction/Destruction
     public:
-        json_array();
-        ~json_array();
+        array();
+        ~array();
 
     // Operations
     public:
@@ -74,24 +74,24 @@ namespace ds_json
         void GetJsonObject(size_t i, object &obj) const; // prefix json used as GetObject quite general function and can be defined
 
     private:
-        json_array(json_array &x);
-        const json_array& operator =(const json_array& x); // copy is disabled by rapidjson
+        array(array &x);
+        const array& operator =(const array& x); // copy is disabled by rapidjson
 
     public:
         void *m_impl;
     };
 
-    void DB_UTILS_API str2obj(const char *sJson, json_array &obj);
-    void DB_UTILS_API obj2str(const json_array &obj, std::string &sJson);
+    void DB_UTILS_API str2obj(const char *sJson, array &obj);
+    void DB_UTILS_API obj2str(const array &obj, std::string &sJson);
 };
 
 #define FIELD_JSON(name, realname) \
 	void Get##name(ds_json::object &object) const        { ds_json::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
-	void Set##name(const ds_json::json_array &object)    { std::string sJson; ds_json::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
-    void Get##name(ds_json::json_array &object) const    { ds_json::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
+	void Set##name(const ds_json::array &object)         { std::string sJson; ds_json::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
+    void Get##name(ds_json::array &object) const         { ds_json::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
 	void Set##name(const ds_json::object &object)        { std::string sJson; ds_json::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
-    static bool IsNull##name(const ds_json::object &obj) { return obj.IsNull(realname); }                                                                           \
-    static void SetNull##name(ds_json::object &obj)      { obj.SetNull(realname); }                                                                                 \
+    static bool IsNull##name(const ds_json::object &obj) { return obj.IsNull(realname); }                                                                     \
+    static void SetNull##name(ds_json::object &obj)      { obj.SetNull(realname); }                                                                           \
 
 #define JSON_LONG(name, realname) \
 	static long Get##name(const ds_json::object &obj)        { return obj.GetInteger(realname);  } \
@@ -122,8 +122,8 @@ namespace ds_json
     static void SetNull##name(ds_json::object &obj)          { obj.SetNull(realname); }         \
 
 #define JSON_ARRAY(name, realname) \
-	static void Get##name(const ds_json::object &obj, ds_json::json_array &array) { obj.GetArray(realname, array); } \
-	static void Set##name(ds_json::object &obj, const ds_json::json_array &array) { obj.SetArray(realname, array); } \
+	static void Get##name(const ds_json::object &obj, ds_json::array &array)            { obj.GetArray(realname, array); } \
+	static void Set##name(ds_json::object &obj, const ds_json::array &array)            { obj.SetArray(realname, array); } \
     static bool IsNull##name(const ds_json::object &obj)                                { return obj.IsNull(realname); }   \
     static void SetNull##name(ds_json::object &obj)                                     { obj.SetNull(realname); }         \
 

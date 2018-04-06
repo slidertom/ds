@@ -66,7 +66,7 @@ namespace sqlite_util
                     case dsFieldType_Integer:
                         {
                             const int nValue = src_table.GetFieldLong(sFieldName);
-                            dst_table.SetFieldLong(sFieldName, nValue);
+                            dst_table.SetFieldInt32(sFieldName, nValue);
                         }
                         break;
                     case dsFieldType_Double:

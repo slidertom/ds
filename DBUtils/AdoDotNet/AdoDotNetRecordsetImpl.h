@@ -49,8 +49,10 @@ public:
     virtual std::string GetFieldStringUTF8(const char *sFieldName) override;
 	virtual void SetFieldStringUTF8(const char *sFieldName, const char *sValue) override;
 
-	virtual int  GetFieldLong(const wchar_t *sFieldName) override;
-	virtual void SetFieldLong(const wchar_t *sFieldName, int lValue) override;
+	virtual int32_t  GetFieldInt32(const wchar_t *sFieldName) override;
+    virtual int32_t  GetFieldInt32(const char *sFieldName) override;
+	virtual void SetFieldInt32(const wchar_t *sFieldName, int32_t lValue) override;
+    virtual void SetFieldInt32(const char *sFieldName, int32_t lValue)  override;
 
 	virtual double GetFieldDouble(const wchar_t *sFieldName) override;
 	virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
@@ -62,7 +64,9 @@ public:
 	virtual bool DoesFieldExist(const wchar_t *sFieldName) override;
 
 	virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) override;
-	virtual bool SeekByLong(const wchar_t *sIndex, int nValue) override;
+    virtual bool SeekByString(const char *sIndex, const char *sValue)       override;
+	virtual bool SeekByLong(const wchar_t *sIndex, int32_t nValue)          override;
+    virtual bool SeekByLong(const char    *sIndex,   int32_t nValue)        override;
 
 private:
 	void OpenImpl();

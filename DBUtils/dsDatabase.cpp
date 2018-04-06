@@ -71,7 +71,7 @@ std::wstring dsDatabase::GetName() const noexcept
 bool dsDatabase::DoesTableExist(const char *sTable) const noexcept
 {
     ASSERT(m_pDatabase);
-    std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
+    const std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
 	return m_pDatabase->DoesTableExist(sTableUTF16.c_str());
 }
 
