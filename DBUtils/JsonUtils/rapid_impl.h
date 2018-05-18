@@ -19,14 +19,16 @@ namespace ds_json
         void create(void *&impl);
         void destroy(void *impl);
         void set_field_string(void *impl, const char *sField, const char *value_str);
-        void set_field_int(void *impl, const char *sField, const int nValue);
+        void set_field_int32(void *impl, const char *sField, const int32_t nValue);
+        void set_field_int64(void *impl, const char *sField, const int64_t nValue);
         void set_field_double(void *impl, const char *sField, const double dValue);
         void set_field_object(void *impl, const char *sField, void *obj);
         void set_field_date_time(void *impl, const char *sField, time_t nValue);
         void set_field_array(void *impl, const char *sField, void *obj);
         void set_field_null(void *impl, const char *sField);
         bool get_field_object(void *impl, const char *sField, void *obj);
-        bool get_field_int(void *impl, const char *sField, int &nValue);
+        bool get_field_int32(void *impl, const char *sField, int32_t &nValue);
+        bool get_field_int64(void *impl, const char *sField, int64_t &nValue);
         bool get_field_double(void *impl, const char *sField, double &dValue);
         bool get_field_string(void *impl, const char *sField, std::string &value_str);
         bool get_field_date_time(void *impl, const char *sField, time_t &nValue);
@@ -38,11 +40,13 @@ namespace ds_json
         //////////////////////////////////////////////////////////
         void create_array(void *&impl);
         void add_array_string(void *impl, const char *str);
-		void add_array_int(void *impl, int nValue);
+		void add_array_int32(void *impl, int32_t nValue);
+        void add_array_int64(void *impl, int64_t nValue);
         void add_array_object(void *impl, const void *obj);
         size_t get_array_size(const void *impl);
         void get_array_string(const void *impl, size_t i, std::string &sValue);
-		int get_array_int(const void *impl, size_t i);
+		int32_t get_array_int32(const void *impl, size_t i);
+        int64_t get_array_int64(const void *impl, size_t i);
         void get_array_object(const void *impl, size_t i, void *obj);
         void set_array_object(void *impl, size_t i, const void *obj);
     }

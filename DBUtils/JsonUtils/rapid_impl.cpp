@@ -123,7 +123,22 @@ namespace ds_json
             }
         }
 
-        void set_field_int(void *impl, const char *sField, const int nValue) 
+        void set_field_int64(void *impl, const char *sField, const int64_t nValue)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+            if ( found == doc->MemberEnd() ) {
+                rapidjson::Value value;
+                value.SetInt64(nValue);
+                doc->AddMember(rapidjson::StringRef(sField), value, doc->GetAllocator());
+            }
+            else {
+                rapidjson::Value &value = found->value;
+                value.SetInt64(nValue);
+            }
+        }
+
+        void set_field_int32(void *impl, const char *sField, const int32_t nValue) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             rapidjson::Document::MemberIterator found = doc->FindMember(sField);
@@ -301,16 +316,8 @@ namespace ds_json
             return false;
         }
 
-        bool get_field_int(void *impl, const char *sField, int &nValue)
+        static inline bool rapid_value_to_int64(const rapidjson::Value &value, int64_t &nValue)
         {
-            rapidjson::Document *doc = (rapidjson::Document *)impl;
-            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
-            if ( found == doc->MemberEnd() ) {
-                return false;
-            }
-
-            const rapidjson::Value &value = found->value;
-
             if ( value.IsInt() ) {
                 nValue = value.GetInt();
                 return true;
@@ -320,11 +327,11 @@ namespace ds_json
                 return true;
             }
             else if ( value.IsInt64() ) {
-                nValue = (int)value.GetInt64();
+                nValue = value.GetInt64();
                 return true;
             }
             else if ( value.IsUint64() ) {
-                nValue = (int)value.GetInt64();
+                nValue = value.GetInt64();
                 return true;
             }
             else if ( value.IsString() ) {
@@ -334,6 +341,55 @@ namespace ds_json
             
             ASSERT(FALSE);
             return false;
+        }
+
+        bool get_field_int64(void *impl, const char *sField, int64_t &nValue)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+            if ( found == doc->MemberEnd() ) {
+                return false;
+            }
+            const rapidjson::Value &value = found->value;
+            return rapid_value_to_int64(value, nValue);
+        }
+
+        static inline bool rapid_value_to_int32(const rapidjson::Value &value, int32_t &nValue)
+        {
+            if ( value.IsInt() ) {
+                nValue = value.GetInt();
+                return true;
+            }
+            else if ( value.IsUint() ) {
+                nValue = value.GetInt();
+                return true;
+            }
+            else if ( value.IsInt64() ) {
+                nValue = (int32_t)value.GetInt64();
+                return true;
+            }
+            else if ( value.IsUint64() ) {
+                nValue = (int32_t)value.GetInt64();
+                return true;
+            }
+            else if ( value.IsString() ) {
+                nValue = ds_str_conv::string_to_long(value.GetString()); // ~= atoi(value_str.c_str());
+                return true;
+            }
+            
+            ASSERT(FALSE);
+            return false;
+        }
+
+        bool get_field_int32(void *impl, const char *sField, int32_t &nValue)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+            if ( found == doc->MemberEnd() ) {
+                return false;
+            }
+            const rapidjson::Value &value = found->value;
+            return rapid_value_to_int32(value, nValue);
         }
 
         bool get_field_double(void *impl, const char *sField, double &dValue)
@@ -404,7 +460,18 @@ namespace ds_json
             doc->PushBack(value, allocator);
         }
 
-		void add_array_int(void *impl, int nValue) 
+        void add_array_int64(void *impl, int64_t nValue)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            ASSERT(doc->IsArray());
+
+            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
+            rapidjson::Value value;
+            value.SetInt64(nValue);
+            doc->PushBack(value, allocator);
+        }
+
+		void add_array_int32(void *impl, int32_t nValue) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             ASSERT(doc->IsArray());
@@ -445,17 +512,28 @@ namespace ds_json
             internal::value2str(value, sValue);
         }
 
-		int get_array_int(const void *impl, size_t i)
+		int32_t get_array_int32(const void *impl, size_t i)
 		{
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             const rapidjson::Value &value = (*doc)[i];
-            if ( value.IsInt() ) {
-                return value.GetInt();
+            int32_t nValue = 0;
+            if ( rapid_value_to_int32(value, nValue) ) {
+                return nValue;
             }
-			
 			return 0;
 		}
-        
+
+        int64_t get_array_int64(const void *impl, size_t i)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            const rapidjson::Value &value = (*doc)[i];
+            int64_t nValue = 0;
+            if ( rapid_value_to_int64(value, nValue) ) {
+                return nValue;
+            }
+            return 0;
+        }
+
         void set_array_object(void *impl, size_t i, const void *obj)
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;

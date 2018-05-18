@@ -51,8 +51,11 @@ namespace ds_json
     void object::SetDouble(const char *sField, double value) {
         _impl::set_field_double(m_impl, sField, value);
     }
-    void object::SetInteger(const char *sField, int value) {
-        _impl::set_field_int(m_impl, sField, value);
+    void object::SetInt32(const char *sField, int32_t value) {
+        _impl::set_field_int32(m_impl, sField, value);
+    }
+    void object::SetInt64(const char* sField, int64_t value) {
+        _impl::set_field_int64(m_impl, sField, value);
     }
     void object::SetArray(const char *sField, const array &array) {
         _impl::set_field_array(m_impl, sField, array.m_impl);
@@ -74,7 +77,7 @@ namespace ds_json
     std::wstring object::GetText(const char *sField) const {
         std::string value_str;
         if (!_impl::get_field_string(m_impl, sField, value_str)) {
-            return _T("");
+            return L"";
         }
         const std::wstring value = ds_str_conv::ConvertFromUTF8(value_str.c_str());
         return value;
@@ -104,13 +107,21 @@ namespace ds_json
         }
         return dValue;
     }
-    int object::GetInteger(const char *sField) const {
-        int nValue = 0;
-        if (!_impl::get_field_int(m_impl, sField, nValue)) {
+    int32_t object::GetInt32(const char *sField) const {
+        int32_t nValue = 0;
+        if (!_impl::get_field_int32(m_impl, sField, nValue)) {
             return 0;
         }
         return nValue;
     }
+    int64_t object::GetInt64(const char *sField) const {
+        int64_t nValue = 0;
+        if (!_impl::get_field_int64(m_impl, sField, nValue)) {
+            return 0;
+        }
+        return nValue;
+    }
+
     bool object::GetJsonObject(const char *sField, object &obj) const {
         return _impl::get_field_object(m_impl, sField, obj.m_impl);
     }
@@ -144,8 +155,11 @@ namespace ds_json
     void array::AddObject(const object &obj) {
         _impl::add_array_object(m_impl, obj.m_impl);
     }
-    void array::SetObject(int i, const object &obj) {
+    void array::SetObject(size_t i, const object &obj) {
         _impl::set_array_object(m_impl, i, obj.m_impl);
+    }
+    void array::AddArray(const array &array) {
+        _impl::add_array_object(m_impl, array.m_impl);
     }
     void array::AddString(const char *str) {
         _impl::add_array_string(m_impl, str);
@@ -154,8 +168,11 @@ namespace ds_json
         std::string sValue = ds_str_conv::ConvertToUTF8(str);
         _impl::add_array_string(m_impl, sValue.c_str());
     }
-	void array::AddInt(int nValue) {
-		_impl::add_array_int(m_impl, nValue);
+    void array::AddInt64(int64_t nValue) {
+        _impl::add_array_int64(m_impl, nValue);
+    }
+	void array::AddInt32(int32_t nValue) {
+		_impl::add_array_int32(m_impl, nValue);
 	}
 
     size_t array::GetSize() const {
@@ -170,8 +187,11 @@ namespace ds_json
         const std::string sValue = GetStringUTF8(i);
         return ds_str_conv::ConvertFromUTF8(sValue.c_str());
     }
-	int array::GetInt(size_t i) const {
-		return _impl::get_array_int(m_impl, i);
+    int64_t array::GetInt64(size_t i) const {
+        return _impl::get_array_int64(m_impl, i);
+    }
+	int32_t array::GetInt32(size_t i) const {
+		return _impl::get_array_int32(m_impl, i);
 	}
     
     void array::GetJsonObject(size_t i, object &obj) const {
