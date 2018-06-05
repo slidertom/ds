@@ -830,7 +830,7 @@ std::wstring CSqLiteRecordsetImpl::GetFieldString(const wchar_t *sFieldName)
         const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
         const std::string sPathUTF8 = ds_str_conv::ConvertToUTF8(m_pDB->GetName().c_str());
         ::OnColumnIndexFailed(m_pErrorHandler, sFieldNameUTF8.c_str(), "CSqLiteRecordsetImpl::GetFieldString", m_sTable.c_str(), sPathUTF8.c_str());
-        return _T("");
+        return L"";
     }
 	const char *localValue = (const char*)sqlite3_column_text(m_stmt, nColumnIndex);
     return ds_str_conv::ConvertFromUTF8(localValue);

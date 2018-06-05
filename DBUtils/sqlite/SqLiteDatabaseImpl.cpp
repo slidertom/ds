@@ -323,7 +323,7 @@ bool CSqLiteDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sT
 {
 	//ASSERT(FALSE);
 	//Impl must be simillar to
-	//sCreateRelSQL.Format(_T("ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE"), sTable1, sRelName, sField1, sTable2, sField2);
+	//sCreateRelSQL.Format(L"ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE", sTable1, sRelName, sField1, sTable2, sField2);
 	//pDB->ExecuteSQL(sCreateRelSQL.c_str());
 	return true;
 }
