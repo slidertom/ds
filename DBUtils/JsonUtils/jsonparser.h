@@ -152,6 +152,12 @@ namespace ds_json
 	static void Set##name(ds_json::object &obj, double dValue) { obj.SetDouble(realname, dValue); } \
     JSON_NULL(name, realname) \
 
+// default: 0.0 -> if default do not save
+#define JSON_DOUBLE_EX(name, realname) \
+	static double Get##name(const ds_json::object &obj)        { return obj.GetDouble(realname);  } \
+	static void Set##name(ds_json::object &obj, double dValue) { if ( (dValue > DBL_EPSILON) || (dValue < -DBL_EPSILON) ) { obj.SetDouble(realname, dValue); } } \
+    JSON_NULL(name, realname) \
+
 #define JSON_TEXT(name, realname) \
 	static std::wstring Get##name(const ds_json::object &obj)                    { return obj.GetText(realname); }              \
 	static void Set##name(ds_json::object &obj, const wchar_t *sValue)           { obj.SetText(realname, sValue); }             \
@@ -174,6 +180,12 @@ namespace ds_json
 #define JSON_BOOL(name, realname) \
 	static bool Get##name(const ds_json::object &obj)        { return obj.GetBool(realname); }  \
 	static void Set##name(ds_json::object &obj, bool bValue) { obj.SetBool(realname, bValue); } \
+    JSON_NULL(name, realname) \
+
+// default: false
+#define JSON_BOOL_EX(name, realname) \
+	static bool Get##name(const ds_json::object &obj)        { return obj.GetBool(realname); }  \
+	static void Set##name(ds_json::object &obj, bool bValue) { if ( bValue ) { obj.SetBool(realname, bValue); } } \
     JSON_NULL(name, realname) \
 
 #define JSON_ARRAY(name, realname) \
