@@ -117,7 +117,7 @@ public:
     std::wstring GetColumnName(int32_t nCol) noexcept;
     dsFieldType GetColumnType(int32_t nCol) noexcept;
 
-	const wchar_t *GetTableName() const noexcept;
+	std::wstring GetTableName() const noexcept;
 
     std::wstring GetUniqueTextFieldValue(const wchar_t *sFieldName, const wchar_t *sPrefix, int width) noexcept; 
 
@@ -144,11 +144,12 @@ private:
 // Field macros with renaming
 
 #define FIELD_TEXT(name, realname) \
-	std::wstring Get##name() const             noexcept { return GetFieldString(DS_WIDEN(realname));          } \
-	void Set##name(const wchar_t *sValue)      noexcept { SetFieldString(DS_WIDEN(realname), sValue);         } \
-    void Set##name(const std::wstring &sValue) noexcept { SetFieldString(DS_WIDEN(realname), sValue.c_str()); } \
-    std::string Get##name##UTF8() const        noexcept { return GetFieldStringUTF8(realname);                } \
-	void Set##name##UTF8(const char *sValue)   noexcept { SetFieldStringUTF8(realname, sValue);               } \
+	std::wstring Get##name() const                  noexcept { return GetFieldString(DS_WIDEN(realname));          } \
+	void Set##name(const wchar_t *sValue)           noexcept { SetFieldString(DS_WIDEN(realname), sValue);         } \
+    void Set##name(const std::wstring &sValue)      noexcept { SetFieldString(DS_WIDEN(realname), sValue.c_str()); } \
+    std::string Get##name##UTF8() const             noexcept { return GetFieldStringUTF8(realname);                } \
+	void Set##name##UTF8(const char *sValue)        noexcept { SetFieldStringUTF8(realname, sValue);               } \
+    void Set##name##UTF8(const std::string &sValue) noexcept { SetFieldStringUTF8(realname, sValue.c_str());       } \
 	FIELD_INDICATORS(name, realname)
 	
 #define FIELD_LONG(name, realname) \

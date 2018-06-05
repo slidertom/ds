@@ -405,9 +405,9 @@ bool dsTable::DeleteByIndex(const char *sField, int32_t nValue) noexcept
     return m_pSet->DeleteByLongValue(sField, nValue);
 }
 
-const wchar_t *dsTable::GetTableName() const noexcept
+std::wstring dsTable::GetTableName() const noexcept
 {
-    return m_sTableName.c_str();
+    return m_sTableName;
 }
 
 std::string dsTable::GetFieldStringUTF8(const char *sFieldName) const noexcept
