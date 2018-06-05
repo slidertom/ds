@@ -19,7 +19,7 @@ namespace ds_str_conv
     //void MakeUpper(std::string &str);
 
     template <typename... T>
-    std::wstring FormatStr(LPCTSTR pszFormat, const T & ... args)
+    std::wstring FormatStr(const wchar_t *pszFormat, const T & ... args)
     {
         const int sz = std::swprintf(nullptr, 0, pszFormat, args...);
         std::vector<wchar_t> buf(sz + 1); // note +1 for null terminator

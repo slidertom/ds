@@ -117,7 +117,7 @@ namespace ds_str_conv
     }
     */
     /*
-    std::wstring FormatStr(LPCTSTR pszFormat, ...)
+    std::wstring FormatStr(const wchar_t *pszFormat, ...)
     {
         va_list arglist;
 	    va_start(arglist, pszFormat);
