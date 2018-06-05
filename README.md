@@ -52,7 +52,7 @@ public:
     FIELD_TEXT(Descr, "DESCRIPTION");
     FIELD_JSON(Data,  "DATA"); // Json based field
 	 JSON_TEXT(Remark, "Remark"); // Data.Remark
-	 JSON_LONG(Order,  "Order");  // Data.Order
+	 JSON_INT32(Order,  "Order"); // Data.Order
 	 // NOTE: new fields can be always added, old fields can be always deleted
 	 // no changes are required in the sqlite or mdb file/database structure.
 };
