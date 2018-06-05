@@ -8,8 +8,8 @@
 
 template <class TDatabase>
 inline bool DaoCheckAddDBField(TDatabase *pDB, 
-							   LPCTSTR sTableName, 
-							   LPCTSTR sFieldName, 
+							   const wchar_t *sTableName, 
+							   const wchar_t *sFieldName, 
 							   short nType, 
 							   long lSize =0L, long lAttributes = dbFixedField)
 {

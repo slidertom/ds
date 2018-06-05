@@ -750,7 +750,7 @@ std::wstring CDaoRecordsetImpl::GetColumnName(int nCol) const
     try {
         CDaoFieldInfo fi;
         m_pSet->GetFieldInfo(nCol, fi);
-        return (LPCTSTR)fi.m_strName;
+        return (const wchar_t *)fi.m_strName;
     }
     catch (CDaoException *e) {
 		std::wstring sMsg = L"CDaoRecordsetImpl::GetColumnName(";
