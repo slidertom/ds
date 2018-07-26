@@ -37,8 +37,8 @@ public:
 	
 // Operations
 public:
-    void RegisterListener(dsDatabaseListener *pListner) noexcept;
-    void UnregisterListener(dsDatabaseListener *pListner) noexcept;
+    void RegisterListener(dsDatabaseListener *pListener) noexcept;
+    void UnregisterListener(dsDatabaseListener *pListener) noexcept;
 
 // Status functions
 public:
@@ -56,19 +56,19 @@ public:
 	void CommitTrans() noexcept; 
 	void RollbackTrans() noexcept;    
 
-	bool Execute(const wchar_t *lpszSQL) noexcept; 
+	bool Execute(const wchar_t *sSQL) noexcept; 
 	
     void Close() noexcept;
 
 	class dsParams
 	{
 	public:
-		dsParams() : m_bReadOnly(false), m_bMultiUser(false) {};
-		~dsParams() {};
+		dsParams() { }
+		~dsParams() { }
 
 	public:
-		bool m_bReadOnly;
-		bool m_bMultiUser;
+        bool m_bReadOnly  {false};
+        bool m_bMultiUser {false};
 		std::wstring m_sKey;
 	};
 
@@ -103,7 +103,7 @@ public:
     bool DoesTableExist(const char *sTable) const noexcept; 
 
 	void DeleteRelation(const wchar_t *sRelation) noexcept; 
-	bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+	bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 						const wchar_t *sField, const wchar_t *sForeignField) noexcept;
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 

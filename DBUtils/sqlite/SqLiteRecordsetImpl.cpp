@@ -66,8 +66,8 @@
 typedef struct UnlockNotification UnlockNotification;
 struct UnlockNotification {
   bool bFired;                    /* True after unlock event has occurred */
-  std::condition_variable cond; /* Condition variable to wait on */
-  std::mutex mutex;             /* Mutex to protect structure */
+  std::condition_variable cond;   /* Condition variable to wait on */
+  std::mutex mutex;               /* Mutex to protect structure */
 };
 
 /*
@@ -205,8 +205,7 @@ static void OnColumnIndexFailed(CSqLiteErrorHandler *pErrorHandler,
 }
 
 CSqLiteRecordsetImpl::CSqLiteRecordsetImpl(CSqLiteDatabaseImpl *pDatabase, CSqLiteErrorHandler *pErrorHandler)
-: m_pDB(pDatabase), m_pErrorHandler(pErrorHandler), m_bEOF(true), m_stmt(nullptr), m_nEditRowId(-1), 
-  m_pSaveData(nullptr), m_pFieldInfoData(nullptr), m_insert_stmt(nullptr), m_bSQLOpened(false), m_update_stmt(nullptr)
+: m_pDB(pDatabase), m_pErrorHandler(pErrorHandler)
 {
  
 }
@@ -316,18 +315,16 @@ static sqlite3_stmt *Prepare(sqlite3 *pDB, const char *sql, CSqLiteErrorHandler 
 
 bool CSqLiteRecordsetImpl::Delete()
 {
-    const int nRowId = ::sqlite3_column_int(m_stmt, 0); // 0 column always holds row id
-
+    const int32_t nRowId = ::sqlite3_column_int(m_stmt, 0); // 0 column always holds row id
     const std::string sRowId = std::to_string(nRowId);
     
     std::string sDelete  = "DELETE FROM ";
                 sDelete += m_sTable;
                 sDelete += " WHERE ROWID = ";
                 sDelete += sRowId;
-	//sDelete.Format("DELETE FROM %s WHERE ROWID = %d", m_sTable.c_str(), nRowId);
-    const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
-    if ( nRetVal == -1 ) {
-        OnErrorCode(nRetVal, "CSqLiteRecordsetImpl::Delete()");
+    const bool bRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
+    if ( !bRetVal ) {
+        OnErrorCode(-1, "CSqLiteRecordsetImpl::Delete()");
         return false;
     }
     return true;
@@ -1216,7 +1213,7 @@ dsFieldType CSqLiteRecordsetImpl::GetColumnType(int nCol) const
     // Future versions of SQLite may change the behavior of sqlite3_column_type() following a type conversion.
 
     ASSERT(m_stmt);
-    int nType = sqlite3_column_type(m_stmt, nCol);
+    int32_t nType = sqlite3_column_type(m_stmt, nCol);
     switch (nType)
     {
     case SQLITE_INTEGER:

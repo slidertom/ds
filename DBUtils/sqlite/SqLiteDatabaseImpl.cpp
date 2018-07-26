@@ -282,11 +282,10 @@ std::wstring CSqLiteDatabaseImpl::GetName()
 	return m_sFilePath;
 }
 
-bool CSqLiteDatabaseImpl::DoesTableExist(const wchar_t *sTable)
+bool CSqLiteDatabaseImpl::DoesTableExistUTF8(const char *sTable)
 {
-    std::string sTableUTF8 = ds_str_conv::ConvertToUTF8(sTable);
-    std::string sSQL  = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = '";
-                sSQL += sTableUTF8;
+     std::string sSQL  = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = '";
+                sSQL += sTable;
                 sSQL += "' COLLATE NOCASE";
     
     CSqLiteRecordsetImpl loader(this, m_pErrorHandler);
@@ -299,6 +298,12 @@ bool CSqLiteDatabaseImpl::DoesTableExist(const wchar_t *sTable)
     }
     
     return true;
+}
+
+bool CSqLiteDatabaseImpl::DoesTableExist(const wchar_t *sTable)
+{
+    std::string sTableUTF8 = ds_str_conv::ConvertToUTF8(sTable);
+    return DoesTableExistUTF8(sTableUTF8.c_str());
 }
 
 CAbsRecordset *CSqLiteDatabaseImpl::CreateRecordset()
@@ -318,7 +323,7 @@ void CSqLiteDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
     //sqlite3_exec
 }
 
-bool CSqLiteDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+bool CSqLiteDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 									     const wchar_t *sField, const wchar_t *sForeignField)
 {
 	//ASSERT(FALSE);
@@ -340,10 +345,9 @@ bool CSqLiteDatabaseImpl::ExecuteUTF8(const char *sqlUTF8)
 	do
     {
         rc = sqlite3_exec(m_pDB, sqlUTF8, 0, 0, &localError);
-
         if ( rc == SQLITE_LOCKED || rc == SQLITE_LOCKED_SHAREDCACHE || rc == SQLITE_BUSY)
         {
-            nRepeatCount++;
+            ++nRepeatCount;
             Sleep(SQLTM_TIME);
         }
 		

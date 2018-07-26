@@ -17,22 +17,16 @@ namespace dao_database_util
 	    {
 		    case VT_R4:
 			    return pSrc->fltVal;
-
 		    case VT_R8:
 			    return pSrc->dblVal;
-
 		    case VT_BOOL:
 			    return V_BOOL(pSrc);
-
 		    case VT_UI1:
 			    return pSrc->bVal;
-
 		    case VT_I2:
 			    return pSrc->iVal;
-
 		    case VT_I4:
 			    return pSrc->lVal;
-
 		    case VT_CY:
 			    return (double)COleCurrency(varSrc).m_cur.int64 / 10000;
 	    }
@@ -49,22 +43,16 @@ namespace dao_database_util
 	    {
 		    case VT_R4:
 			    return (int)pSrc->fltVal;
-
 		    case VT_R8:
 			    return (int)pSrc->dblVal;
-
 		    case VT_BOOL:
 			    return V_BOOL(pSrc);
-
 		    case VT_UI1:
 			    return pSrc->bVal;
-
 		    case VT_I2:
 			    return pSrc->iVal;
-
 		    case VT_I4:
 			    return pSrc->lVal;
-
 		    case VT_BSTR:
 			    return _ttoi((const wchar_t *)pSrc->bstrVal);
 	    }

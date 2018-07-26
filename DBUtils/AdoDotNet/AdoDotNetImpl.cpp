@@ -368,7 +368,7 @@ public:
 	}
 
 public:
-	LPCTSTR GetConnection() { return m_sConn.c_str(); }
+	const wchar_t *GetConnection() { return m_sConn.c_str(); }
 
 private:
 	std::wstring m_sConn;

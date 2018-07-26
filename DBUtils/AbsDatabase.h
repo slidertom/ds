@@ -24,7 +24,7 @@ public:
 	virtual bool CommitTrans() = 0; 
 	virtual bool Rollback()    = 0; 
 
-	virtual bool Execute(const wchar_t *lpszSQL) = 0; 
+	virtual bool Execute(const wchar_t *sSQL) = 0; 
 
     virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) = 0;
     
@@ -34,8 +34,9 @@ public:
 	virtual bool IsOpen()     const = 0;
 
 	virtual std::wstring GetName() = 0;
-
+    // do leave possibility for the realization to use the best encoding system
 	virtual bool DoesTableExist(const wchar_t *sTable) = 0;
+    virtual bool DoesTableExistUTF8(const char *sTable) = 0;
 
 	virtual CAbsRecordset *CreateRecordset() = 0;
 
@@ -44,7 +45,7 @@ public:
     virtual bool CompactDatabase() = 0;
 
 	virtual void DeleteRelation(const wchar_t *sRelation) = 0;
-	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 								const wchar_t *sField, const wchar_t *sForeignField) = 0;
 
     virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) = 0;
@@ -57,13 +58,11 @@ namespace ds_table_field_info_util
 {
     inline void fields_union(dsTableFieldInfo &union_info, const dsTableFieldInfo &src_info, const dsTableFieldInfo &dst_info)
     {
-        auto end_it = src_info.end();
-        for (auto it = src_info.begin(); it != end_it; ++it) 
-        {
-            if ( dst_info.find(it->first.c_str()) == dst_info.end() ) {
+        for (auto &elem : src_info) {
+            if ( dst_info.find(elem.first.c_str()) == dst_info.end() ) {
                 continue;
             }
-            union_info[it->first] = it->second;
+            union_info[elem.first] = elem.second;
         }
     }    
 

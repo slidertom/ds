@@ -5,6 +5,7 @@
 #include "DAOExtensions.h"
 #include "DaoErrorHandler.h"
 
+#include "../dsStrConv.h"
 #include "afxdao.h"
 
 #include "string"
@@ -200,11 +201,16 @@ std::wstring CDaoDatabaseImpl::GetName()
     return sName;
 }
 
+bool CDaoDatabaseImpl::DoesTableExistUTF8(const char *sTable)
+{
+    std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
+    return DoesTableExist(sTableUTF16.c_str());
+}
+
 bool CDaoDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
 	bool bTableExists = false;
-	try
-	{
+	try {
 		CDaoTableDefInfo tabInfo;
 		int nTableCount = m_pDatabase->GetTableDefCount();
 		for (int i1 = 0; i1 < nTableCount; ++i1)
@@ -217,8 +223,7 @@ bool CDaoDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 			}
 		}
 	}
-	catch (CDaoException *e)
-	{
+	catch (CDaoException *e) {
 		ASSERT(FALSE);
         m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::DoesTableExist");
 		e->Delete();
@@ -318,24 +323,22 @@ CDaoDatabaseImpl::dbErrorHandler CDaoDatabaseImpl::SetErrorHandler(CDaoDatabaseI
 
 void CDaoDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
 {
-	try
-	{
+	try {
 		m_pDatabase->DeleteRelation(sRelation);
 	}
 	catch (CDaoException *e) {
         ASSERT(FALSE);
-		m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::DeleteRelation"); //#24884
+		m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::DeleteRelation"); 
 		e->Delete();
     }
 }
 
-bool CDaoDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+bool CDaoDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 									  const wchar_t *sField, const wchar_t *sForeignField)
 {
 	ASSERT(m_pDatabase);
 
-	try
-	{
+	try {
 		m_pDatabase->CreateRelation(sName, sTable, sForeignTable, lAttr, sField, sForeignField);
 	}
     catch (CDaoException *e) {

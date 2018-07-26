@@ -66,7 +66,7 @@ public:
 	virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) override;
     virtual bool SeekByString(const char *sIndex, const char *sValue)       override;
 	virtual bool SeekByLong(const wchar_t *sIndex, int32_t nValue)          override;
-    virtual bool SeekByLong(const char    *sIndex,   int32_t nValue)        override;
+    virtual bool SeekByLong(const char    *sIndex, int32_t nValue)          override;
 
 private:
 	void OpenImpl();

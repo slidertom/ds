@@ -4,6 +4,8 @@
 #include "AdoDotNetImpl.h"
 #include "AdoDotNetRecordsetImpl.h"
 
+#include "../dsStrConv.h"
+
 #ifdef _DEBUG
 	#define new DEBUG_NEW
 #endif
@@ -20,7 +22,6 @@ bool CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(const wchar_t *sPath)
 }
 
 CAdoDotNetDatabaseImpl::CAdoDotNetDatabaseImpl() 
-: m_bReadOnly(false)
 {
 	m_pDatabase = CAdoDotNetUtils::CreateDatabase();
 }
@@ -90,6 +91,12 @@ std::wstring CAdoDotNetDatabaseImpl::GetName()
 	return m_sConnString;
 }
 
+bool CAdoDotNetDatabaseImpl::DoesTableExistUTF8(const char *sTable) 
+{
+    const std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
+    return m_pDatabase->DoesTableExists(sTableUTF16.c_str());
+}
+
 bool CAdoDotNetDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
 	return m_pDatabase->DoesTableExists(sTable);
@@ -110,7 +117,7 @@ void CAdoDotNetDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
 	ASSERT(FALSE);
 }
 
-bool CAdoDotNetDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+bool CAdoDotNetDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 											const wchar_t *sField, const wchar_t *sForeignField)
 {
 	ASSERT(FALSE);

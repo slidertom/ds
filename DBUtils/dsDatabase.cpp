@@ -28,15 +28,15 @@ dsDatabase::~dsDatabase()
 	delete m_pDatabase;
 }
 
-void dsDatabase::RegisterListener(dsDatabaseListener *pListner) noexcept
+void dsDatabase::RegisterListener(dsDatabaseListener *pListener) noexcept
 {
-    ASSERT(std::find(m_listeners.begin(), m_listeners.end(), pListner) == m_listeners.end());
-    m_listeners.push_back(pListner);
+    ASSERT(std::find(m_listeners.begin(), m_listeners.end(), pListener) == m_listeners.end());
+    m_listeners.push_back(pListener);
 }
 
-void dsDatabase::UnregisterListener(dsDatabaseListener *pListner) noexcept
+void dsDatabase::UnregisterListener(dsDatabaseListener *pListener) noexcept
 {
-    auto found = std::find(m_listeners.begin(), m_listeners.end(), pListner);
+    auto found = std::find(m_listeners.begin(), m_listeners.end(), pListener);
     ASSERT(m_listeners.end() != found);
     m_listeners.erase(found);
 }
@@ -71,8 +71,7 @@ std::wstring dsDatabase::GetName() const noexcept
 bool dsDatabase::DoesTableExist(const char *sTable) const noexcept
 {
     ASSERT(m_pDatabase);
-    const std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
-	return m_pDatabase->DoesTableExist(sTableUTF16.c_str());
+	return m_pDatabase->DoesTableExistUTF8(sTable);
 }
 
 bool dsDatabase::DoesTableExist(const wchar_t *sTable) const noexcept
@@ -131,10 +130,10 @@ void dsDatabase::RollbackTrans() noexcept
 	m_pDatabase->Rollback();
 }
 
-bool dsDatabase::Execute(const wchar_t *lpszSQL) noexcept
+bool dsDatabase::Execute(const wchar_t *sSQL) noexcept
 {
 	ASSERT(m_pDatabase);
-	return m_pDatabase->Execute(lpszSQL);
+	return m_pDatabase->Execute(sSQL);
 }
 
 dsDBType dsDatabase::GetType() noexcept
@@ -149,8 +148,7 @@ void dsDatabase::Close() noexcept
 		pListener->OnDatabaseClose();
 	}
 
-	if ( m_pDatabase ) 
-    {
+	if ( m_pDatabase )  {
 		delete m_pDatabase;
 		m_pDatabase = nullptr;
 	}
@@ -193,7 +191,7 @@ void dsDatabase::DeleteRelation(const wchar_t *sRelation) noexcept
     return m_pDatabase->DeleteRelation(sRelation);
 }
 
-bool dsDatabase::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+bool dsDatabase::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 						        const wchar_t *sField, const wchar_t *sForeignField) noexcept
 {
 	ASSERT(m_pDatabase);

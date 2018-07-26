@@ -40,7 +40,8 @@ public:
 	virtual std::wstring GetName() override;
 	
 	virtual bool DoesTableExist(const wchar_t *sTable) override;
-	
+	virtual bool DoesTableExistUTF8(const char *sTable) override;
+
 	virtual CAbsRecordset *CreateRecordset() override;
 
     virtual void CommitDatabase() override { }
@@ -48,7 +49,7 @@ public:
     virtual bool CompactDatabase() override;
 
 	virtual void DeleteRelation(const wchar_t *sRelation) override;
-	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, long lAttr,
+	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 								const wchar_t *sField, const wchar_t *sForeignField) override;
 
     virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) override;

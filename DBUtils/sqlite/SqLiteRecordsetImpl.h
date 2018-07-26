@@ -107,18 +107,18 @@ private:
     CSqLiteErrorHandler *m_pErrorHandler;
     std::string m_sTable;
    
-    sqlite3_stmt *m_stmt;  // main statement
-    sqlite3_stmt *m_insert_stmt;
-    sqlite3_stmt *m_update_stmt;
+    sqlite3_stmt *m_stmt        {nullptr};  // main statement
+    sqlite3_stmt *m_insert_stmt {nullptr};
+    sqlite3_stmt *m_update_stmt {nullptr};
     std::string m_sUpdateValues;
-    bool m_bEOF;
-	bool m_bSQLOpened;
+    bool m_bEOF       {true};
+    bool m_bSQLOpened {false};
     
-    int64_t m_nEditRowId;
+    int64_t m_nEditRowId {-1};
     std::unordered_map<std::wstring, int, std::hash<std::basic_string<wchar_t>>> m_name_to_index;
 
-    sqlite_util::CFieldDataMap *m_pSaveData;
-    const sqlite_util::CFieldInfoMap *m_pFieldInfoData;
+    sqlite_util::CFieldDataMap *m_pSaveData            {nullptr};
+    const sqlite_util::CFieldInfoMap *m_pFieldInfoData {nullptr};
 };
 
 #endif 
