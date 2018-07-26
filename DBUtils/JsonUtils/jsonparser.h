@@ -19,39 +19,91 @@ namespace ds_json
         ~object();
 
     public:
-        void SetText(const char *sField, const wchar_t *value);
-        void SetTextUTF8(const char *sField, const char *sVal);
-        void SetDouble(const char *sField, double value);
-        void SetInt32(const char* sField, int32_t value);
-        void SetInt64(const char* sField, int64_t value);
-        void SetDateTime(const char* sField, time_t value);
-        void SetBool(const char *sField, bool bValue) { SetInt32(sField, bValue ? 1 : 0); }
-        void SetJsonObject(const char *sField, const object &obj); // json prefix applied to avoid conflicts with the general funcion name  SetObject
-        void SetArray(const char *sField, const array &array);
-		void SetStringArray(const char *sField, const std::vector<std::wstring> &array);
-        void SetNull(const char *sField);
+        void SetText(const char *sField, const wchar_t *sVal) noexcept;
+        void SetTextEx(const char *sField, const wchar_t *sVal) noexcept {
+            if ( ::wcslen(sVal) > 0 ) { 
+                SetText(sField, sVal);
+            }
+            #ifdef _DEBUG
+            else {
+                ASSERT(GetText(sField).empty()); // should match default value if exists
+            }
+            #endif
+        }
+        void SetTextUTF8(const char *sField, const char *sVal) noexcept;
+        void SetTextUTF8Ex(const char *sField, const char *sVal) noexcept {
+            if ( ::strlen(sVal) > 0 ) { 
+                SetTextUTF8(sField, sVal);         
+            } 
+            #ifdef _DEBUG
+            else {
+                ASSERT(GetTextUTF8(sField).empty()); // should match default value if exists
+            }
+            #endif
+        } 
+        void SetDouble(const char *sField, double dValue) noexcept;
+        void SetDoubleEx(const char *sField, double dValue) noexcept {
+            if ( (dValue > DBL_EPSILON) || (dValue < -DBL_EPSILON) ) { 
+                SetDouble(sField, dValue); 
+            } 
+            #ifdef _DEBUG
+            else {
+                const double dCheck = GetDouble(sField);
+                ASSERT((dCheck < DBL_EPSILON) && (dCheck > -DBL_EPSILON)); // should match default value if exists
+            }
+            #endif
+        }
+        void SetInt32(const char* sField, int32_t nValue) noexcept;
+        void SetInt32Ex(const char* sField, int32_t nValue) noexcept {
+            if ( nValue != 0) { 
+                SetInt32(sField, nValue); 
+            }
+            #ifdef _DEBUG
+            else {
+                ASSERT(GetInt32(sField) == 0); // should match default value if exists
+            }
+            #endif
+        }
+        void SetInt64(const char* sField, int64_t nValue) noexcept;
+        void SetDateTime(const char* sField, time_t value) noexcept;
+        void SetBool(const char *sField, bool bValue) noexcept { SetInt32(sField, bValue ? 1 : 0); }
+        void SetBoolEx(const char *sField, bool bValue) noexcept { 
+            if ( bValue ) { 
+                SetBool(sField, bValue); 
+            }
+            #ifdef _DEBUG
+            else {
+                ASSERT(!GetBool(sField)); // should match default value if exists
+            }
+            #endif
+        }
+        void SetJsonObject(const char *sField, const object &obj) noexcept; // json prefix applied to avoid conflicts with the general funcion name  SetObject
+        void SetArray(const char *sField, const array &array) noexcept;
+        void SetArrayEx(const char *sField, const array &array) noexcept;
+        void SetStringArray(const char *sField, const std::vector<std::wstring> &array) noexcept;
+        void SetNull(const char *sField) noexcept;
 
-        std::wstring GetText(const char *sField) const;
-        std::string  GetTextUTF8(const char *sField) const;
-        double       GetDouble(const char *sField) const;
-        int32_t      GetInt32(const char *sField) const;
-        int64_t      GetInt64(const char *sField) const;
-        bool         GetBool(const char *sField) const { return GetInt32(sField) != 0; }
-        void         GetArray(const char *sField, array &array) const;
-		void         GetStringArray(const char *sField, std::vector<std::wstring> &array) const;
-        time_t       GetDateTime(const char *sField) const;
-        bool         GetJsonObject(const char *sField, object &obj) const; // json prefix applied to avoid conflicts with the general funcion name GetObject
-        bool         IsNull(const char *sField) const;
+        std::wstring GetText(const char *sField) const noexcept;
+        std::string  GetTextUTF8(const char *sField) const noexcept;
+        double       GetDouble(const char *sField) const noexcept;
+        int32_t      GetInt32(const char *sField) const noexcept;
+        int64_t      GetInt64(const char *sField) const noexcept;
+        bool         GetBool(const char *sField) const noexcept { return GetInt32(sField) != 0; }
+        void         GetArray(const char *sField, array &array) const noexcept;
+		void         GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept;
+        time_t       GetDateTime(const char *sField) const noexcept;
+        bool         GetJsonObject(const char *sField, object &obj) const noexcept; // json prefix applied to avoid conflicts with the general funcion name GetObject
+        bool         IsNull(const char *sField) const noexcept;
 
     private:
-        object(object &x);
-        const object& operator =(const object& x); //#28746 - copy is disabled by rapidjson
+        object(object &x) = delete;
+        const object& operator =(const object& x) = delete; // copy is disabled by rapidjson
 
     public:
-        void *m_impl;
+        void *m_impl {nullptr};
     };
-    void DB_UTILS_API str2obj(const char* sJson, object &obj);
-    void DB_UTILS_API obj2str(const object &obj, std::string &sJson);
+    void DB_UTILS_API str2obj(const char* sJson, object &obj) noexcept;
+    void DB_UTILS_API obj2str(const object &obj, std::string &sJson) noexcept;
 
     // json array support
     class DB_UTILS_API array
@@ -63,27 +115,27 @@ namespace ds_json
 
     // Operations
     public:
-        void AddObject(const object &obj);
-        void SetObject(size_t i, const object &obj);
-        void AddString(const char *str);
-        void AddString(const wchar_t *str);
-		void AddInt32(int32_t nValue);
-        void AddInt64(int64_t nValue);
-        void AddArray(const array &array);
+        void AddObject(const object &obj) noexcept;
+        void SetObject(size_t i, const object &obj) noexcept;
+        void AddString(const char *str) noexcept;
+        void AddString(const wchar_t *str) noexcept;
+		void AddInt32(int32_t nValue) noexcept;
+        void AddInt64(int64_t nValue) noexcept;
+        void AddArray(const array &array) noexcept;
 
-        size_t GetSize() const;
-        std::string GetStringUTF8(size_t i) const;
-        std::wstring GetString(size_t i) const;
-		int32_t GetInt32(size_t i) const;
-        int64_t GetInt64(size_t i) const;
-        void GetJsonObject(size_t i, object &obj) const; // prefix json used as GetObject quite general function and can be defined
+        size_t GetSize() const noexcept;
+        std::string GetStringUTF8(size_t i) const noexcept;
+        std::wstring GetString(size_t i) const noexcept;
+		int32_t GetInt32(size_t i) const noexcept;
+        int64_t GetInt64(size_t i) const noexcept;
+        void GetJsonObject(size_t i, object &obj) const noexcept; // prefix json used as GetObject quite general function and can be defined
 
     private:
         array(array &x)                         = delete;
         const array& operator =(const array& x) = delete; // copy is disabled by rapidjson
 
     public:
-        void *m_impl;
+        void *m_impl {nullptr};
     };
 
     void DB_UTILS_API str2obj(const char *sJson, array &obj);
@@ -106,7 +158,7 @@ namespace ds_json
         void operator=(const object_vect &x) = delete;
     };
 
-    inline void array2vect(const ds_json::array &arr, object_vect &v)
+    inline void array2vect(const ds_json::array &arr, object_vect &v) noexcept
     {
         const size_t nCnt = arr.GetSize();
         v.reserve(nCnt);
@@ -139,7 +191,7 @@ namespace ds_json
 // default: 0 -> if default do not save
 #define JSON_INT32_EX(name, realname) \
 	static int32_t Get##name(const ds_json::object &obj)        { return obj.GetInt32(realname);  } \
-	static void Set##name(ds_json::object &obj, int32_t nValue) { if ( nValue != 0) { obj.SetInt32(realname, nValue); } } \
+	static void Set##name(ds_json::object &obj, int32_t nValue) { obj.SetInt32Ex(realname, nValue); } \
     JSON_NULL(name, realname) \
 
 #define JSON_INT64(name, realname) \
@@ -154,8 +206,8 @@ namespace ds_json
 
 // default: 0.0 -> if default do not save
 #define JSON_DOUBLE_EX(name, realname) \
-	static double Get##name(const ds_json::object &obj)        { return obj.GetDouble(realname);  } \
-	static void Set##name(ds_json::object &obj, double dValue) { if ( (dValue > DBL_EPSILON) || (dValue < -DBL_EPSILON) ) { obj.SetDouble(realname, dValue); } } \
+	static double Get##name(const ds_json::object &obj)        { return obj.GetDouble(realname);    } \
+	static void Set##name(ds_json::object &obj, double dValue) { obj.SetDoubleEx(realname, dValue); } \
     JSON_NULL(name, realname) \
 
 #define JSON_TEXT(name, realname) \
@@ -169,12 +221,12 @@ namespace ds_json
 
 // default: empty string -> if default do not save
 #define JSON_TEXT_EX(name, realname) \
-	static std::wstring Get##name(const ds_json::object &obj)                    { return obj.GetText(realname); }                                               \
-	static void Set##name(ds_json::object &obj, const wchar_t *sValue)           { if ( ::wcslen(sValue) > 0 ) { obj.SetText(realname, sValue);             } }  \
-    static void Set##name(ds_json::object &obj, const std::wstring &sValue)      { if ( !sValue.empty() )      { obj.SetText(realname, sValue.c_str());     } }  \
-    static std::string Get##name##UTF8(const ds_json::object &obj)               { return obj.GetTextUTF8(realname);                                        }    \
-    static void Set##name##UTF8(ds_json::object &obj, const char *sValue)        { if ( ::strlen(sValue) > 0 ) { obj.SetTextUTF8(realname, sValue);         } }  \
-    static void Set##name##UTF8(ds_json::object &obj, const std::string &sValue) { if ( !sValue.empty() )      { obj.SetTextUTF8(realname, sValue.c_str()); } }  \
+	static std::wstring Get##name(const ds_json::object &obj)                    { return obj.GetText(realname);                } \
+	static void Set##name(ds_json::object &obj, const wchar_t *sValue)           { obj.SetTextEx(realname, sValue);             } \
+    static void Set##name(ds_json::object &obj, const std::wstring &sValue)      { obj.SetTextEx(realname, sValue.c_str());     } \
+    static std::string Get##name##UTF8(const ds_json::object &obj)               { return obj.GetTextUTF8(realname);            } \
+    static void Set##name##UTF8(ds_json::object &obj, const char *sValue)        { obj.SetTextUTF8Ex(realname, sValue);         } \
+    static void Set##name##UTF8(ds_json::object &obj, const std::string &sValue) { obj.SetTextUTF8Ex(realname, sValue.c_str()); } \
     JSON_NULL(name, realname) \
 
 #define JSON_BOOL(name, realname) \
@@ -184,8 +236,8 @@ namespace ds_json
 
 // default: false
 #define JSON_BOOL_EX(name, realname) \
-	static bool Get##name(const ds_json::object &obj)        { return obj.GetBool(realname); }  \
-	static void Set##name(ds_json::object &obj, bool bValue) { if ( bValue ) { obj.SetBool(realname, bValue); } } \
+	static bool Get##name(const ds_json::object &obj)        { return obj.GetBool(realname);    } \
+	static void Set##name(ds_json::object &obj, bool bValue) { obj.SetBoolEx(realname, bValue); } \
     JSON_NULL(name, realname) \
 
 #define JSON_ARRAY(name, realname) \
@@ -195,8 +247,8 @@ namespace ds_json
 
 // if array empty -> do no create a record
 #define JSON_ARRAY_EX(name, realname) \
-	static void Get##name(const ds_json::object &obj, ds_json::array &array)            { obj.GetArray(realname, array); } \
-	static void Set##name(ds_json::object &obj, const ds_json::array &array)            { if ( array.GetSize() > 0 ) { obj.SetArray(realname, array); } } \
+	static void Get##name(const ds_json::object &obj, ds_json::array &array)            { obj.GetArray(realname, array);   } \
+	static void Set##name(ds_json::object &obj, const ds_json::array &array)            { obj.SetArrayEx(realname, array); } \
     JSON_NULL(name, realname) \
 
 #define JSON_STRING_ARRAY(name, realname) \
