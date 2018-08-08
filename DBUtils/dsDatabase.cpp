@@ -17,7 +17,6 @@
 #endif
 
 dsDatabase::dsDatabase() 
-:  m_pDatabase(nullptr) 
 { 
     m_pErrorHandler = CLogImpl::Log; // default implementation
 }

@@ -114,7 +114,7 @@ public:
 private:
 	friend class dsTable;
     friend class dsCopyTableData;
-	CAbsDatabase *m_pDatabase;
+    CAbsDatabase *m_pDatabase {nullptr};
     std::vector<dsDatabaseListener *> m_listeners;
     dbErrorHandler m_pErrorHandler;
 };
