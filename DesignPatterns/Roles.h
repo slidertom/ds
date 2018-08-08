@@ -95,6 +95,11 @@ public:
 	const_iterator begin() const { return m_roles_map.begin(); }
 	const_iterator end()   const { return m_roles_map.end();   }
 
+public:
+    void operator=(const CRoleCore &r) {
+        r.Clone(this);
+    }
+
 // Attributes
 private:
 	CRolesMap m_roles_map;
@@ -108,7 +113,7 @@ public:
 		ASSERT(pCore);
 		const CRole *pRole = pCore->GetRole(role_class::GetRoleName());
 		if ( !pRole ) {
-			return NULL;
+			return nullptr;
 		}
 		const role_class *pHoles = (const role_class *)pRole;
 		return pHoles;
@@ -118,7 +123,7 @@ public:
 		ASSERT(pCore);
 		CRole *pRole = pCore->GetRole(role_class::GetRoleName());
 		if ( !pRole ) {
-			return NULL;
+			return nullptr;
 		}
 		role_class *pHoles = (role_class *)pRole;
 		return pHoles;
@@ -164,7 +169,7 @@ inline CRole *CRoleCore::GetRole(const char *sName)
 	if ( found != m_roles_map.end() ) {
 		return found->second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 inline CRole *CRoleCore::GetRole(const char *sName) const
@@ -173,24 +178,21 @@ inline CRole *CRoleCore::GetRole(const char *sName) const
 	if ( found != m_roles_map.end() ) {
 		return found->second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 inline void CRoleCore::Clone(CRoleCore *pTarget) const
 {
     pTarget->DeleteAllRoles(); // do delete all target roles
 
-	CRole *pClone = NULL;
+	CRole *pClone = nullptr;
 	typedef CRolesMap::const_iterator CIt;
 	CIt end_it = m_roles_map.end();
-
 	for (CIt it = m_roles_map.begin(); it != end_it; ++it)
 	{
 		pClone = it->second->Clone(pTarget);
-
 		// Possibility to clone only needed info
-		if ( pClone ) 
-		{
+		if ( pClone )  {
 			pTarget->AddRole(pClone);
 		}
 	}
