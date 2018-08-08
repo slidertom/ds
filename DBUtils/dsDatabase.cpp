@@ -175,6 +175,16 @@ bool dsDatabase::CompactDatabase(const wchar_t *sPath) noexcept
     return database.CompactDatabase();
 }
 
+bool dsDatabase::CompactDatabase(const wchar_t *sPath, dbErrorHandler newHandler) noexcept
+{
+    dsDatabase database;
+    database.SetErrorHandler(newHandler);
+    if ( !database.OpenDB(sPath) ) {
+        return false;
+    }
+    return database.CompactDatabase();
+}
+
 dsDatabase::dbErrorHandler dsDatabase::SetErrorHandler(dsDatabase::dbErrorHandler newHandler) noexcept
 {
     dbErrorHandler prevHandler = m_pErrorHandler;

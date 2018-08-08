@@ -81,9 +81,13 @@ public:
     // This is DAO specific -> DAO fails to save data to file.
     void CommitDatabase() noexcept; 
 
+    typedef void (*dbErrorHandler)(const wchar_t *msg); 
+    dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) noexcept;
+	dbErrorHandler GetErrorHandler();
+
     bool CompactDatabase() noexcept; // or VACUUM
     static bool CompactDatabase(const wchar_t *sPath) noexcept;
-
+    static bool CompactDatabase(const wchar_t *sPath, dbErrorHandler newHandler) noexcept;
 	static void SetLogPath(const wchar_t *sLogPath) noexcept;
 
 // Operations
@@ -105,10 +109,6 @@ public:
 	void DeleteRelation(const wchar_t *sRelation) noexcept; 
 	bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
 						const wchar_t *sField, const wchar_t *sForeignField) noexcept;
-
-    typedef void (*dbErrorHandler)(const wchar_t *msg); 
-    dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) noexcept;
-	dbErrorHandler GetErrorHandler();
 
 // Attributes
 private:
