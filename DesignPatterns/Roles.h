@@ -61,6 +61,17 @@ class CRoleCore
 public:
     typedef std::unordered_map<std::string, CRole*> CRolesMap;
 	CRoleCore() { }
+    CRoleCore(const CRoleCore &r) { *this = r; }
+    CRoleCore(CRoleCore &&r)  { 
+        CRole *pRole = nullptr;
+	    for (auto &elem : r.m_roles_map) {
+		    pRole  = elem.second;
+            ASSERT(pRole);
+            pRole->m_pRoleCore = this;
+			this->AddRole(pRole);
+	    }
+        r.m_roles_map.clear();
+    }
 	virtual ~CRoleCore() {  DeleteAllRoles(); }
 
 // Operations
@@ -98,6 +109,19 @@ public:
 public:
     void operator=(const CRoleCore &r) {
         r.Clone(this);
+    }
+
+    CRoleCore &operator=(CRoleCore &&r) {
+        DeleteAllRoles(); // do delete all roles
+	    CRole *pRole = nullptr;
+	    for (auto &elem : r.m_roles_map) {
+		    pRole  = elem.second;
+            ASSERT(pRole);
+            pRole->m_pRoleCore = this;
+			this->AddRole(pRole);
+	    }
+        r.m_roles_map.clear();
+        return *this;
     }
 
 // Attributes
@@ -184,11 +208,9 @@ inline CRole *CRoleCore::GetRole(const char *sName) const
 inline void CRoleCore::Clone(CRoleCore *pTarget) const
 {
     pTarget->DeleteAllRoles(); // do delete all target roles
-
 	CRole *pClone = nullptr;
-	typedef CRolesMap::const_iterator CIt;
-	CIt end_it = m_roles_map.end();
-	for (CIt it = m_roles_map.begin(); it != end_it; ++it)
+	auto end_it = m_roles_map.end();
+	for (auto it = m_roles_map.begin(); it != end_it; ++it)
 	{
 		pClone = it->second->Clone(pTarget);
 		// Possibility to clone only needed info
