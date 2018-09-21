@@ -67,7 +67,7 @@ loader.AddNew();
    	CCodeDescrLoader::SetRemark(obj, "MyRemark");
 	CCodeDescrLoader::SetOrder(obj,  2);
    loader.SetData(obj); // do store json data
-loader.Update();
+VERIFY(loader.Update());
 
 loader.DeleteById(nNewId); // do delete one record ID=nNewId
 // do delete all records from the Table1 with the code value: New
@@ -87,7 +87,7 @@ if ( loader.MoveFirst() )
 
 ```
 ```C++
-void OnDatabaseError(LPCTSTR sError) 
+void OnDatabaseError(const wchar_t* sError) 
 {
     TRACE(sError); TRACE(L"\n");
 }
