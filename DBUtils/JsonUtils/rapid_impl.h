@@ -35,17 +35,21 @@ namespace ds_json
         bool get_field_array(void *impl, const char *sField, void *obj);
         bool get_field_null(void *impl, const char *sField);
 
+        bool remove_field(void *impl, const char *sField);
+
         //////////////////////////////////////////////////////////
         // array based specific
         //////////////////////////////////////////////////////////
         void create_array(void *&impl);
         void add_array_string(void *impl, const char *str);
-		void add_array_int32(void *impl, int32_t nValue);
+        void add_array_int32(void *impl, int32_t nValue);
         void add_array_int64(void *impl, int64_t nValue);
+        void add_array_double(void *impl, double dValue);
+        void add_array_float(void *impl, float fValue);
         void add_array_object(void *impl, const void *obj);
         size_t get_array_size(const void *impl);
         void get_array_string(const void *impl, size_t i, std::string &sValue);
-		int32_t get_array_int32(const void *impl, size_t i);
+        int32_t get_array_int32(const void *impl, size_t i);
         int64_t get_array_int64(const void *impl, size_t i);
         void get_array_object(const void *impl, size_t i, void *obj);
         void set_array_object(void *impl, size_t i, const void *obj);

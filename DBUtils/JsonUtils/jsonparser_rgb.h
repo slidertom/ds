@@ -11,7 +11,7 @@ namespace ds_jsonparser_rbg
 };
 
 #define JSON_RGB(name, realname) \
-	static unsigned long Get##name(const ds_json::object &obj) { return ds_jsonparser_rbg::GetRGB(obj, realname); } \
-	static void Set##name(ds_json::object &obj, unsigned long color) { ds_jsonparser_rbg::SetRGB(obj, realname, color); } 
+    static unsigned long Get##name(const ds_json::object &obj) { return ds_jsonparser_rbg::GetRGB(obj, realname); } \
+    static void Set##name(ds_json::object &obj, unsigned long color) { ds_jsonparser_rbg::SetRGB(obj, realname, color); } 
 
 #endif

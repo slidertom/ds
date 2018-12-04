@@ -6,7 +6,7 @@
 #include "../dsStrConv.h"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 //********************************
@@ -72,14 +72,14 @@ namespace ds_json
         }
         #endif
     }
-	void object::SetStringArray(const char *sField, const std::vector<std::wstring> &array) noexcept 
-	{
-		ds_json::array array_json;
-		for (const auto &it : array) {
-			array_json.AddString(it.c_str());
-		}
-		_impl::set_field_array(m_impl, sField, array_json.m_impl);
-	}
+    void object::SetStringArray(const char *sField, const std::vector<std::wstring> &array) noexcept 
+    {
+        ds_json::array array_json;
+        for (const auto &it : array) {
+            array_json.AddString(it.c_str());
+        }
+        _impl::set_field_array(m_impl, sField, array_json.m_impl);
+    }
     void object::SetJsonObject(const char *sField, const object &obj) noexcept {
         _impl::set_field_object(m_impl, sField, obj.m_impl);
     }
@@ -103,15 +103,15 @@ namespace ds_json
     void object::GetArray(const char *sField, array &array) const noexcept {
         _impl::get_field_array(m_impl, sField, array.m_impl);
     }
-	void object::GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept 
-	{
-		ds_json::array array_json;
-		_impl::get_field_array(m_impl, sField, array_json.m_impl);
-		const size_t nCnt = array_json.GetSize();
-		for (size_t i = 0; i < nCnt; ++i) {
-			array.push_back(array_json.GetString(i));
-		}	
-	}
+    void object::GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept 
+    {
+        ds_json::array array_json;
+        _impl::get_field_array(m_impl, sField, array_json.m_impl);
+        const size_t nCnt = array_json.GetSize();
+        for (size_t i = 0; i < nCnt; ++i) {
+            array.push_back(array_json.GetString(i));
+        }    
+    }
     double object::GetDouble(const char *sField) const noexcept {
         double dValue; 
         if (!_impl::get_field_double(m_impl, sField, dValue)) {
@@ -151,6 +151,10 @@ namespace ds_json
         return _impl::set_field_null(m_impl, sField);
     }
 
+    bool object::Remove(const char *sField) noexcept {
+         return _impl::remove_field(m_impl, sField);
+    }
+
     void str2obj(const char* sJson, object &obj) noexcept {
         _impl::str2obj(sJson, obj.m_impl);
     }
@@ -183,9 +187,15 @@ namespace ds_json
     void array::AddInt64(int64_t nValue) noexcept {
         _impl::add_array_int64(m_impl, nValue);
     }
-	void array::AddInt32(int32_t nValue) noexcept {
-		_impl::add_array_int32(m_impl, nValue);
-	}
+    void array::AddInt32(int32_t nValue) noexcept {
+        _impl::add_array_int32(m_impl, nValue);
+    }
+    void array::AddDouble(double dValue) noexcept {
+        _impl::add_array_double(m_impl, dValue);
+    }
+    void array::AddFloat(float fValue) noexcept {
+        _impl::add_array_float(m_impl, fValue);
+    }
 
     size_t array::GetSize() const noexcept {
         return _impl::get_array_size(m_impl);
@@ -202,9 +212,9 @@ namespace ds_json
     int64_t array::GetInt64(size_t i) const noexcept {
         return _impl::get_array_int64(m_impl, i);
     }
-	int32_t array::GetInt32(size_t i) const noexcept {
-		return _impl::get_array_int32(m_impl, i);
-	}
+    int32_t array::GetInt32(size_t i) const noexcept {
+        return _impl::get_array_int32(m_impl, i);
+    }
     
     void array::GetJsonObject(size_t i, object &obj) const noexcept {
         _impl::get_array_object(m_impl, i, obj.m_impl);

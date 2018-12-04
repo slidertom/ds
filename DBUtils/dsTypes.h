@@ -4,9 +4,9 @@
 
 enum dsDBType
 {
-	dsType_Dao = 0,
-	dsType_MsSQL,
-	dsType_SqLite
+    dsType_Dao = 0,
+    dsType_MsSQL,
+    dsType_SqLite
 };
 
 enum dsFieldType

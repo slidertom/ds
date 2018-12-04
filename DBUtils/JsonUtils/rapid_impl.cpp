@@ -31,9 +31,9 @@ namespace ds_json
             static inline void value2str(const rapidjson::Value &value, std::string &value_str)
             {
                 rapidjson::StringBuffer buffer;
-				rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-				value.Accept(writer);
-				value_str = buffer.GetString();
+                rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                value.Accept(writer);
+                value_str = buffer.GetString();
             }
 
             static inline void str2obj(const char *sJson, rapidjson::Document *doc) {
@@ -428,14 +428,24 @@ namespace ds_json
                 return false;
             }
 
-            const rapidjson::Value &value = found->value;	
+            const rapidjson::Value &value = found->value;    
             if ( value.IsString() ) {
-				value_str = value.GetString();
-				return true;
-			}
-			
+                value_str = value.GetString();
+                return true;
+            }
+            
             internal::value2str(value, value_str);
-			return true;
+            return true;
+        }
+
+        bool remove_field(void *impl, const char *sField)
+        {
+             rapidjson::Document *doc = (rapidjson::Document *)impl;
+             if (!doc->RemoveMember(sField)) {
+                 return false;
+             }
+
+             return true;
         }
         
         //////////////////////////////////////////////////////////
@@ -471,7 +481,7 @@ namespace ds_json
             doc->PushBack(value, allocator);
         }
 
-		void add_array_int32(void *impl, int32_t nValue) 
+        void add_array_int32(void *impl, int32_t nValue) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             ASSERT(doc->IsArray());
@@ -479,6 +489,28 @@ namespace ds_json
             rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
             rapidjson::Value value;
             value.SetInt(nValue);
+            doc->PushBack(value, allocator);
+        }
+
+        void add_array_double(void *impl, double dValue)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            ASSERT(doc->IsArray());
+
+            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
+            rapidjson::Value value;
+            value.SetDouble(dValue);
+            doc->PushBack(value, allocator);
+        }
+
+        void add_array_float(void *impl, float fValue)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            ASSERT(doc->IsArray());
+
+            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
+            rapidjson::Value value;
+            value.SetFloat(fValue);
             doc->PushBack(value, allocator);
         }
 
@@ -512,16 +544,16 @@ namespace ds_json
             internal::value2str(value, sValue);
         }
 
-		int32_t get_array_int32(const void *impl, size_t i)
-		{
+        int32_t get_array_int32(const void *impl, size_t i)
+        {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             const rapidjson::Value &value = (*doc)[i];
             int32_t nValue = 0;
             if ( rapid_value_to_int32(value, nValue) ) {
                 return nValue;
             }
-			return 0;
-		}
+            return 0;
+        }
 
         int64_t get_array_int64(const void *impl, size_t i)
         {

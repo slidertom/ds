@@ -11,13 +11,13 @@
 #include "string"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 namespace inernal_dao_file_utils
 {
     static inline bool DoesFileExist(const wchar_t *fileName) {
-	    return (GetFileAttributes(fileName) != 0xffffffff);
+        return (GetFileAttributes(fileName) != 0xffffffff);
     }
 
     static inline void RemoveFile(const wchar_t *fileName) {
@@ -41,7 +41,7 @@ CDaoDatabaseImpl::~CDaoDatabaseImpl()
     // CDaoDatabase::~CDaoDatabase()
     // does this:
     // if (IsOpen())
-	//		Close();
+    //        Close();
     // custom implementation to avoid exceptions:
     if ( IsOpen() ) {
         Close();
@@ -55,8 +55,8 @@ bool CDaoDatabaseImpl::IsDaoDB(const wchar_t *sPath)
 {
     FILE *pFile = _tfopen(sPath, L"rb");
     if ( !pFile ) {
-		return false;
-	}
+        return false;
+    }
  //  Standard Jet DB
     
     bool bDao = false;
@@ -85,53 +85,53 @@ bool CDaoDatabaseImpl::IsDaoDB(const wchar_t *sPath)
 
 bool CDaoDatabaseImpl::BeginTrans() 
 {
-	try {
-		m_pDatabase->m_pWorkspace->BeginTrans();
-	}
-	catch (CDaoException *e) {
-		ASSERT(FALSE); // should not happen
+    try {
+        m_pDatabase->m_pWorkspace->BeginTrans();
+    }
+    catch (CDaoException *e) {
+        ASSERT(FALSE); // should not happen
         m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::BeginTrans");
-		e->Delete();
-		return false;
-	}
+        e->Delete();
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool CDaoDatabaseImpl::CommitTrans() 
 {
-	try {
-		m_pDatabase->m_pWorkspace->CommitTrans();
-	}
-	catch (CDaoException *e) {
-		ASSERT(FALSE); // should not happen
+    try {
+        m_pDatabase->m_pWorkspace->CommitTrans();
+    }
+    catch (CDaoException *e) {
+        ASSERT(FALSE); // should not happen
         m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::CommitTrans");
-		e->Delete();
-		return false;
-	}
+        e->Delete();
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool CDaoDatabaseImpl::Rollback()   
 {
-	try {
-		m_pDatabase->m_pWorkspace->Rollback();
-	}
-	catch (CDaoException *e) {
-		ASSERT(FALSE); // should not happen
+    try {
+        m_pDatabase->m_pWorkspace->Rollback();
+    }
+    catch (CDaoException *e) {
+        ASSERT(FALSE); // should not happen
         m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::Rollback");
-		e->Delete();
-		return false;
-	}
+        e->Delete();
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool CDaoDatabaseImpl::Execute(const wchar_t *lpszSQL) 
 {
     try {
-	    m_pDatabase->Execute(lpszSQL);
+        m_pDatabase->Execute(lpszSQL);
     } 
     catch (CDaoException *e) {
         ASSERT(FALSE);
@@ -144,55 +144,55 @@ bool CDaoDatabaseImpl::Execute(const wchar_t *lpszSQL)
 
 void CDaoDatabaseImpl::Close() 
 {
-	try {
-		m_pDatabase->Close();
-	}
-	catch (CDaoException *e) {   
-		ASSERT(FALSE);
+    try {
+        m_pDatabase->Close();
+    }
+    catch (CDaoException *e) {   
+        ASSERT(FALSE);
         m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::Close");
-		e->Delete();
-	}
+        e->Delete();
+    }
 }
 
 bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) 
 {
-	m_bReadOnly = bReadOnly;
+    m_bReadOnly = bReadOnly;
 
-	std::wstring sConnect;
-	if ( _tcslen(szPsw) > 0 ) {
-		sConnect = L";PWD=";
-		sConnect += szPsw;
-		sConnect += L";";
-	}
+    std::wstring sConnect;
+    if ( _tcslen(szPsw) > 0 ) {
+        sConnect = L";PWD=";
+        sConnect += szPsw;
+        sConnect += L";";
+    }
 
-	try {
-		m_pDatabase->Open(sPath, FALSE, bReadOnly, sConnect.c_str());
-	}
-	catch (CDaoException *e)
+    try {
+        m_pDatabase->Open(sPath, FALSE, bReadOnly, sConnect.c_str());
+    }
+    catch (CDaoException *e)
     {
         // TODO: do check is it dao database before open
         //ASSERT(FALSE);
         //m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::OpenDB");
-		e->Delete();
-		return false;
-	}
-	
-	return true;
+        e->Delete();
+        return false;
+    }
+    
+    return true;
 }
 
 dsDBType CDaoDatabaseImpl::GetType()
 {
-	return dsType_Dao;
+    return dsType_Dao;
 }
 
 bool CDaoDatabaseImpl::IsReadOnly() const
 {
-	return m_bReadOnly; 
+    return m_bReadOnly; 
 }
 
 bool CDaoDatabaseImpl::IsOpen() const
 {
-	return m_pDatabase->IsOpen() != FALSE;
+    return m_pDatabase->IsOpen() != FALSE;
 }
 
 std::wstring CDaoDatabaseImpl::GetName()
@@ -209,32 +209,32 @@ bool CDaoDatabaseImpl::DoesTableExistUTF8(const char *sTable)
 
 bool CDaoDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
-	bool bTableExists = false;
-	try {
-		CDaoTableDefInfo tabInfo;
-		int nTableCount = m_pDatabase->GetTableDefCount();
-		for (int i1 = 0; i1 < nTableCount; ++i1)
-		{
-			m_pDatabase->GetTableDefInfo(i1, tabInfo);
-			if (tabInfo.m_strName.CompareNoCase(sTable) == 0)
-			{
-				bTableExists = true;
-				break;
-			}
-		}
-	}
-	catch (CDaoException *e) {
-		ASSERT(FALSE);
+    bool bTableExists = false;
+    try {
+        CDaoTableDefInfo tabInfo;
+        int nTableCount = m_pDatabase->GetTableDefCount();
+        for (int i1 = 0; i1 < nTableCount; ++i1)
+        {
+            m_pDatabase->GetTableDefInfo(i1, tabInfo);
+            if (tabInfo.m_strName.CompareNoCase(sTable) == 0)
+            {
+                bTableExists = true;
+                break;
+            }
+        }
+    }
+    catch (CDaoException *e) {
+        ASSERT(FALSE);
         m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::DoesTableExist");
-		e->Delete();
-	}
+        e->Delete();
+    }
 
-	return bTableExists;
+    return bTableExists;
 }
 
 CAbsRecordset *CDaoDatabaseImpl::CreateRecordset()
 {
-	return new CDaoRecordsetImpl(this, m_pErrorHandler);
+    return new CDaoRecordsetImpl(this, m_pErrorHandler);
 }
 
 void CDaoDatabaseImpl::CommitDatabase()
@@ -259,7 +259,7 @@ void CDaoDatabaseImpl::CommitDatabase()
     m_pDatabase->Close(); // we do not close locker
     delete m_pDatabase;
     m_pDatabase = new CDaoDatabase;
-	this->OpenDB(sName.c_str(), bReadOnly, L"");
+    this->OpenDB(sName.c_str(), bReadOnly, L"");
 }
 
 bool CDaoDatabaseImpl::CompactDatabase()
@@ -271,9 +271,9 @@ bool CDaoDatabaseImpl::CompactDatabase()
     {
         // Make sure you're passing the address of a path to a different target file than the one you're compacting. 
         std::wstring sTemp = sName.c_str();
-		sTemp += L"-temp";
+        sTemp += L"-temp";
         if ( inernal_dao_file_utils::DoesFileExist(sTemp.c_str()) ) {
-		    inernal_dao_file_utils::RemoveFile(sTemp.c_str()); // just in case remove any garbage
+            inernal_dao_file_utils::RemoveFile(sTemp.c_str()); // just in case remove any garbage
         }
 
         m_pDatabase->Close(); 
@@ -283,19 +283,19 @@ bool CDaoDatabaseImpl::CompactDatabase()
         daoWorkspace.CompactDatabase(sName.c_str(), sTemp.c_str(), dbLangGeneral);
 
         if ( !inernal_dao_file_utils::CopyFile(sTemp.c_str(), sName.c_str()) ) {
-			ASSERT(FALSE);
+            ASSERT(FALSE);
             std::wstring sError  = L"inernal_dao_file_utils::CopyFile failed. From: ";
                          sError += sTemp.c_str();
                          sError += L" to ";
                          sError += sName.c_str();
             m_pErrorHandler->OnError(sError.c_str(), L"CDaoDatabaseImpl::CompactDatabase()");
-			return false;
-		}
-	
+            return false;
+        }
+    
         inernal_dao_file_utils::RemoveFile(sTemp.c_str());
 
         m_pDatabase = new CDaoDatabase;
-	    this->OpenDB(sName.c_str(), bReadOnly, L"");
+        this->OpenDB(sName.c_str(), bReadOnly, L"");
     }
     catch (CDaoException *e)
     {
@@ -323,32 +323,32 @@ CDaoDatabaseImpl::dbErrorHandler CDaoDatabaseImpl::SetErrorHandler(CDaoDatabaseI
 
 void CDaoDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
 {
-	try {
-		m_pDatabase->DeleteRelation(sRelation);
-	}
-	catch (CDaoException *e) {
+    try {
+        m_pDatabase->DeleteRelation(sRelation);
+    }
+    catch (CDaoException *e) {
         ASSERT(FALSE);
-		m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::DeleteRelation"); 
-		e->Delete();
+        m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::DeleteRelation"); 
+        e->Delete();
     }
 }
 
 bool CDaoDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
-									  const wchar_t *sField, const wchar_t *sForeignField)
+                                      const wchar_t *sField, const wchar_t *sForeignField)
 {
-	ASSERT(m_pDatabase);
+    ASSERT(m_pDatabase);
 
-	try {
-		m_pDatabase->CreateRelation(sName, sTable, sForeignTable, lAttr, sField, sForeignField);
-	}
+    try {
+        m_pDatabase->CreateRelation(sName, sTable, sForeignTable, lAttr, sField, sForeignField);
+    }
     catch (CDaoException *e) {
         ASSERT(FALSE);
-		m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::CreateRelation");
-		e->Delete();
-		return false;
+        m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::CreateRelation");
+        e->Delete();
+        return false;
     }
 
-	return true;
+    return true;
 }
 
 bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)

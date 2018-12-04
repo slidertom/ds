@@ -5,7 +5,7 @@
 #include "dsTable.h"
 
 #ifndef __x86_64__ 
-	#include "Dao/DaoDatabaseImpl.h"
+    #include "Dao/DaoDatabaseImpl.h"
 #endif
 
 #include "SqLite/sqlite_copy_table.h"
@@ -14,7 +14,7 @@
 #include "dsStrConv.h"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 dsCopyTableData::dsCopyTableData(dsDatabase *pSrcDB, dsDatabase *pDstDB)
@@ -150,7 +150,7 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableName) noexcept
 bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst) noexcept
 {
     ASSERT(m_pSrcDB);
-	ASSERT(m_pDstDB);
+    ASSERT(m_pDstDB);
 
     const dsDBType nSrcType = m_pSrcDB->GetType();
     const dsDBType nDstType = m_pDstDB->GetType();
@@ -213,7 +213,7 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
 bool dsCopyTableData::CopyTableDataEx(const wchar_t *sTableName) noexcept
 {
     ASSERT(m_pSrcDB);
-	ASSERT(m_pDstDB);
+    ASSERT(m_pDstDB);
 
     dsTableFieldInfo union_info;
 
@@ -225,7 +225,7 @@ bool dsCopyTableData::CopyTableDataEx(const wchar_t *sTableName) noexcept
     dsTable src_table(m_pSrcDB, sTableName);
     dsTable dst_table(m_pDstDB, sTableName);
 
-	dst_table.Flush();
+    dst_table.Flush();
 
     return dsCopyTableData::CopyTableData(src_table, dst_table, union_info);
 }

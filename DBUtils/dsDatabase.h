@@ -3,7 +3,7 @@
 #pragma once
 
 #ifndef __DB_UTILS_IMPL_H__
-	#include "DBUtilsImpl.h"
+    #include "DBUtilsImpl.h"
 #endif
 
 #ifndef __ROLES_H__
@@ -11,11 +11,11 @@
 #endif
 
 #ifndef __DS_DATABASE_LISTENER_H__
-	#include "dsDatabaseListener.h"
+    #include "dsDatabaseListener.h"
 #endif
 
 #ifndef __DS_TYPES_H__
-	#include "dsTypes.h"
+    #include "dsTypes.h"
 #endif
 
 #include "vector"
@@ -33,8 +33,8 @@ class DB_UTILS_API dsDatabase : public CRoleCore
 // Constuction/Destruction
 public:
     dsDatabase();
-	virtual ~dsDatabase();
-	
+    virtual ~dsDatabase();
+    
 // Operations
 public:
     void RegisterListener(dsDatabaseListener *pListener) noexcept;
@@ -42,35 +42,35 @@ public:
 
 // Status functions
 public:
-	bool IsReadOnly() const noexcept;
-	bool IsOpen() const noexcept;
-	std::wstring GetName() const noexcept;
-	
+    bool IsReadOnly() const noexcept;
+    bool IsOpen() const noexcept;
+    std::wstring GetName() const noexcept;
+    
 // Operators
 public:
-	dsDBType GetType() noexcept;
-	
+    dsDBType GetType() noexcept;
+    
 // Operations
 public:
-	void BeginTrans() noexcept;  
-	void CommitTrans() noexcept; 
-	void RollbackTrans() noexcept;    
+    void BeginTrans() noexcept;  
+    void CommitTrans() noexcept; 
+    void RollbackTrans() noexcept;    
 
-	bool Execute(const wchar_t *sSQL) noexcept; 
-	
+    bool Execute(const wchar_t *sSQL) noexcept; 
+    
     void Close() noexcept;
 
-	class dsParams
-	{
-	public:
-		dsParams() { }
-		~dsParams() { }
+    class dsParams
+    {
+    public:
+        dsParams() { }
+        ~dsParams() { }
 
-	public:
+    public:
         bool m_bReadOnly  {false};
         bool m_bMultiUser {false};
-		std::wstring m_sKey;
-	};
+        std::wstring m_sKey;
+    };
 
     // sKey - Database encryption key.
     bool OpenDB(const wchar_t *sPath, const dsParams &params = dsParams()) noexcept;
@@ -83,36 +83,36 @@ public:
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) noexcept;
-	dbErrorHandler GetErrorHandler();
+    dbErrorHandler GetErrorHandler();
 
     bool CompactDatabase() noexcept; // or VACUUM
     static bool CompactDatabase(const wchar_t *sPath) noexcept;
     static bool CompactDatabase(const wchar_t *sPath, dbErrorHandler newHandler) noexcept;
-	static void SetLogPath(const wchar_t *sLogPath) noexcept;
+    static void SetLogPath(const wchar_t *sLogPath) noexcept;
 
 // Operations
 public:
-	void Refresh() noexcept; // Refresh database related cache items
+    void Refresh() noexcept; // Refresh database related cache items
 
 public:
-	enum
-	{
-		eDBRelUpdateCascade	= 0x100,
-		eDBRelDeleteCascade	= 0x1000
-	};
-		
+    enum
+    {
+        eDBRelUpdateCascade    = 0x100,
+        eDBRelDeleteCascade    = 0x1000
+    };
+        
 // Database structure help functions
 public:
-	bool DoesTableExist(const wchar_t *sTable) const noexcept; 
+    bool DoesTableExist(const wchar_t *sTable) const noexcept; 
     bool DoesTableExist(const char *sTable) const noexcept; 
 
-	void DeleteRelation(const wchar_t *sRelation) noexcept; 
-	bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
-						const wchar_t *sField, const wchar_t *sForeignField) noexcept;
+    void DeleteRelation(const wchar_t *sRelation) noexcept; 
+    bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
+                        const wchar_t *sField, const wchar_t *sForeignField) noexcept;
 
 // Attributes
 private:
-	friend class dsTable;
+    friend class dsTable;
     friend class dsCopyTableData;
     CAbsDatabase *m_pDatabase {nullptr};
     std::vector<dsDatabaseListener *> m_listeners;

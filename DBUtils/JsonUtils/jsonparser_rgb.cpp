@@ -6,7 +6,7 @@
 #include "string"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 namespace ds_jsonparser_rbg

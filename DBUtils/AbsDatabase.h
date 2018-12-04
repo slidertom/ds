@@ -3,7 +3,7 @@
 #pragma once
 
 #ifndef __DS_TYPES_H__
-	#include "dsTypes.h"
+    #include "dsTypes.h"
 #endif
 
 #include "unordered_map"
@@ -15,38 +15,38 @@ class CAbsDatabase
 {
 // Construction/Destruction
 public:
-	CAbsDatabase() { }
-	virtual ~CAbsDatabase() { }
+    CAbsDatabase() { }
+    virtual ~CAbsDatabase() { }
 
 // Overrides
 public:
-	virtual bool BeginTrans()  = 0; 
-	virtual bool CommitTrans() = 0; 
-	virtual bool Rollback()    = 0; 
+    virtual bool BeginTrans()  = 0; 
+    virtual bool CommitTrans() = 0; 
+    virtual bool Rollback()    = 0; 
 
-	virtual bool Execute(const wchar_t *sSQL) = 0; 
+    virtual bool Execute(const wchar_t *sSQL) = 0; 
 
     virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) = 0;
     
-	virtual dsDBType GetType() = 0;
+    virtual dsDBType GetType() = 0;
 
-	virtual bool IsReadOnly() const = 0;
-	virtual bool IsOpen()     const = 0;
+    virtual bool IsReadOnly() const = 0;
+    virtual bool IsOpen()     const = 0;
 
-	virtual std::wstring GetName() = 0;
+    virtual std::wstring GetName() = 0;
     // do leave possibility for the realization to use the best encoding system
-	virtual bool DoesTableExist(const wchar_t *sTable) = 0;
+    virtual bool DoesTableExist(const wchar_t *sTable) = 0;
     virtual bool DoesTableExistUTF8(const char *sTable) = 0;
 
-	virtual CAbsRecordset *CreateRecordset() = 0;
+    virtual CAbsRecordset *CreateRecordset() = 0;
 
     virtual void CommitDatabase() = 0;
 
     virtual bool CompactDatabase() = 0;
 
-	virtual void DeleteRelation(const wchar_t *sRelation) = 0;
-	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
-								const wchar_t *sField, const wchar_t *sForeignField) = 0;
+    virtual void DeleteRelation(const wchar_t *sRelation) = 0;
+    virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
+                                const wchar_t *sField, const wchar_t *sForeignField) = 0;
 
     virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) = 0;
 

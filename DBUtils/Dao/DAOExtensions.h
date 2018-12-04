@@ -7,7 +7,7 @@ class CDaoErrorHandler;
 
 namespace dao_extensions
 {
-	void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, CDaoErrorHandler *pErrorHandler);
+    void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, CDaoErrorHandler *pErrorHandler);
     // functions does not throw any exception
     bool CopyTableDataImpl(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, CDaoErrorHandler *pErrorHandler);
 };

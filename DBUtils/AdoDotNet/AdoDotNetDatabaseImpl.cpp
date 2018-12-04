@@ -7,23 +7,23 @@
 #include "../dsStrConv.h"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 // String sample:
 // Data Source=SQL-SERVER;Initial Catalog=catalog_name;Integrated Security=False;User ID=sa;Password=passsword
 bool CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(const wchar_t *sPath)
 {
-	if (_tcsstr(sPath, L"Data Source=")) {
-		return true;
-	}
+    if (_tcsstr(sPath, L"Data Source=")) {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 CAdoDotNetDatabaseImpl::CAdoDotNetDatabaseImpl() 
 {
-	m_pDatabase = CAdoDotNetUtils::CreateDatabase();
+    m_pDatabase = CAdoDotNetUtils::CreateDatabase();
 }
 
 CAdoDotNetDatabaseImpl::~CAdoDotNetDatabaseImpl()
@@ -31,32 +31,32 @@ CAdoDotNetDatabaseImpl::~CAdoDotNetDatabaseImpl()
     if ( IsOpen() ) {
         Close();
     }
-	CAdoDotNetUtils::DeleteDatabase(m_pDatabase);
+    CAdoDotNetUtils::DeleteDatabase(m_pDatabase);
 }
 
 bool CAdoDotNetDatabaseImpl::BeginTrans() 
 {
-	return true;
+    return true;
 }
 
 bool CAdoDotNetDatabaseImpl::CommitTrans() 
 {
-	return true;
+    return true;
 }
 
 bool CAdoDotNetDatabaseImpl::Rollback()   
 {
-	return true;
+    return true;
 }
 
 bool CAdoDotNetDatabaseImpl::Execute(const wchar_t *lpszSQL) 
 {
-	return m_pDatabase->Execute(lpszSQL);
+    return m_pDatabase->Execute(lpszSQL);
 }
 
 void CAdoDotNetDatabaseImpl::Close() 
 {
-	m_pDatabase->Close();
+    m_pDatabase->Close();
     m_sConnString = L"";
 }
 
@@ -64,31 +64,31 @@ bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const 
 {
     m_sConnString = sPath;
 
-	m_bReadOnly = bReadOnly;
+    m_bReadOnly = bReadOnly;
 
-	const bool bRet = m_pDatabase->Open(sPath);
+    const bool bRet = m_pDatabase->Open(sPath);
 
-	return bRet;
+    return bRet;
 }
 
 dsDBType CAdoDotNetDatabaseImpl::GetType()
 {
-	return dsType_MsSQL;
+    return dsType_MsSQL;
 }
 
 bool CAdoDotNetDatabaseImpl::IsReadOnly() const
 {
-	return m_bReadOnly; 
+    return m_bReadOnly; 
 }
 
 bool CAdoDotNetDatabaseImpl::IsOpen() const
 {
-	return m_pDatabase->IsOpen();
+    return m_pDatabase->IsOpen();
 }
 
 std::wstring CAdoDotNetDatabaseImpl::GetName()
 {
-	return m_sConnString;
+    return m_sConnString;
 }
 
 bool CAdoDotNetDatabaseImpl::DoesTableExistUTF8(const char *sTable) 
@@ -99,12 +99,12 @@ bool CAdoDotNetDatabaseImpl::DoesTableExistUTF8(const char *sTable)
 
 bool CAdoDotNetDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
-	return m_pDatabase->DoesTableExists(sTable);
+    return m_pDatabase->DoesTableExists(sTable);
 }
 
 CAbsRecordset *CAdoDotNetDatabaseImpl::CreateRecordset()
 {
-	return new CAdoDotNetRecordsetImpl(m_pDatabase);
+    return new CAdoDotNetRecordsetImpl(m_pDatabase);
 }
 
 CAdoDotNetDatabaseImpl::dbErrorHandler CAdoDotNetDatabaseImpl::SetErrorHandler(CAdoDotNetDatabaseImpl::dbErrorHandler newHandler)
@@ -114,21 +114,21 @@ CAdoDotNetDatabaseImpl::dbErrorHandler CAdoDotNetDatabaseImpl::SetErrorHandler(C
 
 void CAdoDotNetDatabaseImpl::DeleteRelation(const wchar_t *sRelation)
 {
-	ASSERT(FALSE);
+    ASSERT(FALSE);
 }
 
 bool CAdoDotNetDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
-											const wchar_t *sField, const wchar_t *sForeignField)
+                                            const wchar_t *sField, const wchar_t *sForeignField)
 {
-	ASSERT(FALSE);
-	//Impl must be simillar to
-	//std::wstring sCreateRelSQL;
-	//sCreateRelSQL.Format(_T("ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE"), sTable1, sRelName, sField1, sTable2, sField2);
-	//pDB->ExecuteSQL(sCreateRelSQL.c_str());
-	return true;
+    ASSERT(FALSE);
+    //Impl must be simillar to
+    //std::wstring sCreateRelSQL;
+    //sCreateRelSQL.Format(_T("ALTER TABLE %s ADD CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s) ON DELETE CASCADE"), sTable1, sRelName, sField1, sTable2, sField2);
+    //pDB->ExecuteSQL(sCreateRelSQL.c_str());
+    return true;
 }
 
 bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
 {
-	return m_pDatabase->GetTableFieldInfo(sTable, info);
+    return m_pDatabase->GetTableFieldInfo(sTable, info);
 }

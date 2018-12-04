@@ -3,7 +3,7 @@
 #pragma once
 
 #ifndef __ABS_DATABASE_H__
-	#include "../AbsDatabase.h"
+    #include "../AbsDatabase.h"
 #endif
 
 class CDaoDatabase;
@@ -13,8 +13,8 @@ class CDaoDatabaseImpl : public CAbsDatabase
 {
 // Construction/Destruction
 public:
-	CDaoDatabaseImpl();
-	virtual ~CDaoDatabaseImpl();
+    CDaoDatabaseImpl();
+    virtual ~CDaoDatabaseImpl();
 
 // Static operations
 public:
@@ -22,32 +22,32 @@ public:
 
 // Overrides
 public:
-	virtual bool BeginTrans() override; 
-	virtual bool CommitTrans() override;
-	virtual bool Rollback() override;
+    virtual bool BeginTrans() override; 
+    virtual bool CommitTrans() override;
+    virtual bool Rollback() override;
 
-	virtual bool Execute(const wchar_t *lpszSQL) override; 
-	virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
+    virtual bool Execute(const wchar_t *lpszSQL) override; 
+    virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
 
-	virtual dsDBType GetType() override;
+    virtual dsDBType GetType() override;
 
-	virtual bool IsReadOnly() const override;
-	virtual bool IsOpen() const override;
+    virtual bool IsReadOnly() const override;
+    virtual bool IsOpen() const override;
 
-	virtual std::wstring GetName() override;
-	
-	virtual bool DoesTableExist(const wchar_t *sTable) override; 
+    virtual std::wstring GetName() override;
+    
+    virtual bool DoesTableExist(const wchar_t *sTable) override; 
     virtual bool DoesTableExistUTF8(const char *sTable) override;
-	
-	virtual CAbsRecordset *CreateRecordset() override;
+    
+    virtual CAbsRecordset *CreateRecordset() override;
 
     virtual void CommitDatabase() override;
 
     virtual bool CompactDatabase() override;
 
-	virtual void DeleteRelation(const wchar_t *sRelation) override;
-	virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
-								const wchar_t *sField, const wchar_t *sForeignField) override;
+    virtual void DeleteRelation(const wchar_t *sRelation) override;
+    virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
+                                const wchar_t *sField, const wchar_t *sForeignField) override;
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
@@ -67,7 +67,7 @@ private:
 private:
     CDaoDatabase *m_pDatabase;
     CDaoErrorHandler *m_pErrorHandler;
-	bool m_bReadOnly;
+    bool m_bReadOnly;
 };
 
 #endif 

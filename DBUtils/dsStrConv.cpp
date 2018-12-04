@@ -7,9 +7,11 @@
 #include "limits"
 #include "algorithm"
 #include "functional"
+#include "locale"
+
 //#include "codecvt"
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 // http://stackoverflow.com/questions/215963/how-do-you-properly-use-widechartomultibyte
@@ -81,7 +83,7 @@ namespace ds_str_conv
         // http://www.cplusplus.com/reference/limits/numeric_limits/
         //strstream.precision(dbl::digits10+2); // double: 15 decimal places + point
         strstream.precision(dbl::digits10+1); // double: 15 decimal places + point
-		strstream << dValue;
+        strstream << dValue;
         strstream >> sValue;
         return sValue;
     }
@@ -99,15 +101,17 @@ namespace ds_str_conv
     {
         const std::locale &loc = std::locale();
         std::transform(str.begin(), str.end(), str.begin(),
-                       std::bind1st(std::mem_fun(&std::ctype<wchar_t>::tolower), &std::use_facet<std::ctype<wchar_t>>(loc)));
+                [&loc](int c) { return std::tolower(c, loc); });
     }
 
+  
     void MakeUpper(std::wstring &str)
     {
         const std::locale &loc = std::locale();
         std::transform(str.begin(), str.end(), str.begin(),
-                       std::bind1st(std::mem_fun(&std::ctype<wchar_t>::toupper), &std::use_facet<std::ctype<wchar_t>>(loc)));
+                [&loc](int c) { return std::toupper(c, loc); });
     }
+
     /*
     void MakeUpper(std::string &str)
     {
@@ -120,14 +124,14 @@ namespace ds_str_conv
     std::wstring FormatStr(const wchar_t *pszFormat, ...)
     {
         va_list arglist;
-	    va_start(arglist, pszFormat);
+        va_start(arglist, pszFormat);
             const int sz = std::swprintf(nullptr, 0, pszFormat, arglist);
             std::vector<wchar_t> buf(sz + 1); // note +1 for null terminator
             std::swprintf(&buf[0], buf.size(), pszFormat, arglist);
             std::wstring sTemp(buf.begin(), buf.end());
-	    va_end(arglist);
+        va_end(arglist);
 
-	    return sTemp;
+        return sTemp;
     }
     */
 };
