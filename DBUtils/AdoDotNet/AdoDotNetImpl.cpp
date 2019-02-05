@@ -541,9 +541,9 @@ public:
                 return msclr::interop::marshal_as<std::wstring>(m_pReader->GetInt64(nColID).ToString());
             }
 
-            if (m_pReader->GetFieldType(nColID) == System::Guid().GetType() ) {
-                ASSERT(FALSE); //#22569 - should not go here
-                return L"";
+            if (m_pReader->GetFieldType(nColID) == System::Guid().GetType() ) 
+            {
+                return msclr::interop::marshal_as<std::wstring>(m_pReader->GetGuid(nColID).ToString());
             }
 
             return msclr::interop::marshal_as<std::wstring>(m_pReader->GetString(nColID));
