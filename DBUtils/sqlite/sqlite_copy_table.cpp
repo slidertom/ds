@@ -10,11 +10,11 @@
 #include "../dsStrConv.h"
 #include "../dsTable.h"
 
-#include "SqLiteDatabaseImpl.h" 
+#include "sqlite_database_impl.h"
 #include "SqLiteErrorHandler.h"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 namespace sqlite_util

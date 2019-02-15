@@ -8,7 +8,7 @@
 #include "algorithm"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 namespace sqlite_util
@@ -120,6 +120,38 @@ namespace sqlite_util
         return dsFieldType_Undefined;
     }
 
+    static bool IsAutoincrement(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler)
+    {
+        // The autoincrement keyword can only be applied to an
+        // integer primary key column, and when it is, sqlite creates a entry in
+        // its internal sqlite_sequence table with the name set to the name of the table. 
+        bool bAutoIncrement = false;
+      
+        // https://stopbyte.com/t/how-to-check-if-a-column-is-autoincrement-primary-key-or-not-in-sqlite/174
+        // First you should understand that at SQLite AUTOINCREMENT can only be applied to PRIMARY KEY’s,
+        // so you can follow these steps:
+        // 1.Check if the table has any primary keys, and get them from the table_info table, using the query below:    
+        //   PRAGMA table_info("<table name here>");
+        // 2.You can go through the returned results using a CURSOR, and only select ones that has "pk" column value 
+        //   different from 0, which indicates that is a Primary Key.
+        // 3.Now you may check if the your data table, has any AUTOINCREMENT Column. can do that by checking 
+        //   the sqlite_master table, this way:
+        CSqLiteRecordsetImpl auto_increment_loader(pDB, pErrorHandler);
+        std::string sSQL;
+        sSQL = "SELECT 'is-autoincrement' FROM sqlite_master WHERE tbl_name='";
+        sSQL += sTableName;
+        sSQL += "'";
+        sSQL += " AND sql LIKE '%AUTOINCREMENT%'";
+            
+        if ( auto_increment_loader.OpenSQLUTF8(sSQL.c_str()) ) {
+            if ( auto_increment_loader.MoveFirstImpl() ) {
+                bAutoIncrement = true;
+            }
+        }
+
+        return bAutoIncrement;
+    }
+
     bool sqlite_get_table_fields_info(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, CFieldInfoMap &map)
     {
         ASSERT(strlen(sTableName) > 0);
@@ -129,24 +161,6 @@ namespace sqlite_util
             // If the count came out as non-zero, the table has an autoincrement primary key column.
             // If the count came out as zero, the table is either empty and has never contained data, or does not have an autoincrement primary key column.
 
-        // The autoincrement keyword can only be applied to an
-        // integer primary key column, and when it is, sqlite creates a entry in
-        // its internal sqlite_sequence table with the name set to the name of the
-        // table. 
-        bool bAutoIncrement = false;
-        {
-            CSqLiteRecordsetImpl auto_increment_loader(pDB, pErrorHandler);
-            std::string sSQL;
-            sSQL = "SELECT COUNT(*) FROM sqlite_sequence WHERE name='";
-            sSQL += sTableName;
-            sSQL += "'";
-            if ( auto_increment_loader.OpenSQLUTF8(sSQL.c_str()) ) {
-                if ( auto_increment_loader.MoveFirstImpl() ) {
-                    bAutoIncrement = auto_increment_loader.GetFieldInt32(L"COUNT(*)") > 0;
-                }
-            }
-        }
-     
         std::string sPragma; 
         sPragma = "PRAGMA table_info (`"; 
         sPragma += sTableName;
@@ -171,7 +185,7 @@ namespace sqlite_util
             field_info.m_sDefault     = loader.GetFieldStringUTF8("dflt_value");
             field_info.m_bPrimary     = loader.GetFieldInt32("pk") == 1;
             if ( field_info.m_bPrimary ) {
-                field_info.m_bAutoIncrement = bAutoIncrement;
+                field_info.m_bAutoIncrement = IsAutoincrement(pDB, sTableName, pErrorHandler);
             } else {
                 field_info.m_bAutoIncrement = false;
             }

@@ -18,6 +18,10 @@
     #include "dsTypes.h"
 #endif
 
+#ifndef __DS_OPEN_PARAMS_H__
+    #include "dsOpenParams.h"
+#endif
+
 #include "vector"
 
 class CAbsDatabase;
@@ -60,25 +64,13 @@ public:
     
     void Close() noexcept;
 
-    class dsParams
-    {
-    public:
-        dsParams() { }
-        ~dsParams() { }
-
-    public:
-        bool m_bReadOnly  {false};
-        bool m_bMultiUser {false};
-        std::wstring m_sKey;
-    };
-
     // sKey - Database encryption key.
-    bool OpenDB(const wchar_t *sPath, const dsParams &params = dsParams()) noexcept;
+    bool OpenDB(const wchar_t *sPath, const dsOpenParams &params = dsOpenParams()) noexcept;
 
     // Do call this function if you want to commit all the data from the memory to file
-    // if possible do not use this function.
     // possibly => everything works with out this function call.
     // This is DAO specific -> DAO fails to save data to file.
+    // This is SqLite specific if m_bMemory flag in use -> commits memory database into file
     void CommitDatabase() noexcept; 
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
@@ -89,6 +81,10 @@ public:
     static bool CompactDatabase(const wchar_t *sPath) noexcept;
     static bool CompactDatabase(const wchar_t *sPath, dbErrorHandler newHandler) noexcept;
     static void SetLogPath(const wchar_t *sLogPath) noexcept;
+
+    static bool IsSqLiteDB(const wchar_t *sPath) noexcept;
+    static bool IsDaoDB(const wchar_t *sPath) noexcept;
+    static bool IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept;
 
 // Operations
 public:

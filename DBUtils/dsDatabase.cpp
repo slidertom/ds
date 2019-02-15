@@ -5,7 +5,7 @@
     #include "Dao/DaoDatabaseImpl.h"
 #endif
 #include "AdoDotNet/AdoDotNetDatabaseImpl.h"
-#include "SqLite/SqLiteDatabaseImpl.h"
+#include "sqlite/sqlite_database_impl.h"
 #include "LogImpl/LogImpl.h"
 
 #include "dsCopyTableData.h"
@@ -79,18 +79,36 @@ bool dsDatabase::DoesTableExist(const wchar_t *sTable) const noexcept
     return m_pDatabase->DoesTableExist(sTable);
 }
 
-bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params) noexcept
+bool dsDatabase::IsSqLiteDB(const wchar_t *sPath) noexcept
+{
+    return CSqLiteDatabaseImpl::IsSqLiteDB(sPath);
+}
+
+bool dsDatabase::IsDaoDB(const wchar_t *sPath) noexcept 
+{
+    #ifndef __x86_64__ 
+        return CDaoDatabaseImpl::IsDaoDB(sPath);
+    #endif
+    return false; // x64 build dao database is not supported
+}
+
+bool dsDatabase::IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept
+{
+    return CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(sPath);
+}
+
+bool dsDatabase::OpenDB(const wchar_t *sPath, const dsOpenParams &params) noexcept
 {
     Close(); // do auto close if opened
     
     ASSERT(!m_pDatabase);
-    ASSERT(_tcslen(sPath) != 0);
+    ASSERT(::wcslen(sPath) != 0);
 
     if ( CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(sPath) ) {
         m_pDatabase = new CAdoDotNetDatabaseImpl;
     }
     else if ( CSqLiteDatabaseImpl::IsSqLiteDB(sPath) ) {
-        m_pDatabase = new CSqLiteDatabaseImpl(params.m_bMultiUser);
+        m_pDatabase = new CSqLiteDatabaseImpl();
     }    
 #ifndef __x86_64__ 
     else if ( CDaoDatabaseImpl::IsDaoDB(sPath) ) {
@@ -103,7 +121,7 @@ bool dsDatabase::OpenDB(const wchar_t *sPath, const dsParams &params) noexcept
 
     m_pDatabase->SetErrorHandler(m_pErrorHandler);
 
-    if ( !m_pDatabase->OpenDB(sPath, params.m_bReadOnly, params.m_sKey.c_str()) ) {
+    if ( !m_pDatabase->OpenDB(sPath, params) ) {
         Close();
         return false;
     }

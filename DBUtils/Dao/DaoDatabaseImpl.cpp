@@ -6,6 +6,7 @@
 #include "DaoErrorHandler.h"
 
 #include "../dsStrConv.h"
+#include "../dsOpenParams.h"
 #include "afxdao.h"
 
 #include "string"
@@ -17,11 +18,11 @@
 namespace inernal_dao_file_utils
 {
     static inline bool DoesFileExist(const wchar_t *fileName) {
-        return (GetFileAttributes(fileName) != 0xffffffff);
+        return (::GetFileAttributes(fileName) != 0xffffffff);
     }
 
     static inline void RemoveFile(const wchar_t *fileName) {
-        ::_tremove(fileName);
+        ::_wremove(fileName);
     }
 
     static inline bool CopyFile(const wchar_t *sSrcFile, const wchar_t *sDstFile) {
@@ -154,19 +155,19 @@ void CDaoDatabaseImpl::Close()
     }
 }
 
-bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) 
+bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) 
 {
-    m_bReadOnly = bReadOnly;
+    m_bReadOnly = open_params.m_bReadOnly;
 
     std::wstring sConnect;
-    if ( _tcslen(szPsw) > 0 ) {
+    if ( ::wcslen(open_params.m_sKey.c_str()) > 0 ) {
         sConnect = L";PWD=";
-        sConnect += szPsw;
+        sConnect += open_params.m_sKey;
         sConnect += L";";
     }
 
     try {
-        m_pDatabase->Open(sPath, FALSE, bReadOnly, sConnect.c_str());
+        m_pDatabase->Open(sPath, FALSE, open_params.m_bReadOnly, sConnect.c_str());
     }
     catch (CDaoException *e)
     {
@@ -253,21 +254,22 @@ void CDaoDatabaseImpl::CommitDatabase()
 
     // NOTE: we do not call dsDatabase::Close(), to avoid m_listners call -> close.
     
-    const bool bReadOnly   = this->IsReadOnly();
+    dsOpenParams open_params;
+    open_params.m_bReadOnly = m_bReadOnly;
+    
     const std::wstring sName = m_pDatabase->GetName();
     
     m_pDatabase->Close(); // we do not close locker
     delete m_pDatabase;
     m_pDatabase = new CDaoDatabase;
-    this->OpenDB(sName.c_str(), bReadOnly, L"");
+    this->OpenDB(sName.c_str(), open_params);
 }
 
 bool CDaoDatabaseImpl::CompactDatabase()
 {
-    const bool bReadOnly   = this->IsReadOnly();
     const std::wstring sName = this->GetName();
 
-    try
+    try 
     {
         // Make sure you're passing the address of a path to a different target file than the one you're compacting. 
         std::wstring sTemp = sName.c_str();
@@ -294,8 +296,10 @@ bool CDaoDatabaseImpl::CompactDatabase()
     
         inernal_dao_file_utils::RemoveFile(sTemp.c_str());
 
+        dsOpenParams open_params;
+        open_params.m_bReadOnly = m_bReadOnly;
         m_pDatabase = new CDaoDatabase;
-        this->OpenDB(sName.c_str(), bReadOnly, L"");
+        this->OpenDB(sName.c_str(), open_params);
     }
     catch (CDaoException *e)
     {

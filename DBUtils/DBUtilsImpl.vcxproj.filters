@@ -47,9 +47,6 @@
     <ClCompile Include="Dao\DAOExtensions.cpp">
       <Filter>Dao</Filter>
     </ClCompile>
-    <ClCompile Include="sqlite\SqLiteDatabaseImpl.cpp">
-      <Filter>SqLite</Filter>
-    </ClCompile>
     <ClCompile Include="sqlite\SqLiteRecordsetImpl.cpp">
       <Filter>SqLite</Filter>
     </ClCompile>
@@ -77,6 +74,9 @@
     </ClCompile>
     <ClCompile Include="JsonUtils\rapid_impl.cpp">
       <Filter>JsonUtils</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlite\sqlite_database_impl.cpp">
+      <Filter>SqLite</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -113,9 +113,6 @@
     </ClInclude>
     <ClInclude Include="Dao\DaoErrorHandler.h">
       <Filter>Dao</Filter>
-    </ClInclude>
-    <ClInclude Include="sqlite\SqLiteDatabaseImpl.h">
-      <Filter>SqLite</Filter>
     </ClInclude>
     <ClInclude Include="sqlite\SqLiteRecordsetImpl.h">
       <Filter>SqLite</Filter>
@@ -192,5 +189,8 @@
       <Filter>SqLite</Filter>
     </ClInclude>
     <ClInclude Include="dsTypes.h" />
+    <ClInclude Include="sqlite\sqlite_database_impl.h">
+      <Filter>SqLite</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

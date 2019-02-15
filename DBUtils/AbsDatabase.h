@@ -6,10 +6,11 @@
     #include "dsTypes.h"
 #endif
 
+class CAbsRecordset;
+class dsOpenParams;
+
 #include "unordered_map"
 class dsTableFieldInfo : public std::unordered_map<std::wstring, dsFieldType, std::hash<std::basic_string<wchar_t> > > { };
-
-class CAbsRecordset;
 
 class CAbsDatabase
 {
@@ -26,7 +27,7 @@ public:
 
     virtual bool Execute(const wchar_t *sSQL) = 0; 
 
-    virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) = 0;
+    virtual bool OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) = 0;
     
     virtual dsDBType GetType() = 0;
 

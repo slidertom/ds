@@ -6,7 +6,7 @@
 #include "sqlite_table_info.h"
 #include "sqlite_include.h"
 
-#include "SqLiteDatabaseImpl.h"
+#include "sqlite_database_impl.h"
 #include "SqLiteErrorHandler.h"
 
 #include "mutex"
@@ -15,7 +15,7 @@
 #include "../dsStrConv.h"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 // http://stackoverflow.com/questions/1711631/improve-insert-per-second-performance-of-sqlite
@@ -75,14 +75,14 @@ struct UnlockNotification {
 */
 static void unlock_notify_cb(void **apArg, int nArg)
 {
-	for ( int i = 0; i < nArg; i++ )
-	{
-		UnlockNotification *p = (UnlockNotification *)apArg[i];
-		p->mutex.lock();
-		p->bFired = true;
-		p->cond.notify_all();
-		p->mutex.unlock();
-	}
+    for ( int i = 0; i < nArg; i++ )
+    {
+        UnlockNotification *p = (UnlockNotification *)apArg[i];
+        p->mutex.lock();
+        p->bFired = true;
+        p->cond.notify_all();
+        p->mutex.unlock();
+    }
 }
 
 /*
@@ -101,37 +101,37 @@ static void unlock_notify_cb(void **apArg, int nArg)
 */
 static int wait_for_unlock_notify(sqlite3 *db)
 {
-	int rc;
-	UnlockNotification un;
+    int rc;
+    UnlockNotification un;
 
-	/* Initialize the UnlockNotification structure. */
-	un.bFired = false;
+    /* Initialize the UnlockNotification structure. */
+    un.bFired = false;
 
-	/* Register for an unlock-notify callback. */
-	rc = sqlite3_unlock_notify(db, unlock_notify_cb, (void *)&un);
-	ASSERT( rc==SQLITE_LOCKED || rc==SQLITE_OK );
+    /* Register for an unlock-notify callback. */
+    rc = sqlite3_unlock_notify(db, unlock_notify_cb, (void *)&un);
+    ASSERT( rc==SQLITE_LOCKED || rc==SQLITE_OK );
 
-	/* The call to sqlite3_unlock_notify() always returns either SQLITE_LOCKED 
-	** or SQLITE_OK. 
-	**
-	** If SQLITE_LOCKED was returned, then the system is deadlocked. In this
-	** case this function needs to return SQLITE_LOCKED to the caller so 
-	** that the current transaction can be rolled back. Otherwise, block
-	** until the unlock-notify callback is invoked, then return SQLITE_OK.
-	*/
-	if( rc==SQLITE_OK ){
-		std::unique_lock<std::mutex> lck(un.mutex);
-		if( !un.bFired ){
-			un.cond.wait(lck);
-		}
-	}
-	else
-	{
-		//DeadLock
-		//To prevent - use "begin exclusive transaction"
-	}
+    /* The call to sqlite3_unlock_notify() always returns either SQLITE_LOCKED 
+    ** or SQLITE_OK. 
+    **
+    ** If SQLITE_LOCKED was returned, then the system is deadlocked. In this
+    ** case this function needs to return SQLITE_LOCKED to the caller so 
+    ** that the current transaction can be rolled back. Otherwise, block
+    ** until the unlock-notify callback is invoked, then return SQLITE_OK.
+    */
+    if( rc==SQLITE_OK ){
+        std::unique_lock<std::mutex> lck(un.mutex);
+        if( !un.bFired ){
+            un.cond.wait(lck);
+        }
+    }
+    else
+    {
+        //DeadLock
+        //To prevent - use "begin exclusive transaction"
+    }
 
-	return rc;
+    return rc;
 }
 
 /*
@@ -147,14 +147,14 @@ static int wait_for_unlock_notify(sqlite3 *db)
 */
 int sqlite3_blocking_step(sqlite3_stmt *pStmt)
 {
-	int rc;
-	while( SQLITE_LOCKED_SHAREDCACHE==(rc = sqlite3_step(pStmt)) ){
-		rc = wait_for_unlock_notify(sqlite3_db_handle(pStmt));
-		if( rc != SQLITE_OK )
-			break;
-		sqlite3_reset(pStmt);
-	}
-	return rc;
+    int rc;
+    while( SQLITE_LOCKED_SHAREDCACHE==(rc = sqlite3_step(pStmt)) ){
+        rc = wait_for_unlock_notify(sqlite3_db_handle(pStmt));
+        if( rc != SQLITE_OK )
+            break;
+        sqlite3_reset(pStmt);
+    }
+    return rc;
 }
 
 /*
@@ -176,13 +176,13 @@ int sqlite3_blocking_prepare_v2(
   const char **pz           /* OUT: End of parsed string */
 )
 {
-	int rc;
-	while( SQLITE_LOCKED_SHAREDCACHE==(rc = sqlite3_prepare_v2(db, zSql, nSql, ppStmt, pz)) ){
-		rc = wait_for_unlock_notify(db);
-		if( rc!=SQLITE_OK ) break;
-	}
+    int rc;
+    while( SQLITE_LOCKED_SHAREDCACHE==(rc = sqlite3_prepare_v2(db, zSql, nSql, ppStmt, pz)) ){
+        rc = wait_for_unlock_notify(db);
+        if( rc!=SQLITE_OK ) break;
+    }
 
-	return rc;
+    return rc;
 }
 
 static void OnColumnIndexFailed(CSqLiteErrorHandler *pErrorHandler, 
@@ -215,7 +215,7 @@ CSqLiteRecordsetImpl::~CSqLiteRecordsetImpl()
     delete m_pSaveData;
     sqlite3_finalize(m_update_stmt);
     sqlite3_finalize(m_insert_stmt);
-	sqlite3_finalize(m_stmt);
+    sqlite3_finalize(m_stmt);
 }
 
 void CSqLiteRecordsetImpl::CloseStatement()
@@ -232,21 +232,21 @@ bool CSqLiteRecordsetImpl::Open(const wchar_t *sTableName)
     if ( m_bSQLOpened ) {
         return true;
     }
-	m_sTable = ds_str_conv::ConvertToUTF8(sTableName);
+    m_sTable = ds_str_conv::ConvertToUTF8(sTableName);
     return true;
 }
 
 bool CSqLiteRecordsetImpl::OpenSQL(const wchar_t *sSQL)
 {
     const std::string sSQLUTF8 = ds_str_conv::ConvertToUTF8(sSQL);
-	const bool bRet = OpenSQLUTF8(sSQLUTF8.c_str());
-	m_bSQLOpened = true;
-	return bRet;
+    const bool bRet = OpenSQLUTF8(sSQLUTF8.c_str());
+    m_bSQLOpened = true;
+    return bRet;
 }
 
 bool CSqLiteRecordsetImpl::OpenSQLUTF8(const char *sSQL)
 {
-	CloseStatement();
+    CloseStatement();
 
     if ( OpenImpl(sSQL) ) {
         m_sTable = sSQL;
@@ -259,14 +259,27 @@ bool CSqLiteRecordsetImpl::OpenView(const wchar_t *sViewName)
 {
     // NOTE: OpenImpl() is not completely correct for the VIEW
     // VIEW does not contain ROWID
-	m_sTable = ds_str_conv::ConvertToUTF8(sViewName);
+    m_sTable = ds_str_conv::ConvertToUTF8(sViewName);
     return true;
+}
+
+void CSqLiteRecordsetImpl::SetFieldBinary(const char *sFieldName, unsigned char *pData, size_t nSize)
+{
+    sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataBinary(pData, nSize);
+    ASSERT(m_pSaveData->find(sFieldName) == m_pSaveData->end());
+    (*m_pSaveData)[sFieldName] = pFieldData;
 }
 
 void CSqLiteRecordsetImpl::SetFieldBinary(const wchar_t *sFieldName, unsigned char *pData, size_t nSize)
 {
-    sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataBinary(pData, nSize);
-    (*m_pSaveData)[ds_str_conv::ConvertToUTF8(sFieldName)] = pFieldData;
+    const std::string sFieldNameUTF8 =  ds_str_conv::ConvertToUTF8(sFieldName);
+    SetFieldBinary(sFieldNameUTF8.c_str(), pData, nSize);
+}
+
+void CSqLiteRecordsetImpl::GetFieldBinary(const char *sFieldName, unsigned char **pData, size_t &nSize)
+{
+    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+    this->GetFieldBinary(sFieldNameUTF16.c_str(), pData, nSize);
 }
 
 void CSqLiteRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned char **pData, size_t &nSize)
@@ -278,7 +291,7 @@ void CSqLiteRecordsetImpl::GetFieldBinary(const wchar_t *sFieldName, unsigned ch
         ::OnColumnIndexFailed(m_pErrorHandler, sFieldNameUTF8.c_str(), "CSqLiteRecordsetImpl::GetFieldBinary", m_sTable.c_str(), sPathUTF8.c_str());
         return;
     }
-	nSize = ::sqlite3_column_bytes(m_stmt, nColumnIndex);
+    nSize = ::sqlite3_column_bytes(m_stmt, nColumnIndex);
     *pData = (unsigned char *)::sqlite3_column_blob(m_stmt, nColumnIndex);
 }
 
@@ -620,7 +633,7 @@ bool CSqLiteRecordsetImpl::Update()
 
     m_nEditRowId = -1;
 
-	return bRetVal;
+    return bRetVal;
 }
 
 void CSqLiteRecordsetImpl::CommitInsert()
@@ -712,7 +725,7 @@ bool CSqLiteRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName)
     if ( m_pFieldInfoData->find(sFieldNameUTF8.c_str()) != m_pFieldInfoData->end() ) {
         return true;
     }
-	return false;
+    return false;
 }
 
 bool CSqLiteRecordsetImpl::SeekByString(const char *sIndex, const char *sValue)
@@ -730,7 +743,7 @@ bool CSqLiteRecordsetImpl::SeekByString(const char *sIndex, const char *sValue)
                 sFind += " = '";
                 sFind += sValue;
                 sFind += "' COLLATE NOCASE";
-	//sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s'", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
+    //sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s'", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
     // NOCASE as "DB BROWSER" does not care about NOCASE attributes inside CREATE statement
     //sFind.Format("SELECT ROWID,* FROM %s WHERE %s = '%s' COLLATE NOCASE", m_sTable.c_str(), sIndexUTF8.c_str(), sValueUTF8.c_str());
 
@@ -739,6 +752,36 @@ bool CSqLiteRecordsetImpl::SeekByString(const char *sIndex, const char *sValue)
             return true;
         }
     }
+
+
+    /*
+    std::string sFind  = "SELECT ROWID,* FROM ";
+                sFind += m_sTable;
+                sFind += " WHERE ";
+                sFind += sIndex;
+                sFind += " = '";
+                sFind += "?";
+                sFind += "' COLLATE NOCASE";
+    auto found = m_select_states.find(sFind);
+    sqlite3_stmt *res = nullptr;
+    if ( found  == m_select_states.end() ) {
+        res = Prepare(m_pDB->GetSqLiteDB(), sFind.c_str(), m_pErrorHandler);
+        if ( !res ) {
+            return false;
+        }
+        m_select_states[sFind] = res;
+        m_stmt = res;
+    }
+    else {
+        m_stmt = found->second;
+    }
+    ::sqlite3_bind_text(m_stmt, 1, sValue, -1, SQLITE_STATIC);
+    
+    if ( MoveFirstImpl() ) {
+        return true;
+    }
+    return false;
+    */
 
     return false;
 }
@@ -783,7 +826,7 @@ bool CSqLiteRecordsetImpl::SeekByLong(const char *sIndexUTF8, int32_t nValue)
 
 void CSqLiteRecordsetImpl::SetFieldStringUTF8(const char *sFieldName, const char *sValue)
 {
-    ASSERT(m_pSaveData);
+    ASSERT(m_pSaveData); // do call Edit or AddNew
     ASSERT(m_pSaveData->find(sFieldName) == m_pSaveData->end()); // should be called only once for the one sFieldName 
 
     if ( strlen(sValue) <= 0 ) {
@@ -811,7 +854,7 @@ std::string CSqLiteRecordsetImpl::GetFieldStringUTF8(const char *sFieldName)
         ::OnColumnIndexFailed(m_pErrorHandler, sFieldName, "CSqLiteRecordsetImpl::GetFieldStringUTF8", m_sTable.c_str(), sPathUTF8.c_str());
         return "";
     }
-	const char *sValue = (const char *)sqlite3_column_text(m_stmt, nColumnIndex);
+    const char *sValue = (const char *)sqlite3_column_text(m_stmt, nColumnIndex);
     if ( !sValue ) {
         return "";
     }
@@ -829,7 +872,7 @@ std::wstring CSqLiteRecordsetImpl::GetFieldString(const wchar_t *sFieldName)
         ::OnColumnIndexFailed(m_pErrorHandler, sFieldNameUTF8.c_str(), "CSqLiteRecordsetImpl::GetFieldString", m_sTable.c_str(), sPathUTF8.c_str());
         return L"";
     }
-	const char *localValue = (const char*)sqlite3_column_text(m_stmt, nColumnIndex);
+    const char *localValue = (const char*)sqlite3_column_text(m_stmt, nColumnIndex);
     return ds_str_conv::ConvertFromUTF8(localValue);
 }
 
@@ -848,13 +891,13 @@ int64_t CSqLiteRecordsetImpl::GetFieldInt64(const wchar_t *sFieldName)
         OnColumnIndexFailed(m_pErrorHandler, sFieldNameUTF8.c_str(), "CSqLiteRecordsetImpl::GetFieldLong", m_sTable.c_str(), sPathUTF8.c_str());
         return 0;
     }
-	return sqlite3_column_int64(m_stmt, nColumnIndex);
+    return sqlite3_column_int64(m_stmt, nColumnIndex);
 }
 
 int32_t CSqLiteRecordsetImpl::GetFieldInt32(const char *sFieldName) 
 {
-    const std::wstring sFieldNameW = ds_str_conv::ConvertFromUTF8(sFieldName);
-    return GetFieldInt32(sFieldNameW.c_str());
+    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+    return GetFieldInt32(sFieldNameUTF16.c_str());
 }
 
 int32_t CSqLiteRecordsetImpl::GetFieldInt32(const wchar_t *sFieldName)
@@ -867,7 +910,7 @@ int32_t CSqLiteRecordsetImpl::GetFieldInt32(const wchar_t *sFieldName)
         OnColumnIndexFailed(m_pErrorHandler, sFieldNameUTF8.c_str(), "CSqLiteRecordsetImpl::GetFieldLong", m_sTable.c_str(), sPathUTF8.c_str());
         return 0;
     }
-	return sqlite3_column_int(m_stmt, nColumnIndex);
+    return sqlite3_column_int(m_stmt, nColumnIndex);
 }
 
 void CSqLiteRecordsetImpl::SetFieldInt32(const char *sFieldName, int32_t lValue)
@@ -898,8 +941,14 @@ void CSqLiteRecordsetImpl::SetFieldInt64(const wchar_t *sFieldName, int64_t lVal
 void CSqLiteRecordsetImpl::SetFieldValueNull(const wchar_t *sFieldName)
 {
     ASSERT(m_pSaveData);
-	sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataNull;
+    sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataNull;
     (*m_pSaveData)[ds_str_conv::ConvertToUTF8(sFieldName)] = pFieldData;
+}
+
+double CSqLiteRecordsetImpl::GetFieldDouble(const char *sFieldName)
+{
+    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+    return GetFieldDouble(sFieldNameUTF16.c_str());
 }
 
 double CSqLiteRecordsetImpl::GetFieldDouble(const wchar_t *sFieldName) 
@@ -912,7 +961,13 @@ double CSqLiteRecordsetImpl::GetFieldDouble(const wchar_t *sFieldName)
         OnColumnIndexFailed(m_pErrorHandler, sFieldNameUTF8.c_str(), "CSqLiteRecordsetImpl::GetFieldDouble", m_sTable.c_str(), sPathUTF8.c_str());
         return 0.;
     }
-	return sqlite3_column_double(m_stmt, nColumnIndex);
+    return sqlite3_column_double(m_stmt, nColumnIndex);
+}
+
+void CSqLiteRecordsetImpl::SetFieldDouble(const char *sFieldName, double dValue) 
+{
+    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+    this->SetFieldDouble(sFieldNameUTF16.c_str(), dValue);
 }
 
 void CSqLiteRecordsetImpl::SetFieldDouble(const wchar_t *sFieldName, double dValue)
@@ -942,13 +997,13 @@ void CSqLiteRecordsetImpl::SetFieldDateTime(const wchar_t *sFieldName, const tim
     ASSERT(m_pSaveData);
     const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
     ASSERT(m_pSaveData->find(sFieldNameUTF8) == m_pSaveData->end()); // should be called only once for the one sFieldName 
-	sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataDateTime(time);
+    sqlite_util::CFieldData *pFieldData = new sqlite_util::CFieldDataDateTime(time);
     (*m_pSaveData)[sFieldNameUTF8] = pFieldData;
 }
 
 bool CSqLiteRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
 {
-	// The sqlite3_stricmp() and sqlite3_strnicmp() APIs allow applications and extensions to compare the contents of two buffers containing UTF-8 strings in a case-independent fashion, using the same definition of "case independence" that SQLite uses internally when comparing identifiers. 
+    // The sqlite3_stricmp() and sqlite3_strnicmp() APIs allow applications and extensions to compare the contents of two buffers containing UTF-8 strings in a case-independent fashion, using the same definition of "case independence" that SQLite uses internally when comparing identifiers. 
     const int nColumnIndex = FindColumnIndex(sFieldName);
     if ( nColumnIndex == -1 ) {
         const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
@@ -978,7 +1033,7 @@ bool CSqLiteRecordsetImpl::IsEOF()
 
 bool CSqLiteRecordsetImpl::MoveNext() 
 {
-	const int rc = sqlite3_blocking_step(m_stmt);
+    const int rc = sqlite3_blocking_step(m_stmt);
     switch (rc)
     {
     case SQLITE_DONE:
@@ -1003,28 +1058,28 @@ bool CSqLiteRecordsetImpl::MoveNext()
 
 bool CSqLiteRecordsetImpl::MoveFirst() 
 {
-	CloseStatement(); // sqlite3_reset would be enough if m_stmt and m_stmt.sql == sSQL
-	ASSERT(!m_sTable.empty());
-	std::string sSQL;
+    CloseStatement(); // sqlite3_reset would be enough if m_stmt and m_stmt.sql == sSQL
+    ASSERT(!m_sTable.empty());
+    std::string sSQL;
 
-	if ( m_bSQLOpened ) {//already opened by OpenSQL with SELECT statement
-		sSQL = m_sTable;
-	}
-	else {
-		sSQL  = "SELECT ROWID,* FROM ";
-		sSQL += m_sTable;
-	}
+    if ( m_bSQLOpened ) {//already opened by OpenSQL with SELECT statement
+        sSQL = m_sTable;
+    }
+    else {
+        sSQL  = "SELECT ROWID,* FROM ";
+        sSQL += m_sTable;
+    }
 
-	if ( !OpenImpl(sSQL.c_str()) ) {
+    if ( !OpenImpl(sSQL.c_str()) ) {
             return false;
     }
-	    
+        
     return MoveFirstImpl();
 }
 
 bool CSqLiteRecordsetImpl::MoveFirstImpl()
 {
-	ASSERT(m_stmt);
+    ASSERT(m_stmt);
     const int rc = sqlite3_blocking_step(m_stmt);
     switch (rc)
     {
@@ -1050,9 +1105,9 @@ bool CSqLiteRecordsetImpl::MoveFirstImpl()
 
 bool CSqLiteRecordsetImpl::OpenImpl(const char *sql)
 {
-	if ( m_stmt ) {
-		return true;
-	}
+    if ( m_stmt ) {
+        return true;
+    }
 
     m_stmt = Prepare(m_pDB->GetSqLiteDB(), sql, m_pErrorHandler);
 

@@ -26,7 +26,7 @@ public:
     virtual bool Rollback() override;    
 
     virtual bool Execute(const wchar_t *lpszSQL) override;
-    virtual bool OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) override;
+    virtual bool OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) override;
 
     virtual dsDBType GetType() override;
 

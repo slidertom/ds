@@ -8,8 +8,8 @@
     #include "Dao/DaoDatabaseImpl.h"
 #endif
 
-#include "SqLite/sqlite_copy_table.h"
-#include "SqLite/SqLiteDatabaseImpl.h"
+#include "sqLite/sqlite_copy_table.h"
+#include "sqLite/sqlite_database_impl.h"
 
 #include "dsStrConv.h"
 

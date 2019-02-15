@@ -3,12 +3,12 @@
 
 #include "SqLiteRecordsetImpl.h"
 #include "sqlite_include.h"
-#include "SqLiteDatabaseImpl.h" 
+#include "sqlite_database_impl.h"
 
 #include "../dsStrConv.h"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 namespace sqlite_util

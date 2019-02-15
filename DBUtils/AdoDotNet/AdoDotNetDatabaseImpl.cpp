@@ -5,6 +5,7 @@
 #include "AdoDotNetRecordsetImpl.h"
 
 #include "../dsStrConv.h"
+#include "../dsOpenParams.h"
 
 #ifdef _DEBUG
     #define new DEBUG_NEW
@@ -17,7 +18,6 @@ bool CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(const wchar_t *sPath)
     if (_tcsstr(sPath, L"Data Source=")) {
         return true;
     }
-
     return false;
 }
 
@@ -60,14 +60,11 @@ void CAdoDotNetDatabaseImpl::Close()
     m_sConnString = L"";
 }
 
-bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, bool bReadOnly, const wchar_t *szPsw) 
+bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) 
 {
     m_sConnString = sPath;
-
-    m_bReadOnly = bReadOnly;
-
+    m_bReadOnly = open_params.m_bReadOnly;
     const bool bRet = m_pDatabase->Open(sPath);
-
     return bRet;
 }
 
