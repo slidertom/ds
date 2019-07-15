@@ -224,57 +224,56 @@ public:
     {
         if (field_type == int().GetType())
         {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
 
         if (field_type == Int64().GetType())
         {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
 
         if (field_type == long().GetType())
         {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
 
         if (field_type == short().GetType())
         {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
 
         if (field_type == float().GetType())
         {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
 
         if (field_type == double().GetType())
         {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
 
         if (field_type == bool().GetType())
         {            
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
 
         if (field_type == String(L"").GetType())
         {            
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
 
         if (field_type == DateTime().GetType())
         {            
-            return dsFieldType_DateTime;
+            return dsFieldType::dsFieldType_DateTime;
         }
 
         if (field_type == System::Guid().GetType())
         {
-            return dsFieldType_Undefined;
+            return dsFieldType::dsFieldType_Undefined;
         }
 
         ASSERT(FALSE);
-
-        return dsFieldType_Undefined;
+        return dsFieldType::dsFieldType_Undefined;
     }
 
     virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)

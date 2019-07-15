@@ -291,5 +291,5 @@ std::wstring CAdoDotNetRecordsetImpl::GetColumnName(int nCol) const
 dsFieldType CAdoDotNetRecordsetImpl::GetColumnType(int nCol) const
 {
     ASSERT(FALSE);
-    return dsFieldType_Undefined;
+    return dsFieldType::dsFieldType_Undefined;
 }

@@ -15,7 +15,9 @@
 // Data Source=SQL-SERVER;Initial Catalog=catalog_name;Integrated Security=False;User ID=sa;Password=passsword
 bool CAdoDotNetDatabaseImpl::IsMSSQLServerAdoDotNet(const wchar_t *sPath)
 {
-    if (_tcsstr(sPath, L"Data Source=")) {
+    std::wstring sPathLC(sPath);
+    ds_str_conv::MakeLower(sPathLC);
+    if (::wcsstr(sPathLC.c_str(), L"data source=")) {
         return true;
     }
     return false;
@@ -70,7 +72,7 @@ bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &op
 
 dsDBType CAdoDotNetDatabaseImpl::GetType()
 {
-    return dsType_MsSQL;
+    return dsDBType::dsType_MsSQL;
 }
 
 bool CAdoDotNetDatabaseImpl::IsReadOnly() const
