@@ -77,7 +77,8 @@ namespace ds_json
             }
             #endif
         }
-        void SetJsonObject(const char *sField, const object &obj) noexcept; // json prefix applied to avoid conflicts with the general funcion name  SetObject
+        // json prefix applied to avoid conflicts with the general funcion name  SetObject
+        void SetJsonObject(const char *sField, const object &obj) noexcept; 
         void SetArray(const char *sField, const array &array) noexcept;
         void SetArrayEx(const char *sField, const array &array) noexcept;
         void SetStringArray(const char *sField, const std::vector<std::wstring> &array) noexcept;
@@ -92,18 +93,20 @@ namespace ds_json
         void         GetArray(const char *sField, array &array) const noexcept;
         void         GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept;
         time_t       GetDateTime(const char *sField) const noexcept;
-        bool         GetJsonObject(const char *sField, object &obj) const noexcept; // json prefix applied to avoid conflicts with the general funcion name GetObject
+        // json prefix applied to avoid conflicts with the general funcion name GetObject
+        bool         GetJsonObject(const char *sField, object &obj) const noexcept; 
         bool         IsNull(const char *sField) const noexcept;
 
         bool Remove(const char *sField) noexcept;
 
     private:
         object(object &x) = delete;
-        const object& operator =(const object& x) = delete; // copy is disabled by rapidjson
+        const object& operator=(const object& x) = delete; // copy is disabled by rapidjson
 
     public:
         void *m_impl {nullptr};
     };
+
     void DB_UTILS_API str2obj(const char* sJson, object &obj) noexcept;
     void DB_UTILS_API obj2str(const object &obj, std::string &sJson) noexcept;
 
@@ -113,11 +116,17 @@ namespace ds_json
     // Construction/Destruction
     public:
         array();
+        array(array &&ar); 
         ~array();
+
+    // Operators
+    public:
+        array &operator=(array &&x);
 
     // Operations
     public:
         void AddObject(const object &obj) noexcept;
+        //void AddObject(object &&obj) noexcept;
         void SetObject(size_t i, const object &obj) noexcept;
         void AddString(const char *str) noexcept;
         void AddString(const wchar_t *str) noexcept;
@@ -126,24 +135,66 @@ namespace ds_json
         void AddDouble(double dValue) noexcept;
         void AddFloat(float fValue) noexcept;
         void AddArray(const array &array) noexcept;
+        //void AddArray(array &&array) noexcept;
 
-        size_t GetSize() const noexcept;
+        size_t GetSize() const noexcept; // TODO: delete this function
+        size_t size() const noexcept;
         std::string GetStringUTF8(size_t i) const noexcept;
         std::wstring GetString(size_t i) const noexcept;
         int32_t GetInt32(size_t i) const noexcept;
         int64_t GetInt64(size_t i) const noexcept;
-        void GetJsonObject(size_t i, object &obj) const noexcept; // prefix json used as GetObject quite general function and can be defined
+        // prefix json used as GetObject quite general function and can be defined
+        void GetJsonObject(size_t i, object &obj) const noexcept; 
+
+     public:
+        class iterator
+        {
+        public:
+            iterator(const array &arr, const size_t nPos) : m_pArr(&arr), m_nPos(nPos) { }
+            ~iterator() { }
+
+        public:
+            iterator &operator++() {
+                m_nPos++;
+                return *this;
+            }
+
+            bool operator!=(iterator &rhs) const {
+                return m_nPos != rhs.m_nPos;
+            }
+
+            int32_t GetInt32() {
+                return m_pArr->GetInt32(m_nPos);
+            }
+
+            std::string GetStringUTF8() {
+                return m_pArr->GetStringUTF8(m_nPos);
+            }
+
+            std::wstring GetString() {
+                return m_pArr->GetString(m_nPos);
+            }
+
+        private:
+            const array *m_pArr;
+            size_t m_nPos;
+        };
+
+    public:
+        iterator begin();
+        iterator end();
 
     private:
-        array(array &x)                         = delete;
-        const array& operator =(const array& x) = delete; // copy is disabled by rapidjson
+        array(array &x)                        = delete;
+        const array& operator=(const array& x) = delete; // copy is disabled by rapidjson
 
     public:
         void *m_impl {nullptr};
     };
 
-    void DB_UTILS_API str2obj(const char *sJson, array &obj);
-    void DB_UTILS_API obj2str(const array &obj, std::string &sJson);
+    void DB_UTILS_API str2obj(const char *sJson, array &obj) noexcept;
+    void DB_UTILS_API str2obj(const char *sJson, std::vector<int32_t> &v) noexcept;
+    void DB_UTILS_API obj2str(const array &obj, std::string &sJson) noexcept;
 
     // do use object_vect as a cache if required multi time access to the array object elements
     class object_vect : public std::vector<ds_json::object *> {
@@ -162,12 +213,12 @@ namespace ds_json
         void operator=(const object_vect &x) = delete;
     };
 
-    inline void array2vect(const ds_json::array &arr, object_vect &v) noexcept
+    template <class ds_json_array>
+    inline void array2vect(const ds_json_array &arr, object_vect &v) noexcept
     {
         const size_t nCnt = arr.GetSize();
         v.reserve(nCnt);
-        for (size_t i = 0; i < nCnt; ++i)
-        {
+        for (size_t i = 0; i < nCnt; ++i) {
             ds_json::object *pObj = new ds_json::object;
             arr.GetJsonObject(i, *pObj);
             v.push_back(pObj);
@@ -283,7 +334,7 @@ namespace ds_json
     JSON_REMOVE(name, realname) \
 
 #define JSON_OBJECT(name, realname) \
-    static void Get##name(const ds_json::object &obj, ds_json::object &get_obj) { obj.GetJsonObject(realname, get_obj); } \
+    static bool Get##name(const ds_json::object &obj, ds_json::object &get_obj) { return obj.GetJsonObject(realname, get_obj); } \
     static void Set##name(ds_json::object &obj, const ds_json::object &set_obj) { obj.SetJsonObject(realname, set_obj); } \
     JSON_NULL(name, realname) \
     JSON_REMOVE(name, realname) \

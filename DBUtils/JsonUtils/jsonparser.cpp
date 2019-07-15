@@ -165,15 +165,37 @@ namespace ds_json
     array::array() {
         _impl::create_array(m_impl);
     }
+    array::array(array &&ar) {
+        m_impl = ar.m_impl;
+        ar.m_impl = nullptr;
+    }
     array::~array() {
         _impl::destroy(m_impl);
+    }
+    array &array::operator=(array &&ar) {
+        _impl::destroy(m_impl);
+        m_impl = ar.m_impl;
+        ar.m_impl = nullptr;
+        return *this;
     }
     void array::AddObject(const object &obj) noexcept {
         _impl::add_array_object(m_impl, obj.m_impl);
     }
+    /*
+    void array::AddObject(object &&obj) noexcept {
+         _impl::add_array_move_object(m_impl, obj.m_impl);
+         obj.m_impl = nullptr;
+    }
+    */
     void array::SetObject(size_t i, const object &obj) noexcept {
         _impl::set_array_object(m_impl, i, obj.m_impl);
     }
+    /*
+    void array::AddArray(array &&array) noexcept {
+        _impl::add_array_move_object(m_impl, array.m_impl);
+        array.m_impl = nullptr;
+    }
+    */
     void array::AddArray(const array &array) noexcept {
         _impl::add_array_object(m_impl, array.m_impl);
     }
@@ -197,6 +219,9 @@ namespace ds_json
         _impl::add_array_float(m_impl, fValue);
     }
 
+    size_t array::size() const noexcept {
+        return _impl::get_array_size(m_impl);
+    }
     size_t array::GetSize() const noexcept {
         return _impl::get_array_size(m_impl);
     }
@@ -215,15 +240,32 @@ namespace ds_json
     int32_t array::GetInt32(size_t i) const noexcept {
         return _impl::get_array_int32(m_impl, i);
     }
-    
+
+    array::iterator array::begin() {
+        return iterator(*this, 0);
+    }
+
+    array::iterator array::end() {
+        return iterator(*this, GetSize());
+    }
+
     void array::GetJsonObject(size_t i, object &obj) const noexcept {
         _impl::get_array_object(m_impl, i, obj.m_impl);
     }
     
-    void str2obj(const char* sJson, array &obj) {
+    void str2obj(const char* sJson, array &obj) noexcept{
         _impl::str2obj(sJson, obj.m_impl);
     }
-    void obj2str(const array &obj, std::string &sJson) {
+    void obj2str(const array &obj, std::string &sJson) noexcept {
         _impl::obj2str(obj.m_impl, sJson);
+    }
+    void str2obj(const char *sJson, std::vector<int32_t> &v) noexcept {
+        ds_json::array arr;
+        str2obj(sJson, arr);
+        size_t nSize = arr.size();
+        v.reserve(nSize);
+        for (size_t i1 = 0; i1 < nSize; ++i1) {
+            v.push_back(arr.GetInt32(i1));
+        }
     }
 };

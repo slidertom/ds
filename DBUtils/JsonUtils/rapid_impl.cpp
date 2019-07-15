@@ -22,6 +22,10 @@
     #include "Rapidjson/writer.h"
 #endif
 
+#ifdef _DEBUG
+    #define new DEBUG_NEW
+#endif
+
 namespace ds_json
 {
     namespace _impl_rapid
@@ -338,7 +342,15 @@ namespace ds_json
                 nValue = ds_str_conv::string_to_long(value.GetString()); // ~= atoi(value_str.c_str());
                 return true;
             }
-            
+            else if ( value.IsNull() ) {
+                nValue = 0;
+                return true;
+            }
+            else if ( value.IsNumber() ) { // do catch all other numeric types: double, float
+                nValue = (int32_t)value.GetDouble();
+                return true;
+            }
+
             ASSERT(FALSE);
             return false;
         }
@@ -376,7 +388,15 @@ namespace ds_json
                 nValue = ds_str_conv::string_to_long(value.GetString()); // ~= atoi(value_str.c_str());
                 return true;
             }
-            
+            else if ( value.IsNull() ) {
+                nValue = 0;
+                return true;
+            }
+            else if ( value.IsNumber() ) { // do catch all other numeric types: double, float
+                nValue = (int32_t)value.GetDouble();
+                return true;
+            }
+
             ASSERT(FALSE);
             return false;
         }
@@ -385,6 +405,7 @@ namespace ds_json
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+
             if ( found == doc->MemberEnd() ) {
                 return false;
             }
@@ -513,7 +534,21 @@ namespace ds_json
             value.SetFloat(fValue);
             doc->PushBack(value, allocator);
         }
-
+        /*
+        void add_array_move_object(void *impl, const void *obj) 
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            ASSERT(doc->IsArray());
+            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
+            rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
+            rapidjson::Value value(doc_obj->GetType());
+            value.Swap(*doc_obj);
+            doc->PushBack(value, allocator);
+            //doc->PushBack(rapidjson::Document(std::move(*doc_obj)), allocator);
+            ASSERT(doc_obj->IsNull());
+            destroy(doc_obj);
+        }
+        */
         void add_array_object(void *impl, const void *obj) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
@@ -524,6 +559,7 @@ namespace ds_json
             rapidjson::Value value(doc_obj->GetType());
             value.CopyFrom(*doc_obj, allocator);
             doc->PushBack(value, allocator);
+            ASSERT(value.IsNull());
         }
 
         size_t get_array_size(const void *impl) 
