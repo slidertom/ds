@@ -61,14 +61,14 @@ namespace ds_json
         _impl::set_field_array(m_impl, sField, array.m_impl);
     }
     void object::SetArrayEx(const char *sField, const array &array) noexcept {
-        if ( array.GetSize() > 0 ) { 
+        if ( array.size() > 0 ) { 
             SetArray(sField, array); 
         }
         #ifdef _DEBUG
         else {
             ds_json::array array_check;
             GetArray(sField, array_check); 
-            ASSERT(array_check.GetSize() == 0); // should match default value
+            ASSERT(array_check.size() == 0); // should match default value
         }
         #endif
     }
@@ -107,7 +107,7 @@ namespace ds_json
     {
         ds_json::array array_json;
         _impl::get_field_array(m_impl, sField, array_json.m_impl);
-        const size_t nCnt = array_json.GetSize();
+        const size_t nCnt = array_json.size();
         for (size_t i = 0; i < nCnt; ++i) {
             array.push_back(array_json.GetString(i));
         }    
@@ -222,9 +222,6 @@ namespace ds_json
     size_t array::size() const noexcept {
         return _impl::get_array_size(m_impl);
     }
-    size_t array::GetSize() const noexcept {
-        return _impl::get_array_size(m_impl);
-    }
     std::string array::GetStringUTF8(size_t i) const noexcept {
         std::string sValue;
         _impl::get_array_string(m_impl, i, sValue);
@@ -240,13 +237,20 @@ namespace ds_json
     int32_t array::GetInt32(size_t i) const noexcept {
         return _impl::get_array_int32(m_impl, i);
     }
+    double array::GetDouble(size_t i) const noexcept {
+        return _impl::get_array_double(m_impl, i);
+    }
+    array::iterator::reference array::iterator::operator*() const { 
+        m_array_object.m_pArr->GetJsonObject(m_array_object.m_nPos, m_array_object.m_object);
+        return m_array_object;
+    }
 
     array::iterator array::begin() {
         return iterator(*this, 0);
     }
 
     array::iterator array::end() {
-        return iterator(*this, GetSize());
+        return iterator(*this, size());
     }
 
     void array::GetJsonObject(size_t i, object &obj) const noexcept {
@@ -267,5 +271,28 @@ namespace ds_json
         for (size_t i1 = 0; i1 < nSize; ++i1) {
             v.push_back(arr.GetInt32(i1));
         }
+    }
+
+    array::array_object::operator int32_t() const noexcept {
+        return m_pArr->GetInt32(m_nPos);
+    }
+    array::array_object::operator int64_t() const noexcept {
+        return m_pArr->GetInt64(m_nPos);
+    }
+    array::array_object::operator reference() const noexcept {
+        m_pArr->GetJsonObject(m_nPos, m_object);
+        return m_object;
+    }
+    array::array_object::operator bool() const noexcept {
+        return m_pArr->GetInt32(m_nPos) != 0;
+    }
+    array::array_object::operator double() const noexcept {
+        return m_pArr->GetDouble(m_nPos) != 0;
+    }
+    array::array_object::operator std::string() const noexcept {
+        return m_pArr->GetStringUTF8(m_nPos);
+    }
+    array::array_object::operator std::wstring() const noexcept {
+        return m_pArr->GetString(m_nPos);
     }
 };
