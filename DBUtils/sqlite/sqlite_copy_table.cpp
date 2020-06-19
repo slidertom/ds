@@ -56,32 +56,32 @@ namespace sqlite_util
 
                     switch (it->second) 
                     {
-                    case dsFieldType_Text:
+                    case dsFieldType::dsFieldType_Text:
                         {
                             const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
                             const std::string sValue = src_table.GetFieldStringUTF8(sFieldNameUTF8.c_str());
                             dst_table.SetFieldStringUTF8(sFieldNameUTF8.c_str(), sValue.c_str());
                         }
                         break;
-                    case dsFieldType_Integer:
+                    case dsFieldType::dsFieldType_Integer:
                         {
                             const int nValue = src_table.GetFieldLong(sFieldName);
                             dst_table.SetFieldInt32(sFieldName, nValue);
                         }
                         break;
-                    case dsFieldType_Double:
+                    case dsFieldType::dsFieldType_Double:
                         {
                             const double dValue = src_table.GetFieldDouble(sFieldName);
                             dst_table.SetFieldDouble(sFieldName, dValue);
                         }
                         break;
-                    case dsFieldType_DateTime:
+                    case dsFieldType::dsFieldType_DateTime:
                         {
                             const time_t nTime = src_table.GetFieldDateTime(sFieldName);
                             dst_table.SetFieldDateTime(sFieldName, nTime);
                         }
                         break;
-                    case dsFieldType_Blob:
+                    case dsFieldType::dsFieldType_Blob:
                         {
                             unsigned char *pData = nullptr;
                             size_t nSize = 0;
@@ -119,8 +119,7 @@ namespace sqlite_util
 
     bool sqlite_detach_database(CSqLiteDatabaseImpl *pDstDB) 
     {  
-        ASSERT(pDstDB->GetType() == dsType_SqLite);
-
+        ASSERT(pDstDB->GetType() == dsDBType::dsType_SqLite);
         const char *sSQL = "DETACH DATABASE SrcDB;";
         if ( !pDstDB->ExecuteUTF8(sSQL) ) {
             return false;
@@ -130,7 +129,7 @@ namespace sqlite_util
 
     bool sqlite_insert_table_from_attached_db(CSqLiteDatabaseImpl *pDstDB, const char *sTableNameSrc, const char *sTableNameDst)
     {
-        ASSERT(pDstDB->GetType() == dsType_SqLite);
+        ASSERT(pDstDB->GetType() == dsDBType::dsType_SqLite);
 
         // INSERT INTO sTableNameDst SELECT * FROM SrcDB.sTableNameSrc;"
         std::string sSQL  = "INSERT INTO ";

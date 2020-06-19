@@ -7,7 +7,6 @@
 #endif
 
 #include "vector"
-#include "string"
 
 namespace ds_json
 {
@@ -83,6 +82,7 @@ namespace ds_json
         void SetArray(const char *sField, const array &array) noexcept;
         void SetArrayEx(const char *sField, const array &array) noexcept;
         void SetStringArray(const char *sField, const std::vector<std::wstring> &array) noexcept;
+        void SetStringArrayUTF8(const char *sField, const std::vector<std::string> &array) noexcept;
         void SetNull(const char *sField) noexcept;
 
         std::wstring GetText(const char *sField) const noexcept;
@@ -93,11 +93,13 @@ namespace ds_json
         bool         GetBool(const char *sField) const noexcept { return GetInt32(sField) != 0; }
         void         GetArray(const char *sField, array &array) const noexcept;
         void         GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept;
+        void         GetStringArrayUTF8(const char *sField, std::vector<std::string> &array) const noexcept;
+
         time_t       GetDateTime(const char *sField) const noexcept;
         // json prefix applied to avoid conflicts with the general funcion name GetObject
         bool         GetJsonObject(const char *sField, object &obj) const noexcept; 
         bool         IsNull(const char *sField) const noexcept;
-        
+
         bool Remove(const char *sField) noexcept;
 
     private:
@@ -138,67 +140,47 @@ namespace ds_json
         void AddArray(const array &array) noexcept;
         //void AddArray(array &&array) noexcept;
 
+        size_t GetSize() const noexcept; // TODO: delete this function
         size_t size() const noexcept;
         std::string GetStringUTF8(size_t i) const noexcept;
         std::wstring GetString(size_t i) const noexcept;
         int32_t GetInt32(size_t i) const noexcept;
         int64_t GetInt64(size_t i) const noexcept;
-        double GetDouble(size_t i) const noexcept;
         // prefix json used as GetObject quite general function and can be defined
         void GetJsonObject(size_t i, object &obj) const noexcept; 
 
      public:
-        class DB_UTILS_API array_object final
-        {
-        public:    
-            using reference = typename object&;
-            using pointer   = typename object*;
-
-            array_object() = delete;
-            array_object(array_object &&x) = delete;
-            array_object(const array_object &x) : m_pArr(x.m_pArr), m_nPos(x.m_nPos) { }
-            array_object(const array &arr, size_t nPos) : m_pArr(&arr), m_nPos(nPos) { }
-            ~array_object() = default;
-            
-        public:
-            operator int32_t() const noexcept;
-            operator int64_t() const noexcept;
-            operator reference() const noexcept;
-            operator bool() const noexcept;
-            operator double() const noexcept;
-            operator std::string() const noexcept;
-            operator std::wstring() const noexcept;
-
-        // Attributes
-        public:
-            const array *m_pArr;
-            size_t m_nPos;
-            mutable ds_json::object m_object;
-        };
-
-        class DB_UTILS_API iterator final
+        class iterator
         {
         public:
-            using reference = typename array_object&;
-            using pointer   = typename array_object*;
-
-            iterator(const array &arr, const size_t nPos) : m_array_object(arr, nPos) { }
-            iterator(const iterator &x) : m_array_object(x.m_array_object) { }
+            iterator(const array &arr, const size_t nPos) : m_pArr(&arr), m_nPos(nPos) { }
             ~iterator() { }
 
-        // Operators
         public:
-            iterator &operator++()   { ++m_array_object.m_nPos; return *this; } // prefix++
-            iterator operator++(int) { ++m_array_object.m_nPos; return iterator(*this); } // postfix++ 
+            iterator &operator++() {
+                m_nPos++;
+                return *this;
+            }
 
-            bool operator!=(iterator &rhs) const { return m_array_object.m_nPos != rhs.m_array_object.m_nPos; }
+            bool operator!=(iterator &rhs) const {
+                return m_nPos != rhs.m_nPos;
+            }
 
-            reference operator*() const;
-            pointer operator->() const { return &(operator*()); }
+            int32_t GetInt32() {
+                return m_pArr->GetInt32(m_nPos);
+            }
 
-        // Attributes 
+            std::string GetStringUTF8() {
+                return m_pArr->GetStringUTF8(m_nPos);
+            }
+
+            std::wstring GetString() {
+                return m_pArr->GetString(m_nPos);
+            }
+
         private:
-            mutable array_object m_array_object;
+            const array *m_pArr;
+            size_t m_nPos;
         };
 
     public:
@@ -237,7 +219,7 @@ namespace ds_json
     template <class ds_json_array>
     inline void array2vect(const ds_json_array &arr, object_vect &v) noexcept
     {
-        const size_t nCnt = arr.size();
+        const size_t nCnt = arr.GetSize();
         v.reserve(nCnt);
         for (size_t i = 0; i < nCnt; ++i) {
             ds_json::object *pObj = new ds_json::object;
@@ -345,6 +327,8 @@ namespace ds_json
 #define JSON_STRING_ARRAY(name, realname) \
     static void Get##name(const ds_json::object &obj, std::vector<std::wstring> &array) { obj.GetStringArray(realname, array); } \
     static void Set##name(ds_json::object &obj, const std::vector<std::wstring> &array) { obj.SetStringArray(realname, array); } \
+    static void Get##name##UTF8(const ds_json::object &obj, std::vector<std::string> &array) { obj.GetStringArrayUTF8(realname, array); } \
+    static void Set##name##UTF8(ds_json::object &obj, const std::vector<std::string> &array) { obj.SetStringArrayUTF8(realname, array); } \
     JSON_NULL(name, realname) \
     JSON_REMOVE(name, realname) \
 

@@ -56,6 +56,8 @@ public:
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
+    virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) override;
+
 public:
     sqlite3 *GetSqLiteDB() { return m_pDB; }
     CSqLiteErrorHandler *GetErrorHandler() { return m_pErrorHandler; }

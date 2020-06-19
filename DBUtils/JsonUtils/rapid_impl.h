@@ -52,7 +52,6 @@ namespace ds_json
         void get_array_string(const void *impl, size_t i, std::string &sValue);
         int32_t get_array_int32(const void *impl, size_t i);
         int64_t get_array_int64(const void *impl, size_t i);
-        double get_array_double(const void *impl, size_t i);
         void get_array_object(const void *impl, size_t i, void *obj);
         void set_array_object(void *impl, size_t i, const void *obj);
     }

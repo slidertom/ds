@@ -396,6 +396,18 @@ namespace ds_json
                 nValue = (int32_t)value.GetDouble();
                 return true;
             }
+            else if ( value.IsBool() ) {
+                nValue = value.GetBool() == true ? 1 : 0;
+                return true;
+            }
+            else if ( value.IsFalse() ) {
+                nValue = 0;
+                return true;
+            }
+            else if ( value.IsTrue() ) {
+                nValue = 1;
+                return true;
+            }
 
             ASSERT(FALSE);
             return false;
@@ -413,8 +425,16 @@ namespace ds_json
             return rapid_value_to_int32(value, nValue);
         }
 
-        static inline bool rapid_value_to_double(const rapidjson::Value &value, double &dValue)
+        bool get_field_double(void *impl, const char *sField, double &dValue)
         {
+            rapidjson::Document *doc = (rapidjson::Document *)impl;
+            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
+            if ( found == doc->MemberEnd() ) {
+                return false;
+            }
+
+            const rapidjson::Value &value = found->value;
+            
             if ( value.IsNumber() ) {
                 dValue = value.GetDouble();
                 return true;
@@ -428,20 +448,9 @@ namespace ds_json
                 return true;
             }
             // TODO IsObject -> to string and string_to_double also do check out IsLosslessDouble()
+
             ASSERT(FALSE);
             return false;
-        }
-
-        bool get_field_double(void *impl, const char *sField, double &dValue)
-        {
-            rapidjson::Document *doc = (rapidjson::Document *)impl;
-            rapidjson::Document::MemberIterator found = doc->FindMember(sField);
-            if ( found == doc->MemberEnd() ) {
-                return false;
-            }
-
-            const rapidjson::Value &value = found->value;
-            return rapid_value_to_double(value, dValue);
         }
 
         bool get_field_string(void *impl, const char *sField, std::string &value_str) 
@@ -583,17 +592,6 @@ namespace ds_json
             internal::value2str(value, sValue);
         }
 
-        double get_array_double(const void *impl, size_t i)
-        {
-            rapidjson::Document *doc = (rapidjson::Document *)impl;
-            const rapidjson::Value &value = (*doc)[i];
-            double dValue = 0.;
-            if ( rapid_value_to_double(value, dValue) ) {
-                return dValue;
-            }
-            return 0.;
-        }
-
         int32_t get_array_int32(const void *impl, size_t i)
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
@@ -604,7 +602,7 @@ namespace ds_json
             }
             return 0;
         }
-        
+
         int64_t get_array_int64(const void *impl, size_t i)
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
@@ -635,9 +633,23 @@ namespace ds_json
             if ( value.IsString() ) {
                 str2obj(value.GetString(), obj);
             }
-            else if ( value.IsObject() ) {
+            else if ( value.IsObject() ) 
+            {
                 rapidjson::Document *obj_doc = (rapidjson::Document *)obj;
-                obj_doc->CopyFrom(value, obj_doc->GetAllocator()); // this is the most slowest part, expected move usage
+                obj_doc->CopyFrom(value, obj_doc->GetAllocator());
+            }
+            else if ( value.IsArray() ) {
+                if ( value.Size() == 0 ) { // special case to support "[]", otherwise rapid asserts in the debug mode
+                    return;// nothing to fill
+                }
+                else {
+                    std::string sJson;
+                    internal::value2str(value, sJson);
+                    str2obj(sJson.c_str(), obj);       
+                }
+            }
+            else if ( value.IsNull() ) {
+                return;// nothing to fill
             }
             else {
                 std::string sJson;

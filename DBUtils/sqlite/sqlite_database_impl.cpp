@@ -290,7 +290,7 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_
 
 dsDBType CSqLiteDatabaseImpl::GetType()
 {
-    return dsType_SqLite;
+    return dsDBType::dsType_SqLite;
 }
 
 bool CSqLiteDatabaseImpl::IsReadOnly() const
@@ -513,4 +513,123 @@ void CSqLiteDatabaseImpl::CommitDatabase()
     if (rc != SQLITE_OK) {
         m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::CommitDatabase::loadOrSaveDb");    
     }
+}
+
+bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName)
+{
+    // SQLite drop column implementation is based on https://www.sqlite.org/faq.html#q11
+
+    const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
+    const sqlite_util::CFieldInfoMap *pFieldInfoMap = GetTableFieldInfoImpl(sTableNameUTF8.c_str());
+    if ( !pFieldInfoMap ) {
+        std::string sError = "DropColumn failed. Table ";
+                    sError += sTableNameUTF8;
+                    sError += " does not exist.";
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::GetTableFieldInfo");
+        return false;
+    }
+
+    bool bColumnExist(false);
+    const std::string sColumnNameUTF8 = ds_str_conv::ConvertToUTF8(sColumnName);
+    for (const auto &it : *pFieldInfoMap) {
+        if (it.first == sColumnNameUTF8) {
+            bColumnExist = true;
+            break;
+        }
+    }
+
+    if (!bColumnExist) {
+        std::string sError = "DropColumn failed. No column ";
+                    sError += sColumnNameUTF8;            
+                    sError += " defined in table ";
+                    sError += sTableNameUTF8;
+                    sError += ".";
+
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::GetTableFieldInfo");
+        return false;
+    }
+
+    // Get fields list with UNIQUE flag and create statements for indexes
+    std::vector<std::string> sUniqueFields;
+    std::unordered_map<std::string, std::string> mapIndexSQLs;
+    sqlite_util::sqlite_get_table_index_info(this, sTableNameUTF8.c_str(), m_pErrorHandler, sUniqueFields, mapIndexSQLs);
+    
+    std::string sMainSQL = "PRAGMA foreign_keys=off;\n";
+    
+    sMainSQL += "ALTER TABLE "; 
+    sMainSQL += sTableNameUTF8;
+    sMainSQL += " RENAME TO ";
+    sMainSQL += sTableNameUTF8;
+    sMainSQL += "_1;\n";
+   
+    // Constructing CREATE statement
+    std::string sPrimary;
+    std::string sFieldsList;
+    sMainSQL += "CREATE TABLE \"" + sTableNameUTF8 + "\" (";
+    for (const auto &it : *pFieldInfoMap) {
+        if (it.first == sColumnNameUTF8) {
+            continue;
+        }
+
+        sFieldsList += it.first + ", ";
+
+        sMainSQL += "\"" + it.first + "\" " + it.second.m_sType;
+
+        if (it.second.m_bPrimary) {
+            sPrimary = it.first;
+        }
+
+        if (it.second.m_bNotNull) {
+            sMainSQL += " NOT NULL";
+        }
+
+        const auto it_find_unique = std::find(sUniqueFields.begin(), sUniqueFields.end(), it.first);
+        if (sUniqueFields.end() != it_find_unique) {
+            sMainSQL += " UNIQUE";
+        }
+
+        sMainSQL += ",";
+    }
+
+    if (!sPrimary.empty()) {
+        sMainSQL +=  " PRIMARY KEY(\"" + sPrimary + "\")";
+    }
+    else {
+        sMainSQL.pop_back(); // To remove last comma.
+    }
+
+    sMainSQL += ");\n";
+
+    // Remowing last comma and space
+    sFieldsList.pop_back();
+    sFieldsList.pop_back();
+
+    // Creating INSERT statement
+    sMainSQL += "INSERT INTO ";
+    sMainSQL += sTableNameUTF8;
+    sMainSQL += " (";
+    sMainSQL += sFieldsList;
+    sMainSQL += ") SELECT ";
+    sMainSQL += sFieldsList;
+    sMainSQL += " FROM ";
+    sMainSQL += sTableNameUTF8;
+    sMainSQL += "_1;\n";
+
+    sMainSQL += "DROP TABLE " + sTableNameUTF8 + "_1;\n";
+
+    // Restore Indexes
+    // TODO: restore Triggers and Views
+    for (const auto &it : mapIndexSQLs) {
+        if (it.first == sColumnNameUTF8) {
+            continue;
+        }
+        sMainSQL += it.second + ";\n";
+    }
+
+    sMainSQL += "PRAGMA foreign_keys=on;";
+    if (!ExecuteUTF8(sMainSQL.c_str())) {
+        return false;
+    }
+
+    return true;
 }

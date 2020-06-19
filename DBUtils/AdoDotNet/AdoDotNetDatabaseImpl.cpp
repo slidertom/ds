@@ -131,3 +131,18 @@ bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFie
 {
     return m_pDatabase->GetTableFieldInfo(sTable, info);
 }
+
+bool CAdoDotNetDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName)
+{
+    std::wstring sSQL = L"ALTER TABLE ";
+    sSQL += sTableName;
+    sSQL += L" DROP COLUMN ";
+    sSQL += sColumnName;
+    sSQL += L";";
+
+    if (!Execute(sSQL.c_str())) {
+        return false;
+    }
+
+    return true;
+}

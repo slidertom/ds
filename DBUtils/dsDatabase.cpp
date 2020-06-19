@@ -100,7 +100,7 @@ bool dsDatabase::IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept
 bool dsDatabase::OpenDB(const wchar_t *sPath, const dsOpenParams &params) noexcept
 {
     Close(); // do auto close if opened
-    
+
     ASSERT(!m_pDatabase);
     ASSERT(::wcslen(sPath) != 0);
 
@@ -139,6 +139,10 @@ void dsDatabase::CommitTrans() noexcept
 {
     ASSERT(m_pDatabase);
     m_pDatabase->CommitTrans();
+
+    if (m_postCommitTrans) {
+        m_postCommitTrans();
+    }
 }
 
 void dsDatabase::RollbackTrans() noexcept
@@ -233,4 +237,42 @@ void dsDatabase::SetLogPath(const wchar_t *sLogPath) noexcept
 dsDatabase::dbErrorHandler dsDatabase::GetErrorHandler()
 {
     return m_pErrorHandler;
+}
+
+bool dsDatabase::DropIndex(const wchar_t *sIndexName)
+{
+    std::wstring sDropStatement = L"DROP INDEX ";
+    sDropStatement += sIndexName;
+    sDropStatement += L";";
+    if (!m_pDatabase->Execute(sDropStatement.c_str())){
+        return false;
+    }
+
+    return true;
+}
+
+std::wstring dsDatabase::AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName)
+{
+    std::wstring sIndexName = sTableName;
+    sIndexName += L"_";
+    sIndexName += sFieldName;
+
+    std::wstring sCreateStatement = L"CREATE UNIQUE INDEX `";
+    sCreateStatement += sIndexName;
+    sCreateStatement += L"` ON `";
+    sCreateStatement += sTableName;
+    sCreateStatement += L"` (`";
+    sCreateStatement += sFieldName;
+    sCreateStatement += L"` COLLATE NOCASE);";
+
+    if (!m_pDatabase->Execute(sCreateStatement.c_str())) {
+        return L"";
+    }
+
+    return sIndexName;
+}
+
+void dsDatabase::SetPostCommitHandler(const FuncPostCommitTrans &func)
+{
+    m_postCommitTrans = func;
 }

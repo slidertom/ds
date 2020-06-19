@@ -28,6 +28,8 @@ namespace sqlite_util
 
     class CFieldInfoMap : public std::unordered_map<std::string, CFieldInfo> { };
     bool sqlite_get_table_fields_info(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, CFieldInfoMap &map);
+    void sqlite_get_table_index_info(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, std::vector<std::string> &sUniqueFields,
+                                     std::unordered_map<std::string, std::string> &mapIndexSQLs);
 };
 
 #endif 

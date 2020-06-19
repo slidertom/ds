@@ -22,6 +22,10 @@
     #include "dsOpenParams.h"
 #endif
 
+#ifndef FASTDELEGATE_H
+	#include "MemFunc/FastDelegate.h"
+#endif
+
 #include "vector"
 
 class CAbsDatabase;
@@ -34,6 +38,8 @@ class CAbsDatabase;
 
 class DB_UTILS_API dsDatabase : public CRoleCore
 {
+    typedef fastdelegate::FastDelegate0<> FuncPostCommitTrans;
+
 // Constuction/Destruction
 public:
     dsDatabase();
@@ -86,6 +92,11 @@ public:
     static bool IsDaoDB(const wchar_t *sPath) noexcept;
     static bool IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept;
 
+    bool DropIndex(const wchar_t *sIndexName);
+    std::wstring AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName);
+
+    void SetPostCommitHandler(const FuncPostCommitTrans &func);
+
 // Operations
 public:
     void Refresh() noexcept; // Refresh database related cache items
@@ -113,6 +124,7 @@ private:
     CAbsDatabase *m_pDatabase {nullptr};
     std::vector<dsDatabaseListener *> m_listeners;
     dbErrorHandler m_pErrorHandler;
+    FuncPostCommitTrans m_postCommitTrans;
 };
 
 #endif

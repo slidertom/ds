@@ -30,6 +30,8 @@ dsTable::dsTable(dsDatabase *pDatabase, const char *sTableNameUTF8)
 
 dsTable::~dsTable()
 {
+    //The database must be opened. Otherwise - memory leaks can be shown
+    ASSERT(m_pDatabase->IsOpen());
     delete m_pSet;
 }
 

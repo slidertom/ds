@@ -6,7 +6,7 @@
 #include "mutex"
 
 #ifdef _DEBUG
-	#define new DEBUG_NEW
+    #define new DEBUG_NEW
 #endif
 
 namespace internal
@@ -42,8 +42,8 @@ void CLogImpl::Log(const wchar_t *sMsg)
 {
     std::lock_guard<std::mutex> lock(g_log_mutex);
 
-	const std::wstring sFilePath = g_sLogPath;
-	ASSERT(!sFilePath.empty());
+    const std::wstring sFilePath = g_sLogPath;
+    ASSERT(!sFilePath.empty());
 
     time_t rawtime;
     struct tm *timeinfo;
@@ -70,5 +70,5 @@ void CLogImpl::Log(const wchar_t *sMsg)
 
 void CLogImpl::SetLogPath(const wchar_t *sLogPath)
 {
-	g_sLogPath = sLogPath;
+    g_sLogPath = sLogPath;
 }

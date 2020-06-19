@@ -183,7 +183,7 @@ bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_par
 
 dsDBType CDaoDatabaseImpl::GetType()
 {
-    return dsType_Dao;
+    return dsDBType::dsType_Dao;
 }
 
 bool CDaoDatabaseImpl::IsReadOnly() const
@@ -379,7 +379,7 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo
         const short nType = fieldInfo.m_nType;
         const dsFieldType field_type = CDaoRecordsetImpl::DaoTypeToDs(nType);
 
-        if ( field_type == dsFieldType_Undefined )
+        if ( field_type == dsFieldType::dsFieldType_Undefined )
         {
             std::wstring sError  = L"Field type: ";
                             sError += std::to_wstring(nType);
@@ -393,6 +393,21 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo
     }
 
     tableInfo.Close();
+
+    return true;
+}
+
+bool CDaoDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName)
+{
+    std::wstring sSQL = L"ALTER TABLE ";
+    sSQL += sTableName;
+    sSQL += L" DROP COLUMN ";
+    sSQL += sColumnName;
+    sSQL += L";";
+
+    if (!Execute(sSQL.c_str())) {
+        return false;
+    }
 
     return true;
 }

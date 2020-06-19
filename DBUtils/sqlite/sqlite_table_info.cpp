@@ -19,105 +19,105 @@ namespace sqlite_util
         std::transform(sType.begin(), sType.end(), sType.begin(), ::toupper); // do use ANSI based -> check out if statements
 
         if ( sType == "INTEGER" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
 
         if ( sType == "TEXT" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
 
         if ( sType == "REAL" ) {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
 
         if ( sType == "BLOB" ) {
-            return dsFieldType_Blob;
+            return dsFieldType::dsFieldType_Blob;
         }
 
         if ( sType == "DATE" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "DATETIME" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         // If the declared type contains the string "INT" then it is assigned INTEGER affinity.
         if ( sType == "INT" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "INTEGER" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "TINYINT" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "SMALLINT" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "MEDIUMINT" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "BIGINT" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "UNSIGNED BIG INT" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "INT2" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         if ( sType == "INT8" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
 
         // If the declared type of the column contains any of the strings "CHAR", "CLOB", or "TEXT" 
         // then that column has TEXT affinity. Notice that the type VARCHAR contains the string "CHAR" and is thus assigned TEXT affinity.
         if ( sType == "CHARACTER" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         if ( sType == "VARCHAR" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         if ( sType == "VARYING CHARACTER" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         if ( sType == "NCHAR" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         if ( sType == "NATIVE CHARACTER" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         if ( sType == "NVARCHAR" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         if ( sType == "CHAR" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         if ( sType == "CLOB" ) {
-            return dsFieldType_Text;
+            return dsFieldType::dsFieldType_Text;
         }
         //SQLite does not have a separate Boolean storage class. Instead, Boolean values are stored as integers 0 (false) and 1 (true).
         if ( sType == "BOOLEAN" ) {
-            return dsFieldType_Integer;
+            return dsFieldType::dsFieldType_Integer;
         }
         // If the declared type for a column contains any of the strings "REAL", "FLOA", or "DOUB" then the column has REAL affinity
         if ( sType == "NUMERIC" ) {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
         if ( sType == "DECIMAL" ) {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
         if ( sType == "FLOAT" ) {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
         if ( sType == "DOUBLE" ) {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
         if ( sType == "DOUBLE PRECISION" ) {
-            return dsFieldType_Double;
+            return dsFieldType::dsFieldType_Double;
         }
 
         ASSERT(FALSE);
-        return dsFieldType_Undefined;
+        return dsFieldType::dsFieldType_Undefined;
     }
 
     static bool IsAutoincrement(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler)
@@ -195,5 +195,74 @@ namespace sqlite_util
         }
 
         return true;
+    }
+
+    void sqlite_get_table_index_info(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler, std::vector<std::string> &sUniqueFields,
+                                     std::unordered_map<std::string, std::string> &mapIndexSQLs)
+    {
+        ASSERT(strlen(sTableName) > 0);
+
+        std::string sPragmaIndexList;
+        sPragmaIndexList = "PRAGMA INDEX_LIST (`"; 
+        sPragmaIndexList += sTableName;
+        sPragmaIndexList += "`)";
+
+        CSqLiteRecordsetImpl loaderIndexList(pDB, pErrorHandler);
+
+        if ( !loaderIndexList.OpenSQLUTF8(sPragmaIndexList.c_str()) ) {
+            return;
+        }
+
+        if ( !loaderIndexList.MoveFirstImpl() ) {
+            return;
+        }
+
+        std::vector<std::string> sIndexNames;
+
+        while ( !loaderIndexList.IsEOF() ) {
+            const bool bUnique = loaderIndexList.GetFieldInt32("unique") == 1;
+            if (bUnique) {
+                const std::string sIndexName = loaderIndexList.GetFieldStringUTF8("name");
+                if (std::string::npos == sIndexName.find("sqlite_autoindex")) {
+                    sIndexNames.push_back(sIndexName);
+                }
+            }
+            loaderIndexList.MoveNext();
+        }
+
+        for (const std::string &sIndexName : sIndexNames) {
+            std::string sFieldName;
+            // Unique fields by index name
+            {
+                CSqLiteRecordsetImpl loaderIndexInfo(pDB, pErrorHandler);
+                const std::string sPragmaIndexInfo = "PRAGMA INDEX_INFO (`" + sIndexName + "`)";
+                if ( !loaderIndexInfo.OpenSQLUTF8(sPragmaIndexInfo.c_str()) ) {
+                    continue;
+                }
+
+                if ( !loaderIndexInfo.MoveFirstImpl() ) {
+                    continue;
+                }
+
+                sFieldName = loaderIndexInfo.GetFieldStringUTF8("name");
+                sUniqueFields.push_back(sFieldName);
+                
+            }
+            // Index create statements by index name
+            {
+                CSqLiteRecordsetImpl loaderMaster(pDB, pErrorHandler);
+                const std::string sMaster = "SELECT sql FROM sqlite_master WHERE name=\"" + sIndexName + "\"";
+                if ( !loaderMaster.OpenSQLUTF8(sMaster.c_str()) ) {
+                    continue;
+                }
+
+                if ( !loaderMaster.MoveFirstImpl() ) {
+                    continue;
+                }
+
+                const std::string sSQL = loaderMaster.GetFieldStringUTF8("sql");
+                mapIndexSQLs[sFieldName] = sSQL;
+            }
+        }
     }
 };

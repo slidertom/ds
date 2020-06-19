@@ -53,6 +53,8 @@ public:
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) = 0;
+
+    virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) = 0;
 };
 
 namespace ds_table_field_info_util

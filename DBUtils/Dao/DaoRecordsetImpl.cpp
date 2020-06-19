@@ -784,7 +784,7 @@ dsFieldType CDaoRecordsetImpl::GetColumnType(int nCol) const
         e->Delete();
     }
 
-    return dsFieldType_Undefined;
+    return dsFieldType::dsFieldType_Undefined;
 }
 
 dsFieldType CDaoRecordsetImpl::DaoTypeToDs(const short nType)
@@ -792,43 +792,43 @@ dsFieldType CDaoRecordsetImpl::DaoTypeToDs(const short nType)
     switch (nType) 
     {
     case dbBoolean:
-        return dsFieldType_Integer;
+        return dsFieldType::dsFieldType_Integer;
         break;
     case dbByte:
-        return dsFieldType_Integer;
+        return dsFieldType::dsFieldType_Integer;
         break;
     case dbInteger:
-        return dsFieldType_Integer;
+        return dsFieldType::dsFieldType_Integer;
         break;
     case dbLong:
-        return dsFieldType_Integer;
+        return dsFieldType::dsFieldType_Integer;
         break;
     case dbCurrency:
-        return dsFieldType_Double;
+        return dsFieldType::dsFieldType_Double;
         break;
     case dbSingle:
-        return dsFieldType_Double; // Single-precision floating-point data
+        return dsFieldType::dsFieldType_Double; // Single-precision floating-point data
         break;
     case dbDouble:
-        return dsFieldType_Double;
+        return dsFieldType::dsFieldType_Double;
         break;
     case dbDate:
-        return dsFieldType_DateTime;
+        return dsFieldType::dsFieldType_DateTime;
         break;
     case dbText:
-        return dsFieldType_Text;
+        return dsFieldType::dsFieldType_Text;
         break;
     case dbLongBinary:
-        return dsFieldType_Blob;
+        return dsFieldType::dsFieldType_Blob;
         break;
     case dbMemo:
-        return dsFieldType_Text;
+        return dsFieldType::dsFieldType_Text;
         break;
     case dbGUID:
-        return dsFieldType_Text;
+        return dsFieldType::dsFieldType_Text;
         break;
     }
 
     ASSERT(FALSE);
-    return dsFieldType_Undefined;
+    return dsFieldType::dsFieldType_Undefined;
 };

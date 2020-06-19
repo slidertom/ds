@@ -331,9 +331,9 @@ bool CSqLiteRecordsetImpl::Delete()
     const int32_t nRowId = ::sqlite3_column_int(m_stmt, 0); // 0 column always holds row id
     const std::string sRowId = std::to_string(nRowId);
     
-    std::string sDelete  = "DELETE FROM ";
+    std::string sDelete  = "DELETE FROM '";
                 sDelete += m_sTable;
-                sDelete += " WHERE ROWID = ";
+                sDelete += "' WHERE ROWID = ";
                 sDelete += sRowId;
     const bool bRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
     if ( !bRetVal ) {
@@ -519,9 +519,9 @@ void CSqLiteRecordsetImpl::DoInsertDefault()
             }
         }
     
-        std::string sSql = "INSERT INTO `";
+        std::string sSql = "INSERT INTO '";
         sSql += m_sTable.c_str();
-        sSql += "` (";
+        sSql += "' (";
         sSql += sColumns.c_str();
         sSql += ")";
         sSql += " VALUES (";
@@ -581,9 +581,9 @@ bool CSqLiteRecordsetImpl::DoUpdate()
     if ( !m_update_stmt )
     {
         const char* pTail = nullptr;
-        std::string sSql  = "UPDATE `";
+        std::string sSql  = "UPDATE '";
                     sSql += m_sTable.c_str();
-                    sSql += "` SET ";
+                    sSql += "' SET ";
                     sSql += sValues.c_str();
                     sSql += " WHERE ROWID = ?";
         rc = ::sqlite3_blocking_prepare_v2(pDB, sSql.c_str(), -1, &m_update_stmt, &pTail);
@@ -608,9 +608,9 @@ bool CSqLiteRecordsetImpl::DoUpdate()
     if ( rc != SQLITE_DONE ) 
     {
         const std::string sErrorValues = sqlite_util::save_data_to_error_values_string(m_pSaveData);
-        std::string sError  = "SQL statement: UPDATE ";
+        std::string sError  = "SQL statement: UPDATE '";
                     sError += m_sTable.c_str();
-                    sError += " SET ";
+                    sError += "' SET ";
                     sError += sErrorValues.c_str();
                     sError += " WHERE ROWID = ";
                     sError += std::to_string(m_nEditRowId);
@@ -645,9 +645,9 @@ void CSqLiteRecordsetImpl::CommitInsert()
     const std::string sColumns = sqlite_util::save_data_to_insert_columns_string(m_pSaveData);
     const std::string sValues  = sqlite_util::save_data_to_insert_values_string(m_pSaveData);
 
-    std::string sSql  = "INSERT INTO ";
+    std::string sSql  = "INSERT INTO '";
                 sSql += m_sTable;
-                sSql += " (";
+                sSql += "' (";
                 sSql += sColumns;
                 sSql += ")";
                 sSql += " VALUES (";
@@ -691,14 +691,15 @@ int CSqLiteRecordsetImpl::GetRecordCount() const
     std::string sSQL;
     if ( m_bSQLOpened )
     {
-        sSQL  = "SELECT COUNT(*) FROM (";
+        sSQL  = "SELECT COUNT(*) FROM ('";
         sSQL += m_sTable.c_str();
-        sSQL += ")";
+        sSQL += "')";
     }
     else
     {
-        sSQL  = "SELECT COUNT(*) FROM ";
+        sSQL  = "SELECT COUNT(*) FROM '";
         sSQL += m_sTable.c_str();
+        sSQL += "'";
     }
 
     CSqLiteRecordsetImpl loader(m_pDB, m_pErrorHandler);
@@ -736,9 +737,9 @@ bool CSqLiteRecordsetImpl::SeekByString(const char *sIndex, const char *sValue)
     // http://zetcode.com/db/sqlitec/ -> could be done optimization -> 
     // do use prepared statements and bind operations
     // do map all prepared statements
-    std::string sFind  = "SELECT ROWID,* FROM ";
+    std::string sFind  = "SELECT ROWID,* FROM '";
                 sFind += m_sTable;
-                sFind += " WHERE ";
+                sFind += "' WHERE ";
                 sFind += sIndex;
                 sFind += " = '";
                 sFind += sValue;
@@ -807,9 +808,9 @@ bool CSqLiteRecordsetImpl::SeekByLong(const char *sIndexUTF8, int32_t nValue)
     // http://zetcode.com/db/sqlitec/ -> could be done optimization -> 
     // do use prepared statements and bind operations
     // do map all prepared statements
-    std::string sFind = "SELECT ROWID,* FROM `";
+    std::string sFind = "SELECT ROWID,* FROM '";
                 sFind += m_sTable.c_str();
-                sFind += "` WHERE ";
+                sFind += "' WHERE ";
                 sFind += sIndexUTF8;
                 sFind += " = '";
                 sFind += std::to_string(nValue);
@@ -1066,8 +1067,9 @@ bool CSqLiteRecordsetImpl::MoveFirst()
         sSQL = m_sTable;
     }
     else {
-        sSQL  = "SELECT ROWID,* FROM ";
+        sSQL  = "SELECT ROWID,* FROM '";
         sSQL += m_sTable;
+        sSQL += "'";
     }
 
     if ( !OpenImpl(sSQL.c_str()) ) {
@@ -1133,9 +1135,9 @@ bool CSqLiteRecordsetImpl::DeleteAllByStringValueUTF8(const char *sField, const 
 {
     ASSERT(!m_sTable.empty());
 
-    std::string sSQL  = "DELETE FROM ";
+    std::string sSQL  = "DELETE FROM '";
                 sSQL += m_sTable;
-                sSQL += " WHERE ";
+                sSQL += "' WHERE ";
                 sSQL += sField;
                 sSQL += " = '";
                 sSQL += sValue;
@@ -1162,9 +1164,9 @@ bool CSqLiteRecordsetImpl::DeleteAllByLongValue(const wchar_t *sField, int32_t n
     const std::string sFieldUTF8 = ds_str_conv::ConvertToUTF8(sField);
     const std::string sValueUTF8 = std::to_string(nValue);
 
-    std::string sSQL  = "DELETE FROM ";
+    std::string sSQL  = "DELETE FROM '";
                 sSQL += m_sTable;
-                sSQL += " WHERE ";
+                sSQL += "' WHERE ";
                 sSQL += sFieldUTF8;
                 sSQL += " = ";
                 sSQL += sValueUTF8;
@@ -1180,8 +1182,9 @@ void CSqLiteRecordsetImpl::Flush()
 {
     ASSERT(!m_sTable.empty());
 
-    std::string sSQL  = "DELETE FROM ";
+    std::string sSQL  = "DELETE FROM '";
                 sSQL += m_sTable;
+                sSQL += "'";
     m_pDB->ExecuteUTF8(sSQL.c_str());
 }
 
@@ -1195,11 +1198,11 @@ bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, int32_t nVal
     // DELETE FROM MyTable WHERE _id IN (SELECT _id FROM MyTable WHERE XYZ ORDER BY Col LIMIT 5);
 
     std::string sDelete;
-    sDelete  = "DELETE FROM ";
+    sDelete  = "DELETE FROM '";
     sDelete += m_sTable;
-    sDelete += " WHERE RowId IN (SELECT RowId FROM ";
+    sDelete += "' WHERE RowId IN (SELECT RowId FROM '";
     sDelete += m_sTable;
-    sDelete += " WHERE ";
+    sDelete += "' WHERE ";
     sDelete += sFieldUTF8;
     sDelete += " = ";
     sDelete += sValueUTF8;
@@ -1220,11 +1223,11 @@ bool CSqLiteRecordsetImpl::DeleteByStringValueUTF8(const char *sField, const cha
     // DELETE FROM MyTable WHERE _id IN (SELECT _id FROM MyTable WHERE XYZ ORDER BY Col LIMIT 5);
 
     std::string sDelete;
-    sDelete  = "DELETE FROM ";
+    sDelete  = "DELETE FROM '";
     sDelete += m_sTable;
-    sDelete += " WHERE RowId IN (SELECT RowId FROM ";
+    sDelete += "' WHERE RowId IN (SELECT RowId FROM '";
     sDelete += m_sTable;
-    sDelete += " WHERE ";
+    sDelete += "' WHERE ";
     sDelete += sField;
     sDelete += " = '";
     sDelete += sValue;
@@ -1272,18 +1275,18 @@ dsFieldType CSqLiteRecordsetImpl::GetColumnType(int nCol) const
     switch (nType)
     {
     case SQLITE_INTEGER:
-        return dsFieldType_Integer;
+        return dsFieldType::dsFieldType_Integer;
         break;
     case SQLITE_FLOAT:
-        return dsFieldType_Double;
+        return dsFieldType::dsFieldType_Double;
         break;
     case SQLITE_TEXT:
-        return dsFieldType_Text;
+        return dsFieldType::dsFieldType_Text;
         break;
     case SQLITE_BLOB:
-        return dsFieldType_Blob;
+        return dsFieldType::dsFieldType_Blob;
         break;
     };
 
-    return dsFieldType_Undefined;
+    return dsFieldType::dsFieldType_Undefined;
 }

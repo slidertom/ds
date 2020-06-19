@@ -53,6 +53,8 @@ public:
 
     virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) override;
 
+    virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) override;
+
 // Static operations
 public:
     static bool CopyTableData(CDaoDatabaseImpl *pSrcDB, CDaoDatabaseImpl *pDstDB, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst);

@@ -8,7 +8,7 @@ class CLogImpl
 // Static operations
 public:
     static void Log(const wchar_t *sMsg);
-	static void SetLogPath(const wchar_t *sLogPath);	
+    static void SetLogPath(const wchar_t *sLogPath);    
 };
 
 #endif

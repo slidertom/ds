@@ -52,6 +52,8 @@ public:
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
+    virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) override;
+
 private:
     void Close(); 
 
