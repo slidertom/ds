@@ -276,3 +276,8 @@ void dsDatabase::SetPostCommitHandler(const FuncPostCommitTrans &func)
 {
     m_postCommitTrans = func;
 }
+
+bool dsDatabase::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept
+{
+    return m_pDatabase->DropColumn(sTableName, sColumnName);
+}

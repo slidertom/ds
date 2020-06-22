@@ -76,8 +76,17 @@ namespace ds_json
     void object::SetStringArrayUTF8(const char *sField, const std::vector<std::string> &array) noexcept
     {
         ds_json::array array_json;
-        for (const auto &it : array) {
-            array_json.AddString(it.c_str());
+        for (const std::string &str : array) {
+            array_json.AddString(str.c_str());
+        }
+        _impl::set_field_array(m_impl, sField, array_json.m_impl);
+    }
+
+    void object::SetInt32Array(const char *sField, const std::vector<int32_t> &array) const noexcept
+    {
+        ds_json::array array_json;
+        for (const int32_t nItem : array) {
+            array_json.AddInt32(nItem);
         }
         _impl::set_field_array(m_impl, sField, array_json.m_impl);
     }
@@ -118,6 +127,7 @@ namespace ds_json
         ds_json::array array_json;
         _impl::get_field_array(m_impl, sField, array_json.m_impl);
         const size_t nCnt = array_json.GetSize();
+        array.reserve(nCnt);
         for (size_t i = 0; i < nCnt; ++i) {
             array.push_back(array_json.GetString(i));
         }
@@ -127,10 +137,22 @@ namespace ds_json
         ds_json::array array_json;
         _impl::get_field_array(m_impl, sField, array_json.m_impl);
         const size_t nCnt = array_json.GetSize();
+        array.reserve(nCnt);
         for (size_t i = 0; i < nCnt; ++i) {
             array.push_back(array_json.GetStringUTF8(i));
         }
     }
+    void object::GetInt32Array(const char *sField, std::vector<int32_t> &array) const noexcept
+    {
+        ds_json::array array_json;
+        _impl::get_field_array(m_impl, sField, array_json.m_impl);
+        const size_t nCnt = array_json.size();
+        array.reserve(nCnt);
+        for (size_t i = 0; i < nCnt; ++i) {
+            array.push_back(array_json.GetInt32(i));
+        }
+    }
+
     double object::GetDouble(const char *sField) const noexcept {
         double dValue; 
         if (!_impl::get_field_double(m_impl, sField, dValue)) {

@@ -83,6 +83,7 @@ namespace ds_json
         void SetArrayEx(const char *sField, const array &array) noexcept;
         void SetStringArray(const char *sField, const std::vector<std::wstring> &array) noexcept;
         void SetStringArrayUTF8(const char *sField, const std::vector<std::string> &array) noexcept;
+        void SetInt32Array(const char *sField, const std::vector<int32_t> &array) const noexcept;
         void SetNull(const char *sField) noexcept;
 
         std::wstring GetText(const char *sField) const noexcept;
@@ -94,7 +95,8 @@ namespace ds_json
         void         GetArray(const char *sField, array &array) const noexcept;
         void         GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept;
         void         GetStringArrayUTF8(const char *sField, std::vector<std::string> &array) const noexcept;
-
+        void         GetInt32Array(const char *sField, std::vector<int32_t> &array) const noexcept;
+            
         time_t       GetDateTime(const char *sField) const noexcept;
         // json prefix applied to avoid conflicts with the general funcion name GetObject
         bool         GetJsonObject(const char *sField, object &obj) const noexcept; 
@@ -329,6 +331,12 @@ namespace ds_json
     static void Set##name(ds_json::object &obj, const std::vector<std::wstring> &array) { obj.SetStringArray(realname, array); } \
     static void Get##name##UTF8(const ds_json::object &obj, std::vector<std::string> &array) { obj.GetStringArrayUTF8(realname, array); } \
     static void Set##name##UTF8(ds_json::object &obj, const std::vector<std::string> &array) { obj.SetStringArrayUTF8(realname, array); } \
+    JSON_NULL(name, realname) \
+    JSON_REMOVE(name, realname) \
+
+#define JSON_INT32_ARRAY(name, realname) \
+    static void Get##name(const ds_json::object &obj, std::vector<int32_t> &array) { obj.GetInt32Array(realname, array); } \
+    static void Set##name(ds_json::object &obj, const std::vector<int32_t> &array) { obj.SetInt32Array(realname, array); } \
     JSON_NULL(name, realname) \
     JSON_REMOVE(name, realname) \
 

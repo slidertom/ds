@@ -97,6 +97,8 @@ public:
 
     void SetPostCommitHandler(const FuncPostCommitTrans &func);
 
+    bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept;
+
 // Operations
 public:
     void Refresh() noexcept; // Refresh database related cache items
