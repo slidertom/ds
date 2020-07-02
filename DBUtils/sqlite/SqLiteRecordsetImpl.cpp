@@ -1073,7 +1073,7 @@ bool CSqLiteRecordsetImpl::MoveFirst()
     }
 
     if ( !OpenImpl(sSQL.c_str()) ) {
-            return false;
+        return false;
     }
         
     return MoveFirstImpl();
@@ -1264,6 +1264,15 @@ std::wstring CSqLiteRecordsetImpl::GetColumnName(int nCol) const
 
 dsFieldType CSqLiteRecordsetImpl::GetColumnType(int nCol) const
 {
+    // https://github.com/slidertom/ds/issues/2
+    // http://sqlite.1065341.n5.nabble.com/sqlite3-column-type-bad-value-td54805.html
+    // You need to call sqlite3_step first. sqlite3_column_type examines actual
+    // data in an actual row, but you haven't fetched any rows yet. 
+
+    // if table is opened -> nothing is done during this call
+    // if table is not opened -> sqlite3_step is called
+    ((CSqLiteRecordsetImpl *)this)->MoveFirst(); // const remove for this
+
     // https://sqlite.org/c3ref/column_blob.html
     // The returned value is one of SQLITE_INTEGER, SQLITE_FLOAT, SQLITE_TEXT, SQLITE_BLOB, or SQLITE_NULL. 
     // The value returned by sqlite3_column_type() is only meaningful if no type conversions have occurred as described below. 
