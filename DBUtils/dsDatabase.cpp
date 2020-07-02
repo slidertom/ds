@@ -234,12 +234,12 @@ void dsDatabase::SetLogPath(const wchar_t *sLogPath) noexcept
     CLogImpl::SetLogPath(sLogPath);
 }
 
-dsDatabase::dbErrorHandler dsDatabase::GetErrorHandler()
+dsDatabase::dbErrorHandler dsDatabase::GetErrorHandler() noexcept
 {
     return m_pErrorHandler;
 }
 
-bool dsDatabase::DropIndex(const wchar_t *sIndexName)
+bool dsDatabase::DropIndex(const wchar_t *sIndexName) noexcept
 {
     std::wstring sDropStatement = L"DROP INDEX ";
     sDropStatement += sIndexName;
@@ -251,7 +251,7 @@ bool dsDatabase::DropIndex(const wchar_t *sIndexName)
     return true;
 }
 
-std::wstring dsDatabase::AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName)
+std::wstring dsDatabase::AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName) noexcept
 {
     std::wstring sIndexName = sTableName;
     sIndexName += L"_";
@@ -272,7 +272,7 @@ std::wstring dsDatabase::AddUniqueIndexNoCase(const wchar_t *sTableName, const w
     return sIndexName;
 }
 
-void dsDatabase::SetPostCommitHandler(const FuncPostCommitTrans &func)
+void dsDatabase::SetPostCommitHandler(const FuncPostCommitTrans &func) noexcept 
 {
     m_postCommitTrans = func;
 }

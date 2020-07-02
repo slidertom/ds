@@ -631,5 +631,10 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
         return false;
     }
 
+    auto found = m_table_field_info_map.find(sTableNameUTF8);
+    if (found != m_table_field_info_map.end()) {
+        found->second->erase(sColumnNameUTF8);
+    }
+
     return true;
 }

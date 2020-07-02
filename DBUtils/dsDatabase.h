@@ -81,7 +81,7 @@ public:
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) noexcept;
-    dbErrorHandler GetErrorHandler();
+    dbErrorHandler GetErrorHandler() noexcept;
 
     bool CompactDatabase() noexcept; // or VACUUM
     static bool CompactDatabase(const wchar_t *sPath) noexcept;
@@ -92,10 +92,10 @@ public:
     static bool IsDaoDB(const wchar_t *sPath) noexcept;
     static bool IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept;
 
-    bool DropIndex(const wchar_t *sIndexName);
-    std::wstring AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName);
+    bool DropIndex(const wchar_t *sIndexName) noexcept;
+    std::wstring AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName)  noexcept;
 
-    void SetPostCommitHandler(const FuncPostCommitTrans &func);
+    void SetPostCommitHandler(const FuncPostCommitTrans &func) noexcept;
 
     bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept;
 
