@@ -22,13 +22,11 @@
     #include "dsOpenParams.h"
 #endif
 
-#ifndef FASTDELEGATE_H
-	#include "MemFunc/FastDelegate.h"
-#endif
-
 #include "vector"
+#include <functional>
 
 class CAbsDatabase;
+class dsTableFieldInfo;
 
 // dsDatabase should not throw any exceptions
 // if any error info is required, should be created separate interface:
@@ -38,8 +36,6 @@ class CAbsDatabase;
 
 class DB_UTILS_API dsDatabase : public CRoleCore
 {
-    typedef fastdelegate::FastDelegate0<> FuncPostCommitTrans;
-
 // Constuction/Destruction
 public:
     dsDatabase();
@@ -65,6 +61,7 @@ public:
     void BeginTrans() noexcept;  
     void CommitTrans() noexcept; 
     void RollbackTrans() noexcept;    
+    bool Backup(const char *sBackupFile) noexcept;
 
     bool Execute(const wchar_t *sSQL) noexcept; 
     
@@ -95,9 +92,15 @@ public:
     bool DropIndex(const wchar_t *sIndexName) noexcept;
     std::wstring AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName)  noexcept;
 
-    void SetPostCommitHandler(const FuncPostCommitTrans &func) noexcept;
+    void SetPostCommitHandler(const std::function<void()> &func) noexcept;
 
     bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept;
+    bool DropTable(const wchar_t *sTableName) noexcept;
+
+    std::vector<std::string> GetTableList();
+    bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info);
+
+    bool CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info);
 
 // Operations
 public:
@@ -126,7 +129,7 @@ private:
     CAbsDatabase *m_pDatabase {nullptr};
     std::vector<dsDatabaseListener *> m_listeners;
     dbErrorHandler m_pErrorHandler;
-    FuncPostCommitTrans m_postCommitTrans;
+    std::function<void()> m_funcPostCommitTrans;
 };
 
 #endif

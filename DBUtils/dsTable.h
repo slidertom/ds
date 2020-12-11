@@ -18,7 +18,7 @@ class CAbsRecordset;
 // Exceptions are never throwed 
 
 // Expected AddNew/INSERT usage:
-// dsTable loader(pDB, _T("Table_Name");
+// dsTable loader(pDB, L"Table_Name");
 //  loader.AddNew();
 //      int nId = loader.GetFieldLong(L"ID"); // after AddNew you can always retrieved new record key
 //      loader.SetFieldString(L"Code", L"My_Code");
@@ -56,10 +56,15 @@ public:
     std::string GetFieldStringUTF8(const char *sFieldName) const noexcept;     
     void SetFieldStringUTF8(const char *sFieldName, const char *sValue) noexcept; 
 
-    int32_t  GetFieldLong(const wchar_t *sFieldName) const noexcept;             
-    int32_t  GetFieldLong(const char *sFieldName) const noexcept;             
+    int32_t GetFieldLong(const wchar_t *sFieldName) const noexcept;             
+    int32_t GetFieldLong(const char *sFieldName) const noexcept;             
     void SetFieldLong(const wchar_t *sFieldName, int32_t nValue) noexcept;      
     void SetFieldLong(const char *sFieldName, int32_t nValue) noexcept;      
+
+    int64_t GetFieldInt64(const wchar_t *sFieldName) const noexcept;             
+    int64_t GetFieldInt64(const char *sFieldName) const noexcept;             
+    void SetFieldInt64(const wchar_t *sFieldName, int64_t nValue) noexcept;      
+    void SetFieldInt64(const char *sFieldName, int64_t nValue) noexcept;      
 
     double GetFieldDouble(const wchar_t *sFieldName) const noexcept;         
     double GetFieldDouble(const char *sFieldName) const noexcept;         
@@ -158,6 +163,11 @@ private:
 #define FIELD_LONG(name, realname) \
     int32_t Get##name() const         noexcept { return GetFieldLong(DS_WIDEN(realname));  } \
     void    Set##name(int32_t nValue) noexcept { SetFieldLong(DS_WIDEN(realname), nValue); } \
+    FIELD_INDICATORS(name, realname)
+
+#define FIELD_INT64(name, realname) \
+    int64_t Get##name() const         noexcept { return GetFieldInt64(DS_WIDEN(realname));  } \
+    void    Set##name(int64_t nValue) noexcept { SetFieldInt64(DS_WIDEN(realname), nValue); } \
     FIELD_INDICATORS(name, realname)
 
 #define FIELD_DOUBLE(name, realname) \

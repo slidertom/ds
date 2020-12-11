@@ -183,7 +183,7 @@ bool CDaoDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_par
 
 dsDBType CDaoDatabaseImpl::GetType()
 {
-    return dsDBType::dsType_Dao;
+    return dsDBType::Dao;
 }
 
 bool CDaoDatabaseImpl::IsReadOnly() const
@@ -379,7 +379,7 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo
         const short nType = fieldInfo.m_nType;
         const dsFieldType field_type = CDaoRecordsetImpl::DaoTypeToDs(nType);
 
-        if ( field_type == dsFieldType::dsFieldType_Undefined )
+        if ( field_type == dsFieldType::Undefined )
         {
             std::wstring sError  = L"Field type: ";
                             sError += std::to_wstring(nType);
@@ -397,6 +397,23 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo
     return true;
 }
 
+std::vector<std::string> CDaoDatabaseImpl::GetTableList()
+{
+    std::vector<std::string> arrTables;
+    const int32_t nTableCount = m_pDatabase->GetTableDefCount();
+
+    for (int32_t i = 0; i < nTableCount; ++i) {
+		CDaoTableDefInfo tabledefinfo;                           
+		m_pDatabase->GetTableDefInfo(i, tabledefinfo);                      
+		if (tabledefinfo.m_lAttributes == 0) {  
+            const std::string sTableName(ds_str_conv::ConvertToUTF8(tabledefinfo.m_strName.GetString()));
+			arrTables.push_back(sTableName);
+		}
+	}
+
+    return arrTables;
+}
+
 bool CDaoDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName)
 {
     std::wstring sSQL = L"ALTER TABLE ";
@@ -406,6 +423,97 @@ bool CDaoDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sCol
     sSQL += L";";
 
     if (!Execute(sSQL.c_str())) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CDaoDatabaseImpl::DropTable(const wchar_t *sTableName)
+{
+    std::wstring sSQL = L"DROP TABLE ";
+    sSQL += sTableName;
+    sSQL += L";";
+
+    if (!Execute(sSQL.c_str())) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CDaoDatabaseImpl::Backup(const char *sBackupFile)
+{
+    ASSERT(FALSE);
+    return true;
+}
+
+bool CDaoDatabaseImpl::CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info)
+{
+    std::wstring sField;
+    dsFieldType nFieldType;
+    try {
+        CDaoTableDef TableDef(m_pDatabase);
+        TableDef.Create(sTableName);
+                        
+        for (const auto it : info) {
+            sField = it.first;
+            nFieldType = it.second;
+
+            short nType = -1;
+            switch (nFieldType) {
+            case dsFieldType::Text:
+            {
+                nType = dbMemo; // Just to be sure, that JSON field will fit in this field
+            }
+            break;
+            case dsFieldType::Integer:
+            {
+                nType = dbLong;
+            }
+            break;
+            case dsFieldType::Double:
+            {
+                nType = dbDouble;
+            }
+            break;
+            case dsFieldType::Blob:
+            {
+                nType = dbLongBinary;
+            }
+            break;
+            case dsFieldType::DateTime:
+            {
+                nType = dbDate;
+            }
+            break;
+            default:
+                ASSERT(false);
+                break;
+            }
+
+            // SQLite does not support date type.
+            // For such reason - date type field decision is executed on such conditions:
+            // if (FieldTypeIsInteger && FieldNameContains("date")) => field type must be DateTime
+            if (nType == dbLong) {
+                std::wstring sFieldUpper = sField;
+                ds_str_conv::MakeUpper(sFieldUpper);
+                const size_t nPos = sFieldUpper.find(L"DATE");
+                if (nPos != std::wstring::npos) {
+                    nType = dbDate;
+                }
+            }
+
+            TableDef.CreateField(sField.c_str(), nType, 0);
+        }
+
+        TableDef.Append();
+    }
+    catch (CDaoException *e)
+    {
+        ASSERT(FALSE);
+        m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::CreateTable");
+        e->Delete();
         return false;
     }
 

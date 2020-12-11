@@ -421,23 +421,26 @@ void dsTable::SetFieldStringUTF8(const char *sFieldName, const char *sValue) noe
 
 bool dsTable::DeleteAllByJsonField(const char *sField, const char *sJsonField, int32_t nValue) noexcept
 {
-    if ( !MoveFirst() ) {
-        return false;
-    }
+    VERIFY(Open());
+    return m_pSet->DeleteAllByJsonField(sField, sJsonField, nValue);
+}
 
-    bool bRetVal = false;
+int64_t dsTable::GetFieldInt64(const wchar_t *sFieldName) const noexcept
+{
+    return m_pSet->GetFieldInt64(sFieldName);
+}
 
-    while ( !IsEOF() ) 
-    {
-        ds_json::object obj;
-        ds_json::str2obj(GetFieldStringUTF8(sField).c_str(), obj);
-       
-        if ( obj.GetInt32(sJsonField) == nValue ) {
-            bRetVal = true;
-            Delete();
-        }
-        MoveNext();
-    }
+int64_t dsTable::GetFieldInt64(const char *sFieldName) const noexcept
+{
+    return m_pSet->GetFieldInt64(sFieldName);
+}
 
-    return bRetVal;
+void dsTable::SetFieldInt64(const wchar_t *sFieldName, int64_t nValue) noexcept
+{
+    m_pSet->SetFieldInt64(sFieldName, nValue);
+}
+
+void dsTable::SetFieldInt64(const char *sFieldName, int64_t nValue) noexcept
+{
+    m_pSet->SetFieldInt64(sFieldName, nValue);
 }

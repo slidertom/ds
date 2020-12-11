@@ -130,7 +130,7 @@ bool CDaoRecordsetImpl::Open(const wchar_t *sTableName)
         return true;
     }
 
-    m_sCurIndex = _T("");
+    m_sCurIndex = L"";
 
     try {
         delete m_pSet; // DAO can close m_pSet during database close, related with the 
@@ -411,7 +411,7 @@ bool CDaoRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName)
 
 // building variants
 static inline COleVariant MakeVariant(const wchar_t *strSrc) {
-    if (strSrc == NULL || strSrc[0] == _T('\0')) {
+    if (strSrc == NULL || strSrc[0] == L'\0') {
         return COleVariant();
     }
     else {
@@ -459,7 +459,7 @@ bool CDaoRecordsetImpl::SeekByLong(const wchar_t *sIndex, int32_t nValue)
     SetIndex(sIndex);
 
     try {
-        return m_pSet->Seek(_T("="), &COleVariant((long)nValue)) != FALSE;
+        return m_pSet->Seek(L"=", &COleVariant((long)nValue)) != FALSE;
     }
     catch (CDaoException *e) {
         std::wstring sMsg = L"CDaoRecordsetImpl::SeekByLong(index='";
@@ -495,7 +495,7 @@ std::wstring CDaoRecordsetImpl::GetFieldString(const wchar_t *sFieldName)
         e->Delete();
     }
 
-    return std::wstring(_T(""));
+    return std::wstring(L"");
 }
 
 void CDaoRecordsetImpl::SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue)
@@ -784,7 +784,7 @@ dsFieldType CDaoRecordsetImpl::GetColumnType(int nCol) const
         e->Delete();
     }
 
-    return dsFieldType::dsFieldType_Undefined;
+    return dsFieldType::Undefined;
 }
 
 dsFieldType CDaoRecordsetImpl::DaoTypeToDs(const short nType)
@@ -792,43 +792,43 @@ dsFieldType CDaoRecordsetImpl::DaoTypeToDs(const short nType)
     switch (nType) 
     {
     case dbBoolean:
-        return dsFieldType::dsFieldType_Integer;
+        return dsFieldType::Integer;
         break;
     case dbByte:
-        return dsFieldType::dsFieldType_Integer;
+        return dsFieldType::Integer;
         break;
     case dbInteger:
-        return dsFieldType::dsFieldType_Integer;
+        return dsFieldType::Integer;
         break;
     case dbLong:
-        return dsFieldType::dsFieldType_Integer;
+        return dsFieldType::Integer;
         break;
     case dbCurrency:
-        return dsFieldType::dsFieldType_Double;
+        return dsFieldType::Double;
         break;
     case dbSingle:
-        return dsFieldType::dsFieldType_Double; // Single-precision floating-point data
+        return dsFieldType::Double; // Single-precision floating-point data
         break;
     case dbDouble:
-        return dsFieldType::dsFieldType_Double;
+        return dsFieldType::Double;
         break;
     case dbDate:
-        return dsFieldType::dsFieldType_DateTime;
+        return dsFieldType::DateTime;
         break;
     case dbText:
-        return dsFieldType::dsFieldType_Text;
+        return dsFieldType::Text;
         break;
     case dbLongBinary:
-        return dsFieldType::dsFieldType_Blob;
+        return dsFieldType::Blob;
         break;
     case dbMemo:
-        return dsFieldType::dsFieldType_Text;
+        return dsFieldType::Text;
         break;
     case dbGUID:
-        return dsFieldType::dsFieldType_Text;
+        return dsFieldType::Text;
         break;
     }
 
     ASSERT(FALSE);
-    return dsFieldType::dsFieldType_Undefined;
+    return dsFieldType::Undefined;
 };

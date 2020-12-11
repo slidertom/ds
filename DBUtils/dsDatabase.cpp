@@ -108,7 +108,7 @@ bool dsDatabase::OpenDB(const wchar_t *sPath, const dsOpenParams &params) noexce
         m_pDatabase = new CAdoDotNetDatabaseImpl;
     }
     else if ( CSqLiteDatabaseImpl::IsSqLiteDB(sPath) ) {
-        m_pDatabase = new CSqLiteDatabaseImpl();
+        m_pDatabase = new CSqLiteDatabaseImpl;
     }    
 #ifndef __x86_64__ 
     else if ( CDaoDatabaseImpl::IsDaoDB(sPath) ) {
@@ -140,8 +140,8 @@ void dsDatabase::CommitTrans() noexcept
     ASSERT(m_pDatabase);
     m_pDatabase->CommitTrans();
 
-    if (m_postCommitTrans) {
-        m_postCommitTrans();
+    if (m_funcPostCommitTrans) {
+        m_funcPostCommitTrans();
     }
 }
 
@@ -272,12 +272,45 @@ std::wstring dsDatabase::AddUniqueIndexNoCase(const wchar_t *sTableName, const w
     return sIndexName;
 }
 
-void dsDatabase::SetPostCommitHandler(const FuncPostCommitTrans &func) noexcept 
+void dsDatabase::SetPostCommitHandler(const std::function<void()> &func) noexcept
 {
-    m_postCommitTrans = func;
+    m_funcPostCommitTrans = func;
+}
+
+std::vector<std::string> dsDatabase::GetTableList()
+{
+    return m_pDatabase->GetTableList();
 }
 
 bool dsDatabase::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept
 {
     return m_pDatabase->DropColumn(sTableName, sColumnName);
+}
+
+bool dsDatabase::DropTable(const wchar_t *sTableName) noexcept
+{
+    return m_pDatabase->DropTable(sTableName);
+}
+
+bool dsDatabase::Backup(const char *sBackupFile) noexcept
+{
+    return m_pDatabase->Backup(sBackupFile);
+}
+
+bool dsDatabase::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
+{
+    if (!m_pDatabase->GetTableFieldInfo(sTable, info)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool dsDatabase::CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info)
+{
+    if (!m_pDatabase->CreateTable(sTableName, info)) {
+        return false;
+    }
+
+    return true;
 }

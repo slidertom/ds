@@ -71,7 +71,9 @@ public:
     virtual void    SetFieldInt32(const char *sFieldName, int32_t lValue) override;
     virtual int64_t GetFieldInt64(const wchar_t *sFieldName) override;
     virtual void    SetFieldInt64(const wchar_t *sFieldName, int64_t lValue) override;
-    
+    virtual int64_t GetFieldInt64(const char *sFieldName) override;
+    virtual void    SetFieldInt64(const char *sFieldName, int64_t lValue) override;
+
     virtual double GetFieldDouble(const wchar_t *sFieldName) override;
     virtual double GetFieldDouble(const char *sFieldName) override;
     virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
@@ -88,6 +90,7 @@ public:
     virtual bool DeleteAllByStringValue(const wchar_t *sField, const wchar_t *sValue) override;
     virtual bool DeleteAllByStringValueUTF8(const char *sField, const char *sValue) override;
     virtual bool DeleteAllByLongValue(const wchar_t *sField, int32_t nValue) override;
+    virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, int32_t nValue) override;
     virtual bool DeleteByLongValue(const wchar_t *sField, int32_t nValue) override;
     virtual bool DeleteByStringValue(const wchar_t *sField, const wchar_t *sValue) override;
     virtual bool DeleteByStringValueUTF8(const char *sField, const char *sValue) override;

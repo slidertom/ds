@@ -689,11 +689,13 @@ void CSqLiteRecordsetImpl::OnErrorCode(int rc, const char *sFunctionName)
 int CSqLiteRecordsetImpl::GetRecordCount() const
 {
     std::string sSQL;
+    // According to SQLite syntax - different query versions must be created for table and another query.
+    // The version for the table must support special characters in table name (for example '&'). Quotes are used for such a requirement.
     if ( m_bSQLOpened )
     {
-        sSQL  = "SELECT COUNT(*) FROM ('";
+        sSQL  = "SELECT COUNT(*) FROM (";
         sSQL += m_sTable.c_str();
-        sSQL += "')";
+        sSQL += ")";
     }
     else
     {
@@ -917,6 +919,18 @@ int32_t CSqLiteRecordsetImpl::GetFieldInt32(const wchar_t *sFieldName)
 void CSqLiteRecordsetImpl::SetFieldInt32(const char *sFieldName, int32_t lValue)
 {
     SetFieldInt32(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), lValue);
+}
+
+int64_t CSqLiteRecordsetImpl::GetFieldInt64(const char *sFieldName)
+{
+    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+    return GetFieldInt64(sFieldNameUTF16.c_str());
+}
+
+void CSqLiteRecordsetImpl::SetFieldInt64(const char *sFieldName, int64_t lValue)
+{
+    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+    SetFieldInt64(sFieldNameUTF16.c_str(), lValue);
 }
 
 void CSqLiteRecordsetImpl::SetFieldInt32(const wchar_t *sFieldName, int32_t lValue)
@@ -1178,6 +1192,30 @@ bool CSqLiteRecordsetImpl::DeleteAllByLongValue(const wchar_t *sField, int32_t n
     return false;
 }
 
+bool CSqLiteRecordsetImpl::DeleteAllByJsonField(const char *sField, const char *sFieldInJson, int32_t nValue)
+{
+    ASSERT(!m_sTable.empty());
+
+    const std::string sValueUTF8 = std::to_string(nValue);
+
+    std::string sSQL = "DELETE FROM '";
+    sSQL += m_sTable;
+    sSQL += "' WHERE ";
+    sSQL += "JSON_EXTRACT(";
+    sSQL += sField;
+    sSQL += ", '$.";
+    sSQL += sFieldInJson;
+    sSQL += "')";
+    sSQL += " = ";
+    sSQL += sValueUTF8;
+
+    if (m_pDB->ExecuteUTF8(sSQL.c_str())) {
+        return true;
+    }
+
+    return false;
+}
+
 void CSqLiteRecordsetImpl::Flush()
 {
     ASSERT(!m_sTable.empty());
@@ -1290,18 +1328,18 @@ dsFieldType CSqLiteRecordsetImpl::GetColumnType(int nCol) const
     switch (nType)
     {
     case SQLITE_INTEGER:
-        return dsFieldType::dsFieldType_Integer;
+        return dsFieldType::Integer;
         break;
     case SQLITE_FLOAT:
-        return dsFieldType::dsFieldType_Double;
+        return dsFieldType::Double;
         break;
     case SQLITE_TEXT:
-        return dsFieldType::dsFieldType_Text;
+        return dsFieldType::Text;
         break;
     case SQLITE_BLOB:
-        return dsFieldType::dsFieldType_Blob;
+        return dsFieldType::Blob;
         break;
     };
 
-    return dsFieldType::dsFieldType_Undefined;
+    return dsFieldType::Undefined;
 }

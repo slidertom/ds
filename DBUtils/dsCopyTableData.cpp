@@ -37,7 +37,7 @@ bool dsCopyTableData::BeginCopy() noexcept
     const dsDBType nSrcTyle = m_pSrcDB->GetType();
     const dsDBType nDstTyle = m_pDstDB->GetType();
  
-    if (nSrcTyle == dsDBType::dsType_SqLite && nDstTyle == dsDBType::dsType_SqLite) 
+    if (nSrcTyle == dsDBType::SqLite && nDstTyle == dsDBType::SqLite) 
     {
         CSqLiteDatabaseImpl *pDstSqlite = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
         CSqLiteDatabaseImpl *pSrcSqLite = dynamic_cast<CSqLiteDatabaseImpl *>(m_pSrcDB->m_pDatabase);
@@ -100,31 +100,31 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
 
                 switch (it->second) 
                 {
-                case dsFieldType::dsFieldType_Text:
+                case dsFieldType::Text:
                     {
                         const std::wstring sValue = src_table.GetFieldString(sFieldName);
                         dst_table.SetFieldString(sFieldName, sValue.c_str());
                     }
                     break;
-                case dsFieldType::dsFieldType_Integer:
+                case dsFieldType::Integer:
                     {
                         const int nValue = src_table.GetFieldLong(sFieldName);
                         dst_table.SetFieldLong(sFieldName, nValue);
                     }
                     break;
-                case dsFieldType::dsFieldType_Double:
+                case dsFieldType::Double:
                     {
                         const double dValue = src_table.GetFieldDouble(sFieldName);
                         dst_table.SetFieldDouble(sFieldName, dValue);
                     }
                     break;
-                case dsFieldType::dsFieldType_DateTime:
+                case dsFieldType::DateTime:
                     {
                         const time_t nTime = src_table.GetFieldDateTime(sFieldName);
                         dst_table.SetFieldDateTime(sFieldName, nTime);
                     }
                     break;
-                case dsFieldType::dsFieldType_Blob:
+                case dsFieldType::Blob:
                     {
                         unsigned char *pData = nullptr;
                         size_t nSize = 0;
@@ -156,7 +156,7 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
     const dsDBType nDstType = m_pDstDB->GetType();
 
 #ifndef __x86_64__ 
-    if ( nDstType == dsDBType::dsType_Dao && nSrcType == dsDBType::dsType_Dao )
+    if ( nDstType == dsDBType::Dao && nSrcType == dsDBType::Dao )
     {
         CDaoDatabaseImpl *pDstDao = dynamic_cast<CDaoDatabaseImpl *>(m_pDstDB->m_pDatabase);
         CDaoDatabaseImpl *pSrcDao = dynamic_cast<CDaoDatabaseImpl *>(m_pSrcDB->m_pDatabase);
@@ -173,7 +173,7 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
     m_pSrcDB->m_pDatabase->GetTableFieldInfo(sTableNameSrc, src_info);
     ds_table_field_info_util::fields_union(union_info, src_info, dst_info);
 
-    if ( nDstType == dsDBType::dsType_SqLite )
+    if ( nDstType == dsDBType::SqLite )
     {  
         CSqLiteDatabaseImpl *pDstDBImpl = dynamic_cast<CSqLiteDatabaseImpl *>(m_pDstDB->m_pDatabase);
 
@@ -187,7 +187,7 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
         }
 
         // special case for the sqlite database 
-        if (nSrcType == dsDBType::dsType_SqLite && m_bAttached ) 
+        if (nSrcType == dsDBType::SqLite && m_bAttached ) 
         {
             // field count and field names should match for the sqlite insert statement
             if ( dst_info == src_info )

@@ -4,11 +4,11 @@
 
 struct sqlite3;
 
-class CSqLiteErrorHandler
+class CSqLiteErrorHandler final
 {
 // Construction/Destruction
 public:
-    CSqLiteErrorHandler() : m_pErrorHandler(nullptr) { } 
+    CSqLiteErrorHandler() { } 
     ~CSqLiteErrorHandler() { }
 
 // Operations
@@ -22,7 +22,7 @@ public:
     
 // Operations
 private:
-    dbErrorHandler m_pErrorHandler;
+    dbErrorHandler m_pErrorHandler {nullptr};
 };
 
 #endif 

@@ -24,6 +24,7 @@ public:
     virtual bool BeginTrans() override;  
     virtual bool CommitTrans() override; 
     virtual bool Rollback() override;    
+    virtual bool Backup(const char *sBackupFile) override;
 
     virtual bool Execute(const wchar_t *lpszSQL) override;
     virtual bool OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) override;
@@ -52,7 +53,12 @@ public:
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
+    virtual std::vector<std::string> GetTableList() override;
+
     virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) override;
+    virtual bool DropTable(const wchar_t *sTableName) override;
+
+    virtual bool CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info) override;
 
 private:
     void Close(); 

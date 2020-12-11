@@ -32,7 +32,7 @@ public:
 
     virtual bool Delete() = 0;
     virtual void AddNew() = 0;
-    virtual void Edit()      = 0;
+    virtual void Edit()   = 0;
     virtual bool Update() = 0;
 
     virtual bool Open(const wchar_t *sTableName)    = 0;
@@ -72,6 +72,9 @@ public:
 
     virtual int64_t GetFieldInt64(const wchar_t *sFieldName)              { return GetFieldInt32(sFieldName);           }
     virtual void SetFieldInt64(const wchar_t *sFieldName, int64_t lValue) { SetFieldInt32(sFieldName, (int32_t)lValue); }
+
+    virtual int64_t GetFieldInt64(const char *sFieldName)              { return GetFieldInt32(sFieldName);           }
+    virtual void SetFieldInt64(const char *sFieldName, int64_t lValue) { SetFieldInt32(sFieldName, (int32_t)lValue); }
 
     virtual double GetFieldDouble(const wchar_t *sFieldName)              = 0;
     virtual double GetFieldDouble(const char *sFieldName) {
@@ -162,6 +165,10 @@ public:
         return bRetVal;
     }
 
+    virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, int32_t nValue) {
+        return false;
+    }
+   
     virtual bool DeleteByLongValue(const wchar_t *sField, int32_t nValue)
     {
         if ( !SeekByLong(sField, nValue) ) {

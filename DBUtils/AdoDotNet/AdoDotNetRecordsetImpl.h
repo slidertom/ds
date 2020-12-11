@@ -79,6 +79,8 @@ private:
 private:
     CDotNetRecordSetAbs *m_pSet;
     CDotNetDatabaseAbs *m_pDB;
+
+    bool m_bSQLOpened {false};
 };
 
 #endif 

@@ -72,7 +72,7 @@ bool CAdoDotNetDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &op
 
 dsDBType CAdoDotNetDatabaseImpl::GetType()
 {
-    return dsDBType::dsType_MsSQL;
+    return dsDBType::MsSQL;
 }
 
 bool CAdoDotNetDatabaseImpl::IsReadOnly() const
@@ -132,6 +132,13 @@ bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFie
     return m_pDatabase->GetTableFieldInfo(sTable, info);
 }
 
+std::vector<std::string> CAdoDotNetDatabaseImpl::GetTableList()
+{
+    ASSERT(FALSE);
+    std::vector<std::string> arrTables;
+    return arrTables;
+}
+
 bool CAdoDotNetDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName)
 {
     std::wstring sSQL = L"ALTER TABLE ";
@@ -145,4 +152,22 @@ bool CAdoDotNetDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t
     }
 
     return true;
+}
+
+bool CAdoDotNetDatabaseImpl::DropTable(const wchar_t *sTableName)
+{
+    ASSERT(false);
+    return false;
+}
+
+bool CAdoDotNetDatabaseImpl::Backup(const char *sBackupFile)
+{
+    ASSERT(FALSE);
+    return true;
+}
+
+bool CAdoDotNetDatabaseImpl::CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info)
+{
+    ASSERT(false);
+    return false;
 }

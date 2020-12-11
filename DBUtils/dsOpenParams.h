@@ -2,7 +2,7 @@
 #define __DS_OPEN_PARAMS_H__
 #pragma once
 
-class dsOpenParams
+class dsOpenParams final
 {
 // Constuction/Destruction
 public:

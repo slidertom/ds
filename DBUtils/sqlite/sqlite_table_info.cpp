@@ -19,105 +19,105 @@ namespace sqlite_util
         std::transform(sType.begin(), sType.end(), sType.begin(), ::toupper); // do use ANSI based -> check out if statements
 
         if ( sType == "INTEGER" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
 
         if ( sType == "TEXT" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
 
         if ( sType == "REAL" ) {
-            return dsFieldType::dsFieldType_Double;
+            return dsFieldType::Double;
         }
 
         if ( sType == "BLOB" ) {
-            return dsFieldType::dsFieldType_Blob;
+            return dsFieldType::Blob;
         }
 
         if ( sType == "DATE" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "DATETIME" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         // If the declared type contains the string "INT" then it is assigned INTEGER affinity.
         if ( sType == "INT" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "INTEGER" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "TINYINT" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "SMALLINT" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "MEDIUMINT" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "BIGINT" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "UNSIGNED BIG INT" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "INT2" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         if ( sType == "INT8" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
 
         // If the declared type of the column contains any of the strings "CHAR", "CLOB", or "TEXT" 
         // then that column has TEXT affinity. Notice that the type VARCHAR contains the string "CHAR" and is thus assigned TEXT affinity.
         if ( sType == "CHARACTER" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         if ( sType == "VARCHAR" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         if ( sType == "VARYING CHARACTER" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         if ( sType == "NCHAR" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         if ( sType == "NATIVE CHARACTER" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         if ( sType == "NVARCHAR" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         if ( sType == "CHAR" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         if ( sType == "CLOB" ) {
-            return dsFieldType::dsFieldType_Text;
+            return dsFieldType::Text;
         }
         //SQLite does not have a separate Boolean storage class. Instead, Boolean values are stored as integers 0 (false) and 1 (true).
         if ( sType == "BOOLEAN" ) {
-            return dsFieldType::dsFieldType_Integer;
+            return dsFieldType::Integer;
         }
         // If the declared type for a column contains any of the strings "REAL", "FLOA", or "DOUB" then the column has REAL affinity
         if ( sType == "NUMERIC" ) {
-            return dsFieldType::dsFieldType_Double;
+            return dsFieldType::Double;
         }
         if ( sType == "DECIMAL" ) {
-            return dsFieldType::dsFieldType_Double;
+            return dsFieldType::Double;
         }
         if ( sType == "FLOAT" ) {
-            return dsFieldType::dsFieldType_Double;
+            return dsFieldType::Double;
         }
         if ( sType == "DOUBLE" ) {
-            return dsFieldType::dsFieldType_Double;
+            return dsFieldType::Double;
         }
         if ( sType == "DOUBLE PRECISION" ) {
-            return dsFieldType::dsFieldType_Double;
+            return dsFieldType::Double;
         }
 
         ASSERT(FALSE);
-        return dsFieldType::dsFieldType_Undefined;
+        return dsFieldType::Undefined;
     }
 
     static bool IsAutoincrement(CSqLiteDatabaseImpl *pDB, const char *sTableName, CSqLiteErrorHandler *pErrorHandler)

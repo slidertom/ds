@@ -59,7 +59,7 @@ void CLogImpl::Log(const wchar_t *sMsg)
     sMsgImpl += ds_str_conv::ConvertToUTF8(sMsg).c_str();
     sMsgImpl += "\n";
 
-    FILE *pFile = _tfopen(sFilePath.c_str(), _T("a"));    
+    FILE *pFile = _wfopen(sFilePath.c_str(), L"a");    
     if ( !pFile ) {
         ASSERT(FALSE);
         return;

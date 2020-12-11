@@ -228,6 +228,7 @@
     <ClInclude Include="DBUtilsImpl.h" />
     <ClInclude Include="dsCopyTableData.h" />
     <ClInclude Include="dsStrConv.h" />
+    <ClInclude Include="dsTableFieldInfo.h" />
     <ClInclude Include="dsTypes.h" />
     <ClInclude Include="JsonUtils\jsonparser.h" />
     <ClInclude Include="JsonUtils\jsonparser_rgb.h" />
@@ -250,6 +251,7 @@
     <ClInclude Include="dsTable.h" />
     <ClInclude Include="dsDatabase.h" />
     <ClInclude Include="dsDatabaseListener.h" />
+    <ClInclude Include="sqlite\sqlite3.h" />
     <ClInclude Include="sqlite\SqLiteErrorHandler.h" />
     <ClInclude Include="sqlite\SqLiteRecordsetImpl.h" />
     <ClInclude Include="sqlite\sqlite_bind_util.h" />

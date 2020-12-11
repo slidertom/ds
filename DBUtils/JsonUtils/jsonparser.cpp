@@ -61,14 +61,14 @@ namespace ds_json
         _impl::set_field_array(m_impl, sField, array.m_impl);
     }
     void object::SetArrayEx(const char *sField, const array &array) noexcept {
-        if ( array.GetSize() > 0 ) { 
+        if ( array.size() > 0 ) { 
             SetArray(sField, array); 
         }
         #ifdef _DEBUG
         else {
             ds_json::array array_check;
             GetArray(sField, array_check); 
-            ASSERT(array_check.GetSize() == 0); // should match default value
+            ASSERT(array_check.size() == 0); // should match default value
         }
         #endif
     }
@@ -122,25 +122,25 @@ namespace ds_json
     void object::GetArray(const char *sField, array &array) const noexcept {
         _impl::get_field_array(m_impl, sField, array.m_impl);
     }
-    void object::GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept
+    void object::GetStringArray(const char *sField, std::vector<std::wstring> &array) const noexcept 
     {
         ds_json::array array_json;
         _impl::get_field_array(m_impl, sField, array_json.m_impl);
-        const size_t nCnt = array_json.GetSize();
+        const size_t nCnt = array_json.size();
         array.reserve(nCnt);
         for (size_t i = 0; i < nCnt; ++i) {
             array.push_back(array_json.GetString(i));
-        }
+        }    
     }
     void object::GetStringArrayUTF8(const char *sField, std::vector<std::string> &array) const noexcept
     {
         ds_json::array array_json;
         _impl::get_field_array(m_impl, sField, array_json.m_impl);
-        const size_t nCnt = array_json.GetSize();
+        const size_t nCnt = array_json.size();
         array.reserve(nCnt);
         for (size_t i = 0; i < nCnt; ++i) {
             array.push_back(array_json.GetStringUTF8(i));
-        }
+        }   
     }
     void object::GetInt32Array(const char *sField, std::vector<int32_t> &array) const noexcept
     {
@@ -196,11 +196,23 @@ namespace ds_json
          return _impl::remove_field(m_impl, sField);
     }
 
-    void str2obj(const char* sJson, object &obj) noexcept {
+    void str2obj(const char *sJson, object &obj) noexcept {
         _impl::str2obj(sJson, obj.m_impl);
     }
+
+    void str2obj(const wchar_t *sJson, object &obj) noexcept {
+        std::string sJsonUTF8 = ds_str_conv::ConvertToUTF8(sJson);
+        _impl::str2obj(sJsonUTF8.c_str(), obj.m_impl);
+    }
+
     void obj2str(const object &obj, std::string &sJson) noexcept {
         _impl::obj2str(obj.m_impl, sJson);
+    }
+
+    void obj2str(const object &obj, std::wstring &sJson) noexcept {
+        std::string sJsonUTF8;
+        _impl::obj2str(obj.m_impl, sJsonUTF8);
+        sJson = ds_str_conv::ConvertFromUTF8(sJsonUTF8.c_str());
     }
 
     array::array() {
@@ -263,9 +275,6 @@ namespace ds_json
     size_t array::size() const noexcept {
         return _impl::get_array_size(m_impl);
     }
-    size_t array::GetSize() const noexcept {
-        return _impl::get_array_size(m_impl);
-    }
     std::string array::GetStringUTF8(size_t i) const noexcept {
         std::string sValue;
         _impl::get_array_string(m_impl, i, sValue);
@@ -281,13 +290,12 @@ namespace ds_json
     int32_t array::GetInt32(size_t i) const noexcept {
         return _impl::get_array_int32(m_impl, i);
     }
-
-    array::iterator array::begin() {
-        return iterator(*this, 0);
+    double array::GetDouble(size_t i) const noexcept {
+        return _impl::get_array_double(m_impl, i);
     }
-
-    array::iterator array::end() {
-        return iterator(*this, GetSize());
+    array::iterator::reference array::iterator::operator*() const { 
+        m_array_object.m_pArr->GetJsonObject(m_array_object.m_nPos, m_array_object.m_object);
+        return m_array_object;
     }
 
     void array::GetJsonObject(size_t i, object &obj) const noexcept {
@@ -308,5 +316,38 @@ namespace ds_json
         for (size_t i1 = 0; i1 < nSize; ++i1) {
             v.push_back(arr.GetInt32(i1));
         }
+    }
+
+    void str2obj(const char *sJson, std::vector<std::string> &v) noexcept {
+        ds_json::array arr;
+        str2obj(sJson, arr);
+        size_t nSize = arr.size();
+        v.reserve(nSize);
+        for (size_t i1 = 0; i1 < nSize; ++i1) {
+            v.push_back(arr.GetStringUTF8(i1));
+        }
+    }
+
+    array::array_object::operator int32_t() const noexcept {
+        return m_pArr->GetInt32(m_nPos);
+    }
+    array::array_object::operator int64_t() const noexcept {
+        return m_pArr->GetInt64(m_nPos);
+    }
+    array::array_object::operator reference() const noexcept {
+        m_pArr->GetJsonObject(m_nPos, m_object);
+        return m_object;
+    }
+    array::array_object::operator bool() const noexcept {
+        return m_pArr->GetInt32(m_nPos) != 0;
+    }
+    array::array_object::operator double() const noexcept {
+        return m_pArr->GetDouble(m_nPos) != 0;
+    }
+    array::array_object::operator std::string() const noexcept {
+        return m_pArr->GetStringUTF8(m_nPos);
+    }
+    array::array_object::operator std::wstring() const noexcept {
+        return m_pArr->GetString(m_nPos);
     }
 };

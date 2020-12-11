@@ -108,6 +108,11 @@ void CSqLiteDatabaseImpl::Close()
     m_pDB = nullptr;
     m_sFilePath = L"";
 
+    ClearFieldsInfo();
+}
+
+void CSqLiteDatabaseImpl::ClearFieldsInfo() 
+{
     for (auto &elem :m_table_field_info_map) {
         delete elem.second;
     }
@@ -232,18 +237,14 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_
         return false;
     }
     
-    //if ( m_bReadOnly ) {
-    //    m_bMemory = true; 
-    //}
-    
-    //m_bMemory = true; // 12 -> 2.5 s.
     // if slow network disk -> m_bMemory open can increase read performance x10
-    
+    bool journal_mode_memory = false;
+
     if ( m_bMemory ) 
     {   // https://sqlite.org/backup.html
         sqlite3 *memorydb = nullptr;
         sqlite3_open(":memory:", &memorydb);
-
+        
         sqlite3_backup *pBackup = sqlite3_backup_init(memorydb, "main", m_pDB, "main");
         if (pBackup) {
             ::sqlite3_backup_step(pBackup, -1);
@@ -258,25 +259,40 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_
 
         // #Try to avoid hitting disk, trading safety for speed.
         // #http://stackoverflow.com/questions/304393
-        ExecuteUTF8("PRAGMA temp_store=MEMORY;");
-        ExecuteUTF8("PRAGMA journal_mode=MEMORY;");
+
+        // https://www.sqlite.org/pragma.html#pragma_journal_mode
+        // Note that the journal_mode for an in-memory database is either MEMORY or OFF 
+        // and can not be changed to a different value. An attempt to change the journal_mode 
+        // of an in-memory database to any setting other than MEMORY or OFF is ignored. 
+        journal_mode_memory = true;
     }
 
     // http://www.sqlite.org/foreignkeys.html#fk_enable
     // Foreign key constraints are disabled by default (for backwards compatibility), 
-    // so must be enabled separately for each database connection. (Note, however, that future releases of SQLite might change so that foreign key 
+    // so must be enabled separately for each database connection. 
+    // (Note, however, that future releases of SQLite might change so that foreign key 
     // constraints enabled by default. 
     ExecuteUTF8("PRAGMA foreign_keys = ON");
     ExecuteUTF8("PRAGMA cache_size = 20000"); // default 2000
     ExecuteUTF8("PRAGMA page_size = 65535");
+    ExecuteUTF8("PRAGMA temp_store=MEMORY;"); // PRAGMA temp_store = 0 | DEFAULT | 1 | FILE | 2 | MEMORY
+
     if ( open_params.m_bExclusive ) {
         ExecuteUTF8("PRAGMA locking_mode = EXCLUSIVE"); // 19 -> 13 the most sensitive for the network file
     }
+
     if ( m_bReadOnly )  {
         ExecuteUTF8("PRAGMA synchronous = OFF");    // network: 25 -> 19
-        ExecuteUTF8("PRAGMA temp_store=MEMORY;");   // 13 -> 12
+        journal_mode_memory = true;
+    }
+
+    if ( journal_mode_memory ) {
         ExecuteUTF8("PRAGMA journal_mode=MEMORY;"); // 13 -> 12
     }
+    else {
+        ExecuteUTF8("PRAGMA journal_mode=WALL;");
+    }
+
     //ExecuteUTF8("PRAGMA main.journal_mode = OFF");
     // https://www.whoishostingthis.com/compare/sqlite/optimize/
     // If you’re already living dangerously with PRAGMA synchronous = OFF, 
@@ -290,7 +306,7 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_
 
 dsDBType CSqLiteDatabaseImpl::GetType()
 {
-    return dsDBType::dsType_SqLite;
+    return dsDBType::SqLite;
 }
 
 bool CSqLiteDatabaseImpl::IsReadOnly() const
@@ -469,6 +485,11 @@ static int loadOrSaveDb(sqlite3 *pInMemory, const char *zFilename, int isSave)
     int rc = sqlite3_open(zFilename, &pFile);
     if (rc == SQLITE_OK)
     {
+        char *localError = 0;
+        // we do copy from the memory to local file 
+        // or from file to memory 
+        // journal can be ignored 
+        sqlite3_exec(pFile, "PRAGMA journal_mode=OFF", 0, 0, &localError); 
         // If this is a 'load' operation (isSave==0), then data is copied
         // from the database file just opened to database pInMemory. 
         // Otherwise, if this is a 'save' operation (isSave==1), then data
@@ -502,6 +523,18 @@ static int loadOrSaveDb(sqlite3 *pInMemory, const char *zFilename, int isSave)
     return rc;
 }
 
+bool CSqLiteDatabaseImpl::Backup(const char *sBackupFile)
+{
+    const int32_t rc                    = ::loadOrSaveDb(m_pDB, sBackupFile, 1);
+    const bool bRet                     = rc == SQLITE_OK;
+
+    if ( !bRet ) {
+        m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::Backup::loadOrSaveDb");
+    }
+
+    return bRet;
+}
+
 void CSqLiteDatabaseImpl::CommitDatabase()
 {
     if ( !m_bMemory ) {   
@@ -515,17 +548,69 @@ void CSqLiteDatabaseImpl::CommitDatabase()
     }
 }
 
+std::vector<std::string> CSqLiteDatabaseImpl::GetTableList()
+{
+    std::vector<std::string> arrTables;
+    
+    CSqLiteRecordsetImpl loader(this, m_pErrorHandler);
+    if (!loader.OpenSQLUTF8("SELECT name FROM sqlite_master WHERE type='table'")) {
+        return arrTables;
+    }
+
+    if (!loader.MoveFirstImpl()) {
+        return arrTables;
+    }
+
+    while (!loader.IsEOF()) {
+        arrTables.push_back(loader.GetFieldStringUTF8("name"));
+        loader.MoveNext();
+    }
+
+    return arrTables;
+}
+
+class CTransRestore 
+{
+public:
+    CTransRestore(CSqLiteDatabaseImpl *pDB, bool bTransMode) : m_pDB(pDB) {
+        if (bTransMode) {
+            m_pDB->CommitTrans();
+            m_bStartTrans = true;
+        }
+    };
+    ~CTransRestore() {
+        if (m_bStartTrans) {
+            m_pDB->BeginTrans();
+        }
+    };
+
+private:
+    CSqLiteDatabaseImpl *m_pDB {nullptr};
+    bool m_bStartTrans {false};
+};
+
 bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName)
 {
-    // SQLite drop column implementation is based on https://www.sqlite.org/faq.html#q11
+    // CTransRestore has been implemented in order to have correct sequence of drop collumn functionality
+    // which involves the usage of BEGIN TRANSACTION command.
+    // Information about correct order of such operations can be found in https://sqlite.org/lang_altertable.html section "5. Making Other Kinds Of Table Schema Changes".
+    // In short:
+    // 1. Create new table
+    // 2. Copy data
+    // 3. Drop old table
+    // 4. Rename new into old 
 
+    // Transaction must be controlled inside DropColumn
+    CTransRestore transRestore(this, m_bTransMode);
+    // SQLite drop column implementation is based on https://www.sqlite.org/faq.html#q11
+    ClearFieldsInfo(); // To always have newest fields information before collecting all the information.
     const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
     const sqlite_util::CFieldInfoMap *pFieldInfoMap = GetTableFieldInfoImpl(sTableNameUTF8.c_str());
     if ( !pFieldInfoMap ) {
         std::string sError = "DropColumn failed. Table ";
                     sError += sTableNameUTF8;
                     sError += " does not exist.";
-        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::GetTableFieldInfo");
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::DropColumn");
         return false;
     }
 
@@ -545,7 +630,7 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
                     sError += sTableNameUTF8;
                     sError += ".";
 
-        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::GetTableFieldInfo");
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::DropColumn");
         return false;
     }
 
@@ -554,18 +639,14 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
     std::unordered_map<std::string, std::string> mapIndexSQLs;
     sqlite_util::sqlite_get_table_index_info(this, sTableNameUTF8.c_str(), m_pErrorHandler, sUniqueFields, mapIndexSQLs);
     
-    std::string sMainSQL = "PRAGMA foreign_keys=off;\n";
-    
-    sMainSQL += "ALTER TABLE "; 
-    sMainSQL += sTableNameUTF8;
-    sMainSQL += " RENAME TO ";
-    sMainSQL += sTableNameUTF8;
-    sMainSQL += "_1;\n";
-   
+    std::string sMainSQL;
+    sMainSQL += "PRAGMA foreign_keys=off;\n";
+    sMainSQL += "BEGIN TRANSACTION;\n";
+  
     // Constructing CREATE statement
     std::string sPrimary;
     std::string sFieldsList;
-    sMainSQL += "CREATE TABLE \"" + sTableNameUTF8 + "\" (";
+    sMainSQL += "CREATE TABLE \"" + sTableNameUTF8 + "_temporal\" (";
     for (const auto &it : *pFieldInfoMap) {
         if (it.first == sColumnNameUTF8) {
             continue;
@@ -588,6 +669,22 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
             sMainSQL += " UNIQUE";
         }
 
+        if (!it.second.m_sDefault.empty()) {
+            sMainSQL += " DEFAULT ";
+            sMainSQL += it.second.m_sDefault;
+        }
+
+		// Collate settings
+        const char* pCollSeq;
+		const int ret = sqlite3_table_column_metadata(m_pDB, nullptr, sTableNameUTF8.c_str(), it.first.c_str(), nullptr, &pCollSeq, nullptr, nullptr, nullptr);
+        if (SQLITE_OK == ret) {
+            const std::string sCollate = pCollSeq;
+            if ("BINARY" != sCollate) { // Default is Binary
+                sMainSQL += " COLLATE ";
+                sMainSQL += sCollate;
+            }
+        }
+
         sMainSQL += ",";
     }
 
@@ -607,15 +704,23 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
     // Creating INSERT statement
     sMainSQL += "INSERT INTO ";
     sMainSQL += sTableNameUTF8;
+    sMainSQL += "_temporal";
     sMainSQL += " (";
     sMainSQL += sFieldsList;
     sMainSQL += ") SELECT ";
     sMainSQL += sFieldsList;
     sMainSQL += " FROM ";
     sMainSQL += sTableNameUTF8;
-    sMainSQL += "_1;\n";
+    sMainSQL += ";\n";
 
-    sMainSQL += "DROP TABLE " + sTableNameUTF8 + "_1;\n";
+    sMainSQL += "DROP TABLE " + sTableNameUTF8 + ";\n";
+
+    sMainSQL += "ALTER TABLE ";
+    sMainSQL += sTableNameUTF8;
+    sMainSQL += "_temporal";
+    sMainSQL += " RENAME TO ";
+    sMainSQL += sTableNameUTF8;
+    sMainSQL += ";\n";
 
     // Restore Indexes
     // TODO: restore Triggers and Views
@@ -626,8 +731,16 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
         sMainSQL += it.second + ";\n";
     }
 
-    sMainSQL += "PRAGMA foreign_keys=on;";
+    sMainSQL += "COMMIT;\n";
+    sMainSQL += "PRAGMA foreign_keys=on;\n";
+     
     if (!ExecuteUTF8(sMainSQL.c_str())) {
+        ExecuteUTF8("ROLLBACK;");
+        std::string sError = "DropColumn failed. SQL error: ";
+                    sError += sMainSQL;            
+                    sError += ".";
+
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::DropColumn");
         return false;
     }
 
@@ -637,4 +750,56 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
     }
 
     return true;
+}
+
+bool CSqLiteDatabaseImpl::DropTable(const wchar_t *sTableName)
+{
+    const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
+    std::string sTriggerList;
+    sTriggerList = "SELECT * FROM sqlite_master WHERE type='trigger' AND tbl_name='"; 
+    sTriggerList += sTableNameUTF8;
+    sTriggerList += "';";
+
+    CSqLiteRecordsetImpl loaderTriggerList(this, m_pErrorHandler);
+    if (loaderTriggerList.OpenSQLUTF8(sTriggerList.c_str())) {
+        if (loaderTriggerList.MoveFirstImpl()) {
+            while ( !loaderTriggerList.IsEOF()) {
+                const std::string sTriggerName = loaderTriggerList.GetFieldStringUTF8("name");
+                std::string sSQL = "DROP TRIGGER ";
+                sSQL += sTriggerName;
+                sSQL += ";";
+
+                if (!this->ExecuteUTF8(sSQL.c_str())) {
+                    std::string sError = "DropTable failed. DROP TRIGGER SQL error: ";
+                    sError += sSQL;            
+                    sError += ".";
+
+                    m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::DropTable");
+                }
+
+                loaderTriggerList.MoveNext();
+            }
+        }
+    }
+
+    std::string sSQL = "DROP TABLE ";
+    sSQL += sTableNameUTF8;
+    sSQL += ";";
+
+    if (!ExecuteUTF8(sSQL.c_str())) {
+        std::string sError = "DropTable failed. DROP TABLE SQL error: ";
+        sError += sSQL;            
+        sError += ".";
+
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::DropTable");
+        return false;
+    }
+
+    return true;
+}
+
+bool CSqLiteDatabaseImpl::CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info)
+{
+    ASSERT(false);
+    return false;
 }

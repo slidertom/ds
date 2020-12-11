@@ -44,6 +44,10 @@ bool CAdoDotNetRecordsetImpl::IsEOF()
 
 bool CAdoDotNetRecordsetImpl::Open(const wchar_t *sTableName)
 {
+    if ( m_bSQLOpened ) {
+        return true;
+    }
+
     m_sTable = sTableName;
     return true;
 }
@@ -54,7 +58,13 @@ bool CAdoDotNetRecordsetImpl::OpenSQL(const wchar_t *sSQL)
         m_pSet->Close();
     }
 
-    return m_pSet->Open(sSQL);
+    if (!m_pSet->Open(sSQL)) {
+        return false;
+    }
+
+    m_sTable = sSQL;
+    m_bSQLOpened = true;
+    return true;
 }
 
 bool CAdoDotNetRecordsetImpl::OpenView(const wchar_t *sViewName)
@@ -112,9 +122,17 @@ bool CAdoDotNetRecordsetImpl::Update()
 
 int CAdoDotNetRecordsetImpl::GetRecordCount() const
 {
-     CAdoDotNetRecordsetImpl loader(m_pDB);
-    std::wstring sCountSQL = L"SELECT COUNT(*) AS RecordCount FROM ";
-    sCountSQL += m_sTable;
+    CAdoDotNetRecordsetImpl loader(m_pDB);
+    std::wstring sCountSQL;
+    if (m_bSQLOpened) {
+        sCountSQL = L"SELECT COUNT(*) AS RecordCount FROM (";
+        sCountSQL += m_sTable;
+        sCountSQL += L") AS TheMain";
+    }
+    else {
+        sCountSQL = L"SELECT COUNT(*) AS RecordCount FROM ";
+        sCountSQL += m_sTable;
+    }
 
     if ( !loader.OpenSQL(sCountSQL.c_str()) ) {
         return -1;
@@ -161,11 +179,21 @@ bool CAdoDotNetRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t 
         m_pSet->Close();
     }
 
-    std::wstring sFind = L"SELECT * FROM ";
-    sFind += m_sTable;
-    sFind += L" WHERE ";
-    sFind += sIndex;
-    sFind += L" = ";
+    std::wstring sFind;
+    if (m_bSQLOpened) {
+        sFind = L"SELECT * FROM (";
+        sFind += m_sTable;
+        sFind += L") AS TheMain WHERE ";
+        sFind += sIndex;
+        sFind += L" = ";
+    }
+    else {
+        sFind = L"SELECT * FROM ";
+        sFind += m_sTable;
+        sFind += L" WHERE ";
+        sFind += sIndex;
+        sFind += L" = ";
+    }
 
     if ( !m_pSet->SeekByString(sFind.c_str(), sValue) ) {
         return false;
@@ -196,12 +224,23 @@ bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, int32_t nValue)
         m_pSet->Close();
     }
 
-    std::wstring sFind = L"SELECT * FROM ";
-    sFind += m_sTable;
-    sFind += L" WHERE ";
-    sFind += sIndex;
-    sFind += L" = ";
-    sFind += std::to_wstring(nValue);
+    std::wstring sFind;
+    if (m_bSQLOpened) {
+        sFind = L"SELECT * FROM (";
+        sFind += m_sTable;
+        sFind += L") AS TheMain WHERE ";
+        sFind += sIndex;
+        sFind += L" = ";
+        sFind += std::to_wstring(nValue);
+    }
+    else {
+        sFind = L"SELECT * FROM ";
+        sFind += m_sTable;
+        sFind += L" WHERE ";
+        sFind += sIndex;
+        sFind += L" = ";
+        sFind += std::to_wstring(nValue);
+    }
 
     if ( !m_pSet->Open(sFind.c_str()) ) {
         return false;
@@ -291,5 +330,5 @@ std::wstring CAdoDotNetRecordsetImpl::GetColumnName(int nCol) const
 dsFieldType CAdoDotNetRecordsetImpl::GetColumnType(int nCol) const
 {
     ASSERT(FALSE);
-    return dsFieldType::dsFieldType_Undefined;
+    return dsFieldType::Undefined;
 }

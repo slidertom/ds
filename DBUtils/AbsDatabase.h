@@ -6,11 +6,12 @@
     #include "dsTypes.h"
 #endif
 
+#ifndef __DS_TABLE_FIELD_INFO_H__
+    #include "dsTableFieldInfo.h"
+#endif
+
 class CAbsRecordset;
 class dsOpenParams;
-
-#include "unordered_map"
-class dsTableFieldInfo : public std::unordered_map<std::wstring, dsFieldType, std::hash<std::basic_string<wchar_t> > > { };
 
 class CAbsDatabase
 {
@@ -21,14 +22,15 @@ public:
 
 // Overrides
 public:
-    virtual bool BeginTrans()  = 0; 
-    virtual bool CommitTrans() = 0; 
-    virtual bool Rollback()    = 0; 
+    virtual bool BeginTrans()                       = 0; 
+    virtual bool CommitTrans()                      = 0; 
+    virtual bool Rollback()                         = 0; 
+    virtual bool Backup(const char *sBackupFile)    = 0;
 
     virtual bool Execute(const wchar_t *sSQL) = 0; 
 
     virtual bool OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) = 0;
-    
+        
     virtual dsDBType GetType() = 0;
 
     virtual bool IsReadOnly() const = 0;
@@ -54,18 +56,24 @@ public:
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) = 0;
 
+    virtual std::vector<std::string> GetTableList() = 0;
+
     virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) = 0;
+    virtual bool DropTable(const wchar_t *sTableName) = 0;
+
+    virtual bool CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info) = 0;
 };
 
 namespace ds_table_field_info_util
 {
     inline void fields_union(dsTableFieldInfo &union_info, const dsTableFieldInfo &src_info, const dsTableFieldInfo &dst_info)
     {
-        for (auto &elem : src_info) {
-            if ( dst_info.find(elem.first.c_str()) == dst_info.end() ) {
+        for (const auto &src_elem : src_info) {
+            const auto dst_found = dst_info.find(src_elem.first.c_str());
+            if ( dst_found == dst_info.end() ) {
                 continue;
             }
-            union_info[elem.first] = elem.second;
+            union_info[src_elem.first] = dst_found->second;
         }
     }    
 

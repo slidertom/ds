@@ -192,5 +192,9 @@
     <ClInclude Include="sqlite\sqlite_database_impl.h">
       <Filter>SqLite</Filter>
     </ClInclude>
+    <ClInclude Include="sqlite\sqlite3.h">
+      <Filter>SqLite</Filter>
+    </ClInclude>
+    <ClInclude Include="dsTableFieldInfo.h" />
   </ItemGroup>
 </Project>
