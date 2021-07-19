@@ -24,3 +24,4 @@ DBUtilsImpl.lib
 DBUtilsImplD.dll
 DBUtilsImpl.dll
 /DBUtils/*.opendb
+/DBUtils/.vs/DBUtilsImpl/v15/*.opendb
