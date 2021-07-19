@@ -187,7 +187,6 @@
     <ClCompile Include="dsCopyTableData.cpp" />
     <ClCompile Include="dsStrConv.cpp" />
     <ClCompile Include="JsonUtils\jsonparser.cpp" />
-    <ClCompile Include="JsonUtils\jsonparser_rgb.cpp" />
     <ClCompile Include="JsonUtils\rapid_impl.cpp" />
     <ClCompile Include="LogImpl\LogImpl.cpp" />
     <ClCompile Include="dsTable.cpp">
@@ -231,7 +230,6 @@
     <ClInclude Include="dsTableFieldInfo.h" />
     <ClInclude Include="dsTypes.h" />
     <ClInclude Include="JsonUtils\jsonparser.h" />
-    <ClInclude Include="JsonUtils\jsonparser_rgb.h" />
     <ClInclude Include="JsonUtils\RapidJson\allocators.h" />
     <ClInclude Include="JsonUtils\RapidJson\document.h" />
     <ClInclude Include="JsonUtils\RapidJson\encodedstream.h" />

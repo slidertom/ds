@@ -10,7 +10,8 @@ class dsTableFieldInfo;
 
 namespace sqlite_util
 {
-    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, const dsTableFieldInfo &union_info);
+    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, 
+                         const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, const dsTableFieldInfo &union_info);
 
     // Attach, detach controls attached database name as SrcDB.
     // Do attach src db for the dst db.

@@ -88,6 +88,14 @@ public:
     static bool IsSqLiteDB(const wchar_t *sPath) noexcept;
     static bool IsDaoDB(const wchar_t *sPath) noexcept;
     static bool IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept;
+    
+    // Target database chema must match source.
+    // Target database tables will be cleared (flushed)
+    static bool CopyData(dsDatabase &dbSource, dsDatabase &dbTarget) noexcept;
+    
+    // Target database chema must match source.
+    // Target database tables will be cleared (flushed)
+    bool CloneTo(const wchar_t *sPath, dsDBType eType) noexcept;
 
     bool DropIndex(const wchar_t *sIndexName) noexcept;
     std::wstring AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName)  noexcept;
@@ -95,12 +103,17 @@ public:
     void SetPostCommitHandler(const std::function<void()> &func) noexcept;
 
     bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept;
+    bool RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept;
     bool DropTable(const wchar_t *sTableName) noexcept;
+    bool DropTrigger(const wchar_t *sTriggerName) noexcept;
 
-    std::vector<std::string> GetTableList();
-    bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info);
+    std::vector<std::string> GetTableList() noexcept;
+    bool GetTableFieldInfo(const char *sTable, dsTableFieldInfo &info) noexcept;
 
-    bool CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info);
+    bool CreateTable(const char *sTableName, const dsTableFieldInfo &info) noexcept;
+    bool CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info)  noexcept;
+
+    bool CreateDB(const wchar_t *sPath, dsDBType eType) noexcept;
 
 // Operations
 public:

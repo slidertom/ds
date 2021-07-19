@@ -4,6 +4,7 @@
 #ifndef __x86_64__ 
     #include "Dao/DaoDatabaseImpl.h"
 #endif
+#include "Dao/DaoFileUtil.h"
 #include "AdoDotNet/AdoDotNetDatabaseImpl.h"
 #include "sqlite/sqlite_database_impl.h"
 #include "LogImpl/LogImpl.h"
@@ -86,10 +87,7 @@ bool dsDatabase::IsSqLiteDB(const wchar_t *sPath) noexcept
 
 bool dsDatabase::IsDaoDB(const wchar_t *sPath) noexcept 
 {
-    #ifndef __x86_64__ 
-        return CDaoDatabaseImpl::IsDaoDB(sPath);
-    #endif
-    return false; // x64 build dao database is not supported
+    return CDaoFileUtil::IsDaoDB(sPath);
 }
 
 bool dsDatabase::IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept
@@ -241,14 +239,7 @@ dsDatabase::dbErrorHandler dsDatabase::GetErrorHandler() noexcept
 
 bool dsDatabase::DropIndex(const wchar_t *sIndexName) noexcept
 {
-    std::wstring sDropStatement = L"DROP INDEX ";
-    sDropStatement += sIndexName;
-    sDropStatement += L";";
-    if (!m_pDatabase->Execute(sDropStatement.c_str())){
-        return false;
-    }
-
-    return true;
+    return m_pDatabase->DropIndex(sIndexName);
 }
 
 std::wstring dsDatabase::AddUniqueIndexNoCase(const wchar_t *sTableName, const wchar_t *sFieldName) noexcept
@@ -277,7 +268,7 @@ void dsDatabase::SetPostCommitHandler(const std::function<void()> &func) noexcep
     m_funcPostCommitTrans = func;
 }
 
-std::vector<std::string> dsDatabase::GetTableList()
+std::vector<std::string> dsDatabase::GetTableList() noexcept
 {
     return m_pDatabase->GetTableList();
 }
@@ -287,9 +278,19 @@ bool dsDatabase::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnNam
     return m_pDatabase->DropColumn(sTableName, sColumnName);
 }
 
+bool dsDatabase::RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept
+{
+    return m_pDatabase->RemoveColumnCollateNoCase(sTableName, sColumnName);
+}
+
 bool dsDatabase::DropTable(const wchar_t *sTableName) noexcept
 {
     return m_pDatabase->DropTable(sTableName);
+}
+
+bool dsDatabase::DropTrigger(const wchar_t *sTriggerName) noexcept
+{
+    return m_pDatabase->DropTrigger(sTriggerName);
 }
 
 bool dsDatabase::Backup(const char *sBackupFile) noexcept
@@ -297,18 +298,114 @@ bool dsDatabase::Backup(const char *sBackupFile) noexcept
     return m_pDatabase->Backup(sBackupFile);
 }
 
-bool dsDatabase::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
+bool dsDatabase::GetTableFieldInfo(const char *sTable, dsTableFieldInfo &info) noexcept
 {
     if (!m_pDatabase->GetTableFieldInfo(sTable, info)) {
+        return false;
+    }
+    return true;
+}
+
+bool dsDatabase::CreateTable(const char *sTableName, const dsTableFieldInfo &info) noexcept
+{
+    if (!m_pDatabase->CreateTable(sTableName, info)) {
+        return false;
+    }
+    return true;
+}
+
+bool dsDatabase::CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info)  noexcept
+{
+    if (!m_pDatabase->CreateTables(tables_info)) {
+        return false;
+    }
+    return true;
+}
+
+bool dsDatabase::CreateDB(const wchar_t *sPath, dsDBType eType) noexcept
+{
+    Close(); // do auto close if opened
+
+    ASSERT(!m_pDatabase);
+    ASSERT(::wcslen(sPath) != 0);
+
+    if ( dsDBType::MsSQL == eType ) {
+        m_pDatabase = new CAdoDotNetDatabaseImpl;
+    }
+    if ( dsDBType::SqLite == eType ) {
+        m_pDatabase = new CSqLiteDatabaseImpl;
+    }    
+#ifndef __x86_64__ 
+    else if ( dsDBType::Dao == eType ) {
+        m_pDatabase = new CDaoDatabaseImpl;
+    } 
+#endif
+    else {
+        return false;
+    }
+
+    m_pDatabase->SetErrorHandler(m_pErrorHandler);
+
+    if ( !m_pDatabase->CreateDB(sPath) ) {
+        Close();
         return false;
     }
 
     return true;
 }
 
-bool dsDatabase::CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info)
+bool dsDatabase::CopyData(dsDatabase &dbSource, dsDatabase &dbTarget) noexcept
 {
-    if (!m_pDatabase->CreateTable(sTableName, info)) {
+    dsCopyTableData copy_table_data(&dbSource, &dbTarget);
+    const std::vector<std::string> arrTargetTables = dbTarget.GetTableList();
+    copy_table_data.BeginCopy();
+    for (const std::string &sTable : arrTargetTables) {
+        dsTable table(&dbTarget, sTable.c_str());
+        table.Flush();
+
+        const std::wstring sTable_ = ds_str_conv::ConvertFromUTF8(sTable.c_str());
+        if (!copy_table_data.CopyTableData(sTable_.c_str())) {
+            return false;
+        }
+    }
+
+    if (!copy_table_data.EndCopy()) {
+        return false;
+    }
+
+    return true;
+}
+
+bool dsDatabase::CloneTo(const wchar_t *sPath, dsDBType eType) noexcept
+{
+    // Same type databases - use Backup functionality.
+    if (GetType() == eType) {
+        ASSERT(false);
+    }
+
+    dsDatabase dbTarget;
+    if (!dbTarget.OpenDB(sPath)) {
+        if (!dbTarget.CreateDB(sPath, dsDBType::Dao)) {
+            return false;
+        }
+
+        std::vector<std::pair<std::string, dsTableFieldInfo>> tables_info;
+        const std::vector<std::string> arrSourceTables = GetTableList();
+        for (const std::string &sTable : arrSourceTables) {
+            dsTableFieldInfo info;
+            if (!GetTableFieldInfo(sTable.c_str(), info)) { 
+                return false;
+            }
+
+            tables_info.push_back(std::make_pair(sTable, info));
+        }
+
+        if (!dbTarget.CreateTables(tables_info)) {
+            return false;
+        }
+    } 
+
+    if (!dsDatabase::CopyData(*this, dbTarget)) {
         return false;
     }
 

@@ -318,6 +318,16 @@ namespace ds_json
         }
     }
 
+    void str2obj(const char *sJson, std::unordered_set<std::string> &v) noexcept {
+        ds_json::array arr;
+        str2obj(sJson, arr);
+        size_t nSize = arr.size();
+        v.reserve(nSize);
+        for (size_t i1 = 0; i1 < nSize; ++i1) {
+            v.emplace(arr.GetStringUTF8(i1));
+        }
+    }
+
     void str2obj(const char *sJson, std::vector<std::string> &v) noexcept {
         ds_json::array arr;
         str2obj(sJson, arr);
@@ -349,5 +359,18 @@ namespace ds_json
     }
     array::array_object::operator std::wstring() const noexcept {
         return m_pArr->GetString(m_nPos);
+    }
+};
+
+namespace ds_jsonparser_rbg
+{
+    void SetRGB(ds_json::object &obj, const char *sField, unsigned long color) {
+        std::string sRGB = std::to_string(color);
+        obj.SetTextUTF8(sField, sRGB.c_str());
+    }
+
+    unsigned long GetRGB(const ds_json::object &obj, const char *sField) {
+        const unsigned long color = atol(obj.GetTextUTF8(sField).c_str());
+        return color;
     }
 };

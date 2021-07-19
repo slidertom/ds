@@ -7,6 +7,7 @@
 #endif
 
 #include "vector"
+#include "unordered_set"
 #include "string"
 
 namespace ds_json
@@ -27,7 +28,7 @@ namespace ds_json
             }
             #ifdef _DEBUG
             else {
-                ASSERT(GetText(sField).empty()); // should match default value if exists
+                ASSERT(GetText(sField).empty()); // should match default value if exists also indicates that not the whole object datastructure is being saved
             }
             #endif
         }
@@ -38,7 +39,7 @@ namespace ds_json
             } 
             #ifdef _DEBUG
             else {
-                ASSERT(GetTextUTF8(sField).empty()); // should match default value if exists
+                ASSERT(GetTextUTF8(sField).empty()); // should match default value if exists also indicates that not the whole object datastructure is being saved
             }
             #endif
         } 
@@ -50,7 +51,7 @@ namespace ds_json
             #ifdef _DEBUG
             else {
                 const double dCheck = GetDouble(sField);
-                ASSERT((dCheck < DBL_EPSILON) && (dCheck > -DBL_EPSILON)); // should match default value if exists
+                ASSERT((dCheck < DBL_EPSILON) && (dCheck > -DBL_EPSILON)); // should match default value if exists also indicates that not the whole object datastructure is being saved
             }
             #endif
         }
@@ -74,7 +75,7 @@ namespace ds_json
             }
             #ifdef _DEBUG
             else {
-                ASSERT(!GetBool(sField)); // should match default value if exists
+                ASSERT(!GetBool(sField)); // should match default value if exists, also indicates that not the whole object datastructure is being saved
             }
             #endif
         }
@@ -225,6 +226,7 @@ namespace ds_json
     void DB_UTILS_API str2obj(const char *sJson, array &obj) noexcept;
     void DB_UTILS_API str2obj(const char *sJson, std::vector<int32_t> &v) noexcept;
     void DB_UTILS_API str2obj(const char *sJson, std::vector<std::string> &v) noexcept;
+    void DB_UTILS_API str2obj(const char *sJson, std::unordered_set<std::string> &v) noexcept;
     void DB_UTILS_API obj2str(const array &obj, std::string &sJson) noexcept;
 
     // do use object_vect as a cache if required multi time access to the array object elements
@@ -257,6 +259,12 @@ namespace ds_json
     }
 };
 
+namespace ds_jsonparser_rbg
+{
+    void DB_UTILS_API SetRGB(ds_json::object &obj, const char *sField, unsigned long color);
+    unsigned long DB_UTILS_API GetRGB(const ds_json::object &obj, const char *sField);
+};
+
 #define FIELD_JSON(name, realname) \
     void Get##name(ds_json::object &object) const        { ds_json::str2obj(GetFieldStringUTF8(realname).c_str(), object); }                                  \
     void Set##name(const ds_json::array &object)         { std::string sJson; ds_json::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
@@ -264,7 +272,9 @@ namespace ds_json
     void Set##name(const ds_json::object &object)        { std::string sJson; ds_json::obj2str(object, sJson); SetFieldStringUTF8(realname, sJson.c_str()); } \
     void Set##name(const char *sJson)                    { SetFieldStringUTF8(realname, sJson);         }                                                     \
     void Set##name(const std::string &sJson)             { SetFieldStringUTF8(realname, sJson.c_str()); }                                                     \
-    bool DeleteAllByJson##name(const char *sJsonField, int32_t nValue) noexcept { return DeleteAllByJsonField(realname, sJsonField, nValue); }                \
+    bool DeleteAllByJson##name(const char *sJsonField, int32_t nValue)        noexcept { return DeleteAllByJsonField(realname, sJsonField, nValue); }         \
+    bool DeleteAllByJson##name(const char *sJsonField, const wchar_t *sValue) noexcept { return DeleteAllByJsonField(realname, sJsonField, sValue); }         \
+    bool SeekByJson##name(const char *sJsonField, const wchar_t *sValue) noexcept { return SeekByJsonField(realname, sJsonField, sValue); }                   \
     static bool IsNull##name(const ds_json::object &obj) { return obj.IsNull(realname); }                                                                     \
     static void SetNull##name(ds_json::object &obj)      { obj.SetNull(realname); }                                                                           \
 
@@ -379,5 +389,9 @@ namespace ds_json
     static void Set##name(ds_json::object &obj, const ds_json::object &set_obj) { obj.SetJsonObject(realname, set_obj); } \
     JSON_NULL(name, realname) \
     JSON_REMOVE(name, realname) \
+
+#define JSON_RGB(name, realname) \
+    static unsigned long Get##name(const ds_json::object &obj) { return ds_jsonparser_rbg::GetRGB(obj, realname); } \
+    static void Set##name(ds_json::object &obj, unsigned long color) { ds_jsonparser_rbg::SetRGB(obj, realname, color); } 
 
 #endif

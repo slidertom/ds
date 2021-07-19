@@ -4,6 +4,7 @@
 #include "DaoRecordsetImpl.h"
 #include "DAOExtensions.h"
 #include "DaoErrorHandler.h"
+#include "DaoFileUtil.h"
 
 #include "../dsStrConv.h"
 #include "../dsOpenParams.h"
@@ -54,34 +55,7 @@ CDaoDatabaseImpl::~CDaoDatabaseImpl()
 
 bool CDaoDatabaseImpl::IsDaoDB(const wchar_t *sPath)
 {
-    FILE *pFile = _tfopen(sPath, L"rb");
-    if ( !pFile ) {
-        return false;
-    }
- //  Standard Jet DB
-    
-    bool bDao = false;
-    char buffer[16];
-    int nRead = fread(buffer, 1, 16, pFile);
-    if ( nRead > 15 && 
-         buffer[4]  == 'S' && 
-         buffer[5]  == 't' && 
-         buffer[6]  == 'a' && 
-         buffer[7]  == 'n' && 
-         buffer[8]  == 'd' && 
-         buffer[9]  == 'a' &&
-         buffer[10] == 'r' && 
-         buffer[11] == 'd' && 
-         buffer[13] == 'J' && 
-         buffer[14] == 'e' &&
-         buffer[15] == 't' ) 
-    {
-        bDao = true;
-    }
-
-    fclose(pFile);
-
-    return bDao;
+    return CDaoFileUtil::IsDaoDB(sPath);
 }
 
 bool CDaoDatabaseImpl::BeginTrans() 
@@ -127,6 +101,11 @@ bool CDaoDatabaseImpl::Rollback()
     }
 
     return true;
+}
+
+bool CDaoDatabaseImpl::Execute(const char *sSQL) {
+    const std::wstring sSQLUTF16 = ds_str_conv::ConvertFromUTF8(sSQL);
+    return Execute(sSQLUTF16.c_str());
 }
 
 bool CDaoDatabaseImpl::Execute(const wchar_t *lpszSQL) 
@@ -355,16 +334,17 @@ bool CDaoDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t *sTabl
     return true;
 }
 
-bool CDaoDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
+bool CDaoDatabaseImpl::GetTableFieldInfo(const char *sTable, dsTableFieldInfo &info)
 {
     ASSERT(m_pDatabase);
     CDaoTableDef tableInfo(m_pDatabase);
-    tableInfo.Open(sTable);
+    const std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
+    tableInfo.Open(sTableUTF16.c_str());
 
     if ( !tableInfo.IsOpen() ) 
     {
         std::wstring sError = L"GetTableFieldInfo failed. Table ";
-        sError += sTable;
+        sError += sTableUTF16;
         sError += L".";
         m_pErrorHandler->OnError(sError.c_str(), L"CDaoDatabaseImpl::GetTableFieldInfo");
         return false;
@@ -429,6 +409,12 @@ bool CDaoDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sCol
     return true;
 }
 
+bool CDaoDatabaseImpl::RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName)
+{
+    ASSERT(false);
+    return false;
+}
+
 bool CDaoDatabaseImpl::DropTable(const wchar_t *sTableName)
 {
     std::wstring sSQL = L"DROP TABLE ";
@@ -442,19 +428,45 @@ bool CDaoDatabaseImpl::DropTable(const wchar_t *sTableName)
     return true;
 }
 
+bool CDaoDatabaseImpl::DropTrigger(const wchar_t *sTriggerName)
+{
+    std::wstring sSQL = L"DROP TRIGGER ";
+    sSQL += sTriggerName;
+    sSQL += L";";
+
+    if (!Execute(sSQL.c_str())) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CDaoDatabaseImpl::DropIndex(const wchar_t *sIndexName)
+{
+    std::wstring sDropStatement = L"DROP INDEX ";
+    sDropStatement += sIndexName;
+    sDropStatement += L";";
+    if (!Execute(sDropStatement.c_str())){
+        return false;
+    }
+
+    return true;
+}
+
 bool CDaoDatabaseImpl::Backup(const char *sBackupFile)
 {
     ASSERT(FALSE);
     return true;
 }
 
-bool CDaoDatabaseImpl::CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info)
+bool CDaoDatabaseImpl::CreateTable(const char *sTableName, const dsTableFieldInfo &info)
 {
     std::wstring sField;
     dsFieldType nFieldType;
     try {
         CDaoTableDef TableDef(m_pDatabase);
-        TableDef.Create(sTableName);
+        const std::wstring sTableNameUTF16 = ds_str_conv::ConvertFromUTF8(sTableName);
+        TableDef.Create(sTableNameUTF16.c_str());
                         
         for (const auto it : info) {
             sField = it.first;
@@ -513,6 +525,33 @@ bool CDaoDatabaseImpl::CreateTable(const wchar_t *sTableName, const dsTableField
     {
         ASSERT(FALSE);
         m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::CreateTable");
+        e->Delete();
+        return false;
+    }
+
+    return true;
+}
+
+bool CDaoDatabaseImpl::CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info)
+{
+    for (const std::pair<std::string, dsTableFieldInfo> &info : tables_info) {
+        if (!CreateTable(info.first.c_str(), info.second)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool CDaoDatabaseImpl::CreateDB(const wchar_t *sPath)
+{
+    try {
+        m_pDatabase->Create(sPath);
+    }
+    catch (CDaoException *e)
+    {
+        ASSERT(FALSE);
+        m_pErrorHandler->OnDaoException(e, L"CDaoDatabaseImpl::CreateDB");
         e->Delete();
         return false;
     }

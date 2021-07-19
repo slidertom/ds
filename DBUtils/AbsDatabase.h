@@ -28,6 +28,7 @@ public:
     virtual bool Backup(const char *sBackupFile)    = 0;
 
     virtual bool Execute(const wchar_t *sSQL) = 0; 
+    virtual bool Execute(const char *sSQL)    = 0; 
 
     virtual bool OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) = 0;
         
@@ -51,7 +52,7 @@ public:
     virtual bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,
                                 const wchar_t *sField, const wchar_t *sForeignField) = 0;
 
-    virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) = 0;
+    virtual bool GetTableFieldInfo(const char *sTable, dsTableFieldInfo &info) = 0;
 
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) = 0;
@@ -59,9 +60,15 @@ public:
     virtual std::vector<std::string> GetTableList() = 0;
 
     virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) = 0;
+    virtual bool RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName) = 0;
     virtual bool DropTable(const wchar_t *sTableName) = 0;
+    virtual bool DropTrigger(const wchar_t *sTriggerName) = 0;
+    virtual bool DropIndex(const wchar_t *sIndexName) = 0;
 
-    virtual bool CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info) = 0;
+    virtual bool CreateTable(const char *sTableName, const dsTableFieldInfo &info) = 0;
+    virtual bool CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info) = 0;
+
+    virtual bool CreateDB(const wchar_t *sPath) = 0;
 };
 
 namespace ds_table_field_info_util
@@ -77,7 +84,8 @@ namespace ds_table_field_info_util
         }
     }    
 
-    inline bool fields_union(dsTableFieldInfo &union_info, CAbsDatabase *pSrcDB, const wchar_t *sTableNameSrc, CAbsDatabase *pDstDB, const wchar_t *sTableNameDst) 
+    inline bool fields_union(dsTableFieldInfo &union_info, CAbsDatabase *pSrcDB,
+                             const char *sTableNameSrc, CAbsDatabase *pDstDB, const char *sTableNameDst) 
     {
         dsTableFieldInfo dst_info;
         if ( !pDstDB->GetTableFieldInfo(sTableNameDst, dst_info) ) {

@@ -51,9 +51,15 @@ bool CAdoDotNetDatabaseImpl::Rollback()
     return true;
 }
 
-bool CAdoDotNetDatabaseImpl::Execute(const wchar_t *lpszSQL) 
+bool CAdoDotNetDatabaseImpl::Execute(const wchar_t *sSQL) 
 {
-    return m_pDatabase->Execute(lpszSQL);
+    return m_pDatabase->Execute(sSQL);
+}
+
+bool CAdoDotNetDatabaseImpl::Execute(const char *sSQL)
+{
+    const std::wstring sSQLUTF16 = ds_str_conv::ConvertFromUTF8(sSQL);
+    return Execute(sSQLUTF16.c_str());
 }
 
 void CAdoDotNetDatabaseImpl::Close() 
@@ -127,9 +133,10 @@ bool CAdoDotNetDatabaseImpl::CreateRelation(const wchar_t *sName, const wchar_t 
     return true;
 }
 
-bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info)
+bool CAdoDotNetDatabaseImpl::GetTableFieldInfo(const char *sTable, dsTableFieldInfo &info)
 {
-    return m_pDatabase->GetTableFieldInfo(sTable, info);
+    const std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
+    return m_pDatabase->GetTableFieldInfo(sTableUTF16.c_str(), info);
 }
 
 std::vector<std::string> CAdoDotNetDatabaseImpl::GetTableList()
@@ -154,10 +161,34 @@ bool CAdoDotNetDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t
     return true;
 }
 
+bool CAdoDotNetDatabaseImpl::RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName)
+{
+    ASSERT(false);
+    return false;
+}
+
 bool CAdoDotNetDatabaseImpl::DropTable(const wchar_t *sTableName)
 {
     ASSERT(false);
     return false;
+}
+
+bool CAdoDotNetDatabaseImpl::DropTrigger(const wchar_t *sTriggerName)
+{
+    ASSERT(FALSE);
+    return true;
+}
+
+bool CAdoDotNetDatabaseImpl::DropIndex(const wchar_t *sIndexName)
+{
+    std::wstring sDropStatement = L"DROP INDEX ";
+    sDropStatement += sIndexName;
+    sDropStatement += L";";
+    if (!Execute(sDropStatement.c_str())){
+        return false;
+    }
+
+    return true;
 }
 
 bool CAdoDotNetDatabaseImpl::Backup(const char *sBackupFile)
@@ -166,7 +197,19 @@ bool CAdoDotNetDatabaseImpl::Backup(const char *sBackupFile)
     return true;
 }
 
-bool CAdoDotNetDatabaseImpl::CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info)
+bool CAdoDotNetDatabaseImpl::CreateTable(const char *sTableName, const dsTableFieldInfo &info)
+{
+    ASSERT(false);
+    return false;
+}
+
+bool CAdoDotNetDatabaseImpl::CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info)
+{
+    ASSERT(false);
+    return false;
+}
+
+bool CAdoDotNetDatabaseImpl::CreateDB(const wchar_t *sPath)
 {
     ASSERT(false);
     return false;

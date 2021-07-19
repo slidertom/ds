@@ -335,7 +335,7 @@ bool CSqLiteRecordsetImpl::Delete()
                 sDelete += m_sTable;
                 sDelete += "' WHERE ROWID = ";
                 sDelete += sRowId;
-    const bool bRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
+    const bool bRetVal = m_pDB->Execute(sDelete.c_str());
     if ( !bRetVal ) {
         OnErrorCode(-1, "CSqLiteRecordsetImpl::Delete()");
         return false;
@@ -1157,7 +1157,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByStringValueUTF8(const char *sField, const 
                 sSQL += sValue;
                 sSQL += "'";
 
-    if ( m_pDB->ExecuteUTF8(sSQL.c_str()) ) {
+    if ( m_pDB->Execute(sSQL.c_str()) ) {
         return true;
     }
 
@@ -1185,7 +1185,7 @@ bool CSqLiteRecordsetImpl::DeleteAllByLongValue(const wchar_t *sField, int32_t n
                 sSQL += " = ";
                 sSQL += sValueUTF8;
 
-    if ( m_pDB->ExecuteUTF8(sSQL.c_str()) ) {
+    if ( m_pDB->Execute(sSQL.c_str()) ) {
         return true;
     }
 
@@ -1209,8 +1209,61 @@ bool CSqLiteRecordsetImpl::DeleteAllByJsonField(const char *sField, const char *
     sSQL += " = ";
     sSQL += sValueUTF8;
 
-    if (m_pDB->ExecuteUTF8(sSQL.c_str())) {
+    if (m_pDB->Execute(sSQL.c_str())) {
         return true;
+    }
+
+    return false;
+}
+
+bool CSqLiteRecordsetImpl::DeleteAllByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue)
+{
+    ASSERT(!m_sTable.empty());
+
+    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
+
+    std::string sSQL = "DELETE FROM '";
+    sSQL += m_sTable;
+    sSQL += "' WHERE ";
+    sSQL += "JSON_EXTRACT(";
+    sSQL += sField;
+    sSQL += ", '$.";
+    sSQL += sFieldInJson;
+    sSQL += "')";
+    sSQL += " = '";
+    sSQL += sValueUTF8;
+    sSQL += "' COLLATE NOCASE";
+
+    if (m_pDB->Execute(sSQL.c_str())) {
+        return true;
+    }
+
+    return false;
+}
+
+bool CSqLiteRecordsetImpl::SeekByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue)
+{
+    ASSERT(!m_sTable.empty());
+
+    CloseStatement();
+
+    const std::string sValueUTF8 = ds_str_conv::ConvertToUTF8(sValue);
+    std::string sFind  = "SELECT ROWID,* FROM '";
+                sFind += m_sTable;
+                sFind += "' WHERE ";
+                sFind += "JSON_EXTRACT(";
+                sFind += sField;
+                sFind += ", '$.";
+                sFind += sFieldInJson;
+                sFind += "')";
+                sFind += " = '";
+                sFind += sValueUTF8;
+                sFind += "' COLLATE NOCASE";
+
+    if ( OpenImpl(sFind.c_str()) ) {
+        if ( MoveFirstImpl() ) {
+            return true;
+        }
     }
 
     return false;
@@ -1223,7 +1276,7 @@ void CSqLiteRecordsetImpl::Flush()
     std::string sSQL  = "DELETE FROM '";
                 sSQL += m_sTable;
                 sSQL += "'";
-    m_pDB->ExecuteUTF8(sSQL.c_str());
+    m_pDB->Execute(sSQL.c_str());
 }
 
 bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, int32_t nValue)
@@ -1246,7 +1299,7 @@ bool CSqLiteRecordsetImpl::DeleteByLongValue(const wchar_t *sField, int32_t nVal
     sDelete += sValueUTF8;
     sDelete += " LIMIT 1)";
 
-    const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
+    const int nRetVal = m_pDB->Execute(sDelete.c_str());
     if ( nRetVal == -1 ) {
         OnErrorCode(nRetVal, "CSqLiteRecordsetImpl::DeleteByLongValue()");
         return false;
@@ -1271,7 +1324,7 @@ bool CSqLiteRecordsetImpl::DeleteByStringValueUTF8(const char *sField, const cha
     sDelete += sValue;
     sDelete += "' LIMIT 1)";
 
-    const int nRetVal = m_pDB->ExecuteUTF8(sDelete.c_str());
+    const int nRetVal = m_pDB->Execute(sDelete.c_str());
     if ( nRetVal == -1 ) {
         OnErrorCode(nRetVal, "CSqLiteRecordsetImpl::DeleteByStringValue()");
         return false;

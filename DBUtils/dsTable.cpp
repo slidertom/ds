@@ -425,6 +425,18 @@ bool dsTable::DeleteAllByJsonField(const char *sField, const char *sJsonField, i
     return m_pSet->DeleteAllByJsonField(sField, sJsonField, nValue);
 }
 
+bool dsTable::DeleteAllByJsonField(const char *sField, const char *sJsonField, const wchar_t *sValue) noexcept
+{
+    VERIFY(Open());
+    return m_pSet->DeleteAllByJsonField(sField, sJsonField, sValue);
+}
+
+bool dsTable::SeekByJsonField(const char *sField, const char *sJsonField, const wchar_t *sValue) noexcept
+{
+    VERIFY(Open());
+    return m_pSet->SeekByJsonField(sField, sJsonField, sValue);
+}
+
 int64_t dsTable::GetFieldInt64(const wchar_t *sFieldName) const noexcept
 {
     return m_pSet->GetFieldInt64(sFieldName);

@@ -28,6 +28,8 @@ public:
     virtual bool Backup(const char *sBackupFile) override;
 
     virtual bool Execute(const wchar_t *lpszSQL) override; 
+    virtual bool Execute(const char *sSQL) override;
+
     virtual bool OpenDB(const wchar_t *sPath, const dsOpenParams &open_params) override;
 
     virtual dsDBType GetType() override;
@@ -52,14 +54,20 @@ public:
 
     virtual dbErrorHandler SetErrorHandler(dbErrorHandler newHandler) override;
 
-    virtual bool GetTableFieldInfo(const wchar_t *sTable, dsTableFieldInfo &info) override;
+    virtual bool GetTableFieldInfo(const char *sTable, dsTableFieldInfo &info) override;
 
     virtual std::vector<std::string> GetTableList() override;
 
     virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) override;
+    virtual bool RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName) override;
     virtual bool DropTable(const wchar_t *sTableName) override;
+    virtual bool DropTrigger(const wchar_t *sTriggerName) override;
+    virtual bool DropIndex(const wchar_t *sIndexName) override;
 
-    virtual bool CreateTable(const wchar_t *sTableName, const dsTableFieldInfo &info) override;
+    virtual bool CreateTable(const char *sTableName, const dsTableFieldInfo &info) override;
+    virtual bool CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info) override;
+
+    virtual bool CreateDB(const wchar_t *sPath) override;
 
 // Static operations
 public:

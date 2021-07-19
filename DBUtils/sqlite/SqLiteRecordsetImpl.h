@@ -91,6 +91,8 @@ public:
     virtual bool DeleteAllByStringValueUTF8(const char *sField, const char *sValue) override;
     virtual bool DeleteAllByLongValue(const wchar_t *sField, int32_t nValue) override;
     virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, int32_t nValue) override;
+    virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue) override;
+    virtual bool SeekByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue) override;
     virtual bool DeleteByLongValue(const wchar_t *sField, int32_t nValue) override;
     virtual bool DeleteByStringValue(const wchar_t *sField, const wchar_t *sValue) override;
     virtual bool DeleteByStringValueUTF8(const char *sField, const char *sValue) override;

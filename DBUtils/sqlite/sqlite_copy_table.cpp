@@ -19,7 +19,8 @@
 
 namespace sqlite_util
 {   
-    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, const dsTableFieldInfo &union_info)
+    bool ImportTableData(dsDatabase *pSrcDB, CSqLiteDatabaseImpl *pDstDB, 
+                         const wchar_t *sTableNameSrc, const wchar_t *sTableNameDst, const dsTableFieldInfo &union_info)
     {
         if ( union_info.size() == 0 ) {
             const std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
@@ -111,7 +112,7 @@ namespace sqlite_util
         sSQL += "\"";
         sSQL += " as SrcDB;";
 
-        if ( !pDstDB->ExecuteUTF8(sSQL.c_str()) ) {
+        if ( !pDstDB->Execute(sSQL.c_str()) ) {
             return false;
         }
         return true;
@@ -121,7 +122,7 @@ namespace sqlite_util
     {  
         ASSERT(pDstDB->GetType() == dsDBType::SqLite);
         const char *sSQL = "DETACH DATABASE SrcDB;";
-        if ( !pDstDB->ExecuteUTF8(sSQL) ) {
+        if ( !pDstDB->Execute(sSQL) ) {
             return false;
         }
         return true;
@@ -138,7 +139,7 @@ namespace sqlite_util
                     sSQL += sTableNameSrc;
                     sSQL += ";";
 
-        if ( !pDstDB->ExecuteUTF8(sSQL.c_str()) ) {
+        if ( !pDstDB->Execute(sSQL.c_str()) ) {
             return false;
         }
 

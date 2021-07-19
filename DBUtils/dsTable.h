@@ -107,6 +107,8 @@ public:
     bool DeleteAllByIndex(const char *sField, int32_t nValue) noexcept;           // returns false in case of error or no record found
 
     bool DeleteAllByJsonField(const char *sField, const char *sJsonField, int32_t nValue) noexcept;
+    bool DeleteAllByJsonField(const char *sField, const char *sJsonField, const wchar_t *sValue) noexcept;
+    bool SeekByJsonField(const char *sField, const char *sJsonField, const wchar_t *sValue) noexcept;
 
     bool DeleteByIndex(const wchar_t *sField, const wchar_t *sValue) noexcept;
     bool DeleteByIndex(const char *sField, const char *sValue) noexcept;

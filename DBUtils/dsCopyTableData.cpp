@@ -167,10 +167,12 @@ bool dsCopyTableData::CopyTableData(const wchar_t *sTableNameSrc, const wchar_t 
     dsTableFieldInfo union_info;
 
     dsTableFieldInfo dst_info;
-    VERIFY(m_pDstDB->m_pDatabase->GetTableFieldInfo(sTableNameDst, dst_info));
+    const std::string sTableNameDstUTF8 = ds_str_conv::ConvertToUTF8(sTableNameDst);
+    VERIFY(m_pDstDB->m_pDatabase->GetTableFieldInfo(sTableNameDstUTF8.c_str(), dst_info));
   
     dsTableFieldInfo src_info;
-    m_pSrcDB->m_pDatabase->GetTableFieldInfo(sTableNameSrc, src_info);
+    const std::string sTableNameSrcUTF8 = ds_str_conv::ConvertToUTF8(sTableNameSrc);
+    m_pSrcDB->m_pDatabase->GetTableFieldInfo(sTableNameSrcUTF8.c_str(), src_info);
     ds_table_field_info_util::fields_union(union_info, src_info, dst_info);
 
     if ( nDstType == dsDBType::SqLite )
@@ -218,7 +220,8 @@ bool dsCopyTableData::CopyTableDataEx(const wchar_t *sTableName) noexcept
     dsTableFieldInfo union_info;
 
     // default implementation
-    if ( !ds_table_field_info_util::fields_union(union_info, m_pSrcDB->m_pDatabase, sTableName, m_pDstDB->m_pDatabase, sTableName) ) {
+    const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
+    if ( !ds_table_field_info_util::fields_union(union_info, m_pSrcDB->m_pDatabase, sTableNameUTF8.c_str(), m_pDstDB->m_pDatabase, sTableNameUTF8.c_str()) ) {
         return false;
     }
 

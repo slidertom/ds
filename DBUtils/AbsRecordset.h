@@ -168,6 +168,14 @@ public:
     virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, int32_t nValue) {
         return false;
     }
+
+    virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue) {
+        return false;
+    }
+
+    virtual bool SeekByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue) {
+        return false;
+    }
    
     virtual bool DeleteByLongValue(const wchar_t *sField, int32_t nValue)
     {
