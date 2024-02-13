@@ -19,7 +19,9 @@ If you're a [**NoSQL**](https://en.wikipedia.org/wiki/NoSQL) type of person and 
 DS is an **exception free** code.
 
 Visual Studio Workspace Generation
+
 cd DBUtils
+
 cmake.exe" CMakeLists.txt
 
 Samples: 
