@@ -47,7 +47,7 @@ namespace sqlite_util
                 auto end_it = union_info.end();
                 for (auto it = union_info.begin(); it != end_it; ++it) 
                 {
-                    const TCHAR *sFieldName = it->first.c_str();
+                    const char *sFieldName = it->first.c_str();
 
                     if ( src_table.IsFieldValueNull(sFieldName) )
                     {
@@ -59,9 +59,8 @@ namespace sqlite_util
                     {
                     case dsFieldType::Text:
                         {
-                            const std::string sFieldNameUTF8 = ds_str_conv::ConvertToUTF8(sFieldName);
-                            const std::string sValue = src_table.GetFieldStringUTF8(sFieldNameUTF8.c_str());
-                            dst_table.SetFieldStringUTF8(sFieldNameUTF8.c_str(), sValue.c_str());
+                            const std::string sValue = src_table.GetFieldStringUTF8(sFieldName);
+                            dst_table.SetFieldStringUTF8(sFieldName, sValue.c_str());
                         }
                         break;
                     case dsFieldType::Integer:

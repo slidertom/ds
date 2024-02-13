@@ -102,6 +102,12 @@ bool CAdoDotNetDatabaseImpl::DoesTableExistUTF8(const char *sTable)
     return m_pDatabase->DoesTableExists(sTableUTF16.c_str());
 }
 
+bool CAdoDotNetDatabaseImpl::DoesViewExistUTF8(const char *sView)
+{
+    ASSERT(FALSE);
+    return false;
+}
+
 bool CAdoDotNetDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
     return m_pDatabase->DoesTableExists(sTable);
@@ -161,6 +167,27 @@ bool CAdoDotNetDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t
     return true;
 }
 
+bool CAdoDotNetDatabaseImpl::DropColumn(const char *sTableName, const char *sColumnName)
+{
+    std::string sSQL = "ALTER TABLE ";
+    sSQL += sTableName;
+    sSQL += " DROP COLUMN ";
+    sSQL += sColumnName;
+    sSQL += ";";
+
+    if (!Execute(sSQL.c_str())) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CAdoDotNetDatabaseImpl::DropForeignKeys(const wchar_t* sTableName)
+{
+    ASSERT(false);
+    return false;
+}
+
 bool CAdoDotNetDatabaseImpl::RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName)
 {
     ASSERT(false);
@@ -170,6 +197,12 @@ bool CAdoDotNetDatabaseImpl::RemoveColumnCollateNoCase(const wchar_t *sTableName
 bool CAdoDotNetDatabaseImpl::DropTable(const wchar_t *sTableName)
 {
     ASSERT(false);
+    return false;
+}
+
+bool CAdoDotNetDatabaseImpl::DropTable(const char *sTableName)
+{
+    ASSERT(FALSE);
     return false;
 }
 
@@ -210,6 +243,12 @@ bool CAdoDotNetDatabaseImpl::CreateTables(const std::vector<std::pair<std::strin
 }
 
 bool CAdoDotNetDatabaseImpl::CreateDB(const wchar_t *sPath)
+{
+    ASSERT(false);
+    return false;
+}
+
+bool CAdoDotNetDatabaseImpl::DoesIndexExistUTF8(const char *sIndex)
 {
     ASSERT(false);
     return false;

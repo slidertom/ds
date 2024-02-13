@@ -22,7 +22,7 @@
     #include "dsOpenParams.h"
 #endif
 
-#include "vector"
+#include <vector>
 #include <functional>
 
 class CAbsDatabase;
@@ -36,7 +36,7 @@ class dsTableFieldInfo;
 
 class DB_UTILS_API dsDatabase : public CRoleCore
 {
-// Constuction/Destruction
+// Construction/Destruction
 public:
     dsDatabase();
     virtual ~dsDatabase();
@@ -89,11 +89,11 @@ public:
     static bool IsDaoDB(const wchar_t *sPath) noexcept;
     static bool IsMSSQLServerAdoDotNet(const wchar_t *sPath) noexcept;
     
-    // Target database chema must match source.
+    // Target database schema must match source.
     // Target database tables will be cleared (flushed)
     static bool CopyData(dsDatabase &dbSource, dsDatabase &dbTarget) noexcept;
     
-    // Target database chema must match source.
+    // Target database schema must match source.
     // Target database tables will be cleared (flushed)
     bool CloneTo(const wchar_t *sPath, dsDBType eType) noexcept;
 
@@ -103,9 +103,12 @@ public:
     void SetPostCommitHandler(const std::function<void()> &func) noexcept;
 
     bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept;
+    bool DropColumn(const char *sTableName, const char *sColumnName) noexcept;
     bool RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept;
     bool DropTable(const wchar_t *sTableName) noexcept;
+    bool DropTable(const char *sTableName) noexcept;
     bool DropTrigger(const wchar_t *sTriggerName) noexcept;
+    bool DropForeignKeys(const wchar_t* sTableName) noexcept;
 
     std::vector<std::string> GetTableList() noexcept;
     bool GetTableFieldInfo(const char *sTable, dsTableFieldInfo &info) noexcept;
@@ -130,6 +133,8 @@ public:
 public:
     bool DoesTableExist(const wchar_t *sTable) const noexcept; 
     bool DoesTableExist(const char *sTable) const noexcept; 
+    bool DoesViewExist(const char *sView) const noexcept;
+    bool DoesIndexExist(const char *sIndex) const noexcept;
 
     void DeleteRelation(const wchar_t *sRelation) noexcept; 
     bool CreateRelation(const wchar_t *sName, const wchar_t *sTable, const wchar_t *sForeignTable, int32_t lAttr,

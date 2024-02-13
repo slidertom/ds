@@ -2,6 +2,8 @@
 #define __SQ_LITE_ERROR_HANDLER_H__
 #pragma once
 
+#include <string>
+
 struct sqlite3;
 
 class CSqLiteErrorHandler final
@@ -20,9 +22,12 @@ public:
     typedef void (*dbErrorHandler)(const wchar_t *msg); 
     dbErrorHandler SetErrorHandler(dbErrorHandler newHandler);
     
+    void SetDatabaseLocation(const char *sDbLocation);
+
 // Operations
 private:
     dbErrorHandler m_pErrorHandler {nullptr};
+    std::string m_sDBLocation;
 };
 
 #endif 

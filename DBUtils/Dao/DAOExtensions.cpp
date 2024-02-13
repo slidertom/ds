@@ -14,9 +14,10 @@ namespace dao_extensions
 {
     namespace internal
     {
-        static void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *pszTableNameSrc, const wchar_t *pszTableNameDst, const wchar_t *pszColumnName, CDaoErrorHandler *pErrorHandler)
+        static void CopyTableData(CDaoDatabase *pDbSrc, CDaoDatabase *pDbDst, const wchar_t *pszTableNameSrc, 
+                                  const wchar_t *pszTableNameDst, const wchar_t *pszColumnName, CDaoErrorHandler *pErrorHandler)
         {
-            //std::wstring strFormat = ::FormatStr(_T("INSERT INTO %s IN '%s' SELECT %s FROM %s;"), pszTableNameDst, pDbDst->GetName(), pszColumnName, pszTableNameSrc);
+            // "INSERT INTO %s IN '%s' SELECT %s FROM %s;"), pszTableNameDst, pDbDst->GetName(), pszColumnName, pszTableNameSrc;
             std::wstring strFormat = L"INSERT INTO ";
             strFormat += pszTableNameDst;
             strFormat += L" IN '";

@@ -18,8 +18,8 @@ inline bool DaoCheckAddDBField(TDatabase *pDB,
 
     ASSERT(pDB != NULL);
     ASSERT(pDB->IsOpen());
-    ASSERT(0 != _tcslen(sTableName));
-    ASSERT(0 != _tcslen(sFieldName));
+    ASSERT(0 != ::wcslen(sTableName));
+    ASSERT(0 != ::wcslen(sFieldName));
 
     try
     {

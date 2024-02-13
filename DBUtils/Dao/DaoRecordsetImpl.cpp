@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "DaoRecordsetImpl.h"
 
+#include "afxdao.h"
+
 #include "DaoDatabaseUtil.h"
 #include "DaoDatabaseImpl.h"
 #include "DaoBinaryFieldUtil.h"
 #include "DaoErrorHandler.h"
 
 #include "../dsStrConv.h"
-
-#include "afxdao.h"
 
 #ifdef _DEBUG
     #define new DEBUG_NEW
@@ -392,9 +392,15 @@ void CDaoRecordsetImpl::SetFieldValueNull(const wchar_t *sFieldName)
     }
 }
 
+bool CDaoRecordsetImpl::DoesFieldExist(const char *sFieldName)
+{
+    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+    return this->DoesFieldExist(sFieldNameUTF16.c_str());
+}
+
 bool CDaoRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName) 
 {
-    ASSERT(_tcslen(sFieldName) != 0);
+    ASSERT(::wcslen(sFieldName) != 0);
 
     try {
         CDaoFieldInfo fieldinfo;
@@ -431,7 +437,8 @@ bool CDaoRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValu
     SetIndex(sIndex);
 
     try {
-        return m_pSet->Seek(L"=", &MakeVariant(sValue)) != FALSE;
+        COleVariant var = MakeVariant(sValue);
+        return m_pSet->Seek(L"=", &var) != FALSE;
     }
     catch (CDaoException *e) {
         std::wstring sMsg = L"CDaoRecordsetImpl::SeekByString(index='";
@@ -459,7 +466,8 @@ bool CDaoRecordsetImpl::SeekByLong(const wchar_t *sIndex, int32_t nValue)
     SetIndex(sIndex);
 
     try {
-        return m_pSet->Seek(L"=", &COleVariant((long)nValue)) != FALSE;
+        COleVariant var((long)nValue);
+        return m_pSet->Seek(L"=", &var) != FALSE;
     }
     catch (CDaoException *e) {
         std::wstring sMsg = L"CDaoRecordsetImpl::SeekByLong(index='";
@@ -637,6 +645,11 @@ static inline time_t OleDateTimeToTime(const TOleDateTime &oleDt)
     return mktime(&tmDate);
 }
 
+time_t CDaoRecordsetImpl::GetFieldDateTime(const char *sFieldName)
+{
+    return this->GetFieldDateTime(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+}
+
 time_t CDaoRecordsetImpl::GetFieldDateTime(const wchar_t *sFieldName)
 {
     try {
@@ -657,6 +670,11 @@ time_t CDaoRecordsetImpl::GetFieldDateTime(const wchar_t *sFieldName)
     }
 
     return time_t(-1);
+}
+
+void CDaoRecordsetImpl::SetFieldDateTime(const char *sFieldName, const time_t &time)
+{
+    this->SetFieldDateTime(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), time);
 }
 
 void CDaoRecordsetImpl::SetFieldDateTime(const wchar_t *sFieldName, const time_t &time)
@@ -685,9 +703,14 @@ void CDaoRecordsetImpl::SetFieldDateTime(const wchar_t *sFieldName, const time_t
     }
 }
 
+bool CDaoRecordsetImpl::IsFieldValueNull(const char  *sFieldName)
+{
+    return this->IsFieldValueNull(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+}
+
 bool CDaoRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)
 {
-    ASSERT(_tcslen(sFieldName) != 0);
+    ASSERT(::wcslen(sFieldName) != 0);
     try {
         COleVariant var;
         m_pSet->GetFieldValue(sFieldName, var);

@@ -177,7 +177,7 @@ bool CDaoDatabaseImpl::IsOpen() const
 
 std::wstring CDaoDatabaseImpl::GetName()
 {
-    const std::wstring sName = m_pDatabase->GetName();
+    const std::wstring sName = (LPCTSTR)m_pDatabase->GetName();
     return sName;
 }
 
@@ -185,6 +185,12 @@ bool CDaoDatabaseImpl::DoesTableExistUTF8(const char *sTable)
 {
     std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
     return DoesTableExist(sTableUTF16.c_str());
+}
+
+bool CDaoDatabaseImpl::DoesViewExistUTF8(const char *sView)
+{
+    ASSERT(FALSE);
+    return false;
 }
 
 bool CDaoDatabaseImpl::DoesTableExist(const wchar_t *sTable)
@@ -236,7 +242,7 @@ void CDaoDatabaseImpl::CommitDatabase()
     dsOpenParams open_params;
     open_params.m_bReadOnly = m_bReadOnly;
     
-    const std::wstring sName = m_pDatabase->GetName();
+    const std::wstring sName = (LPCTSTR)m_pDatabase->GetName();
     
     m_pDatabase->Close(); // we do not close locker
     delete m_pDatabase;
@@ -368,8 +374,8 @@ bool CDaoDatabaseImpl::GetTableFieldInfo(const char *sTable, dsTableFieldInfo &i
             ASSERT(FALSE);
         }
          
-        std::wstring sName = fieldInfo.m_strName;
-        info[sName] = field_type;
+        const std::wstring sName = (LPCTSTR)fieldInfo.m_strName;
+        info[ds_str_conv::ConvertToUTF8(sName.c_str())] = field_type;
     }
 
     tableInfo.Close();
@@ -409,10 +415,37 @@ bool CDaoDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sCol
     return true;
 }
 
+bool CDaoDatabaseImpl::DropColumn(const char *sTableName, const char *sColumnName)
+{
+    std::string sSQL = "ALTER TABLE ";
+    sSQL += sTableName;
+    sSQL += " DROP COLUMN ";
+    sSQL += sColumnName;
+    sSQL += ";";
+
+    if (!Execute(sSQL.c_str())) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CDaoDatabaseImpl::DropForeignKeys(const wchar_t* sTableName)
+{
+    ASSERT(false);
+    return false;
+}
+
 bool CDaoDatabaseImpl::RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName)
 {
     ASSERT(false);
     return false;
+}
+
+bool CDaoDatabaseImpl::DropTable(const char *sTableName)
+{
+    const std::wstring sTableUTF16 = ds_str_conv::ConvertFromUTF8(sTable);
+    return this->DropTable(sTableUTF16.c_str());
 }
 
 bool CDaoDatabaseImpl::DropTable(const wchar_t *sTableName)
@@ -461,7 +494,7 @@ bool CDaoDatabaseImpl::Backup(const char *sBackupFile)
 
 bool CDaoDatabaseImpl::CreateTable(const char *sTableName, const dsTableFieldInfo &info)
 {
-    std::wstring sField;
+    std::string sField;
     dsFieldType nFieldType;
     try {
         CDaoTableDef TableDef(m_pDatabase);
@@ -508,7 +541,7 @@ bool CDaoDatabaseImpl::CreateTable(const char *sTableName, const dsTableFieldInf
             // For such reason - date type field decision is executed on such conditions:
             // if (FieldTypeIsInteger && FieldNameContains("date")) => field type must be DateTime
             if (nType == dbLong) {
-                std::wstring sFieldUpper = sField;
+                std::wstring sFieldUpper = ds_str_conv::ConvertFromUTF8(sField.c_str());
                 ds_str_conv::MakeUpper(sFieldUpper);
                 const size_t nPos = sFieldUpper.find(L"DATE");
                 if (nPos != std::wstring::npos) {
@@ -516,7 +549,7 @@ bool CDaoDatabaseImpl::CreateTable(const char *sTableName, const dsTableFieldInf
                 }
             }
 
-            TableDef.CreateField(sField.c_str(), nType, 0);
+            TableDef.CreateField(ds_str_conv::ConvertFromUTF8(sField.c_str()).c_str(), nType, 0);
         }
 
         TableDef.Append();
@@ -557,4 +590,10 @@ bool CDaoDatabaseImpl::CreateDB(const wchar_t *sPath)
     }
 
     return true;
+}
+
+bool CDaoDatabaseImpl::DoesIndexExistUTF8(const char *sIndex)
+{
+    ASSERT(false);
+    return false;
 }

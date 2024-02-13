@@ -19,9 +19,16 @@
 *.ilk
 *.cache
 *.db
+*.vcxproj
+*.filters
+*.sln
 DBUtilsImplD.lib
 DBUtilsImpl.lib
 DBUtilsImplD.dll
 DBUtilsImpl.dll
 /DBUtils/*.opendb
-/DBUtils/.vs/DBUtilsImpl/v15/*.opendb
+/DBUtils/.vs
+/DBUtils/CMakeFiles
+/DBUtils/CMakeCache.txt
+/DBUtils/DBUtilsImpl.dir 
+/DBUtils/cmake_install.cmake

@@ -151,6 +151,11 @@ void CAdoDotNetRecordsetImpl::SetFieldValueNull(const wchar_t *lpszName)
     ASSERT(FALSE);
 }
 
+bool CAdoDotNetRecordsetImpl::DoesFieldExist(const char *sFieldName)
+{
+    return m_pSet->DoesFieldExist(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+}
+
 bool CAdoDotNetRecordsetImpl::DoesFieldExist(const wchar_t *sFieldName) 
 {
     return m_pSet->DoesFieldExist(sFieldName);
@@ -165,7 +170,7 @@ bool CAdoDotNetRecordsetImpl::SeekByString(const char *sIndex, const char *sValu
 
 bool CAdoDotNetRecordsetImpl::SeekByString(const wchar_t *sIndex, const wchar_t *sValue)
 {
-    if ( _tcslen(sIndex) <= 0 ) {
+    if ( ::wcslen(sIndex) <= 0 ) {
         ASSERT(FALSE);
         return false;
     }
@@ -209,7 +214,7 @@ bool CAdoDotNetRecordsetImpl::SeekByLong(const char *sIndex, int32_t nValue)
 
 bool CAdoDotNetRecordsetImpl::SeekByLong(const wchar_t *sIndex, int32_t nValue)
 {
-    if ( _tcslen(sIndex) <= 0 ) {
+    if ( ::wcslen(sIndex) <= 0 ) {
         ASSERT(FALSE);
         return false;
     }
@@ -284,14 +289,29 @@ void CAdoDotNetRecordsetImpl::SetFieldDouble(const wchar_t *sFieldName, double d
     m_pSet->SetFieldDouble(sFieldName, dValue);
 }
 
+time_t CAdoDotNetRecordsetImpl::GetFieldDateTime(const char *sFieldName)
+{
+    return m_pSet->GetFieldDateTime(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
+}
+
 time_t CAdoDotNetRecordsetImpl::GetFieldDateTime(const wchar_t *sFieldName)
 {
     return m_pSet->GetFieldDateTime(sFieldName);
 }
 
+void CAdoDotNetRecordsetImpl::SetFieldDateTime(const char *sFieldName, const time_t &time)
+{
+    m_pSet->SetFieldDateTime(ds_str_conv::ConvertFromUTF8(sFieldName).c_str(), time);
+}
+
 void CAdoDotNetRecordsetImpl::SetFieldDateTime(const wchar_t *sFieldName, const time_t &time)
 {
     m_pSet->SetFieldDateTime(sFieldName, time);
+}
+
+bool CAdoDotNetRecordsetImpl::IsFieldValueNull(const char *sFieldName)
+{
+    return m_pSet->IsFieldValueNull(ds_str_conv::ConvertFromUTF8(sFieldName).c_str());
 }
 
 bool CAdoDotNetRecordsetImpl::IsFieldValueNull(const wchar_t *sFieldName)

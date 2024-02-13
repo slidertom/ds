@@ -2,7 +2,8 @@
 #define __SQ_LITE_UTIL_H__
 #pragma once
 
-#include "unordered_map"
+#include <unordered_map>
+#include <string>
 
 struct sqlite3_stmt;
 class CSqLiteErrorHandler;

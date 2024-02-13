@@ -6,7 +6,7 @@
     #include "../AbsRecordset.h"
 #endif
 
-#include "unordered_map"
+#include <unordered_map>
 
 // Notes:
 // Columns and tables names are case insensitive
@@ -35,6 +35,8 @@ public:
     virtual bool SeekByString(const char *sIndex, const char *sValue)       override;
     virtual bool SeekByLong(const wchar_t *sIndex, int32_t nValue)          override;
     virtual bool SeekByLong(const char    *sIndex, int32_t nValue)          override;
+    virtual bool SeekByInt64(const wchar_t *sIndex, int64_t nValue)         override;
+    virtual bool SeekByInt64(const char    *sIndex, int64_t nValue)         override;
 
     virtual bool MoveNext() override;
     virtual bool MoveFirst() override;
@@ -57,7 +59,8 @@ public:
     virtual void GetFieldBinary(const char *sFieldName, unsigned char **pData, size_t &nSize) override;
     virtual void FreeBinary(unsigned char *pData);
 
-    virtual void SetFieldValueNull(const wchar_t *lpszName) override;
+    virtual void SetFieldValueNull(const wchar_t *sFieldName) override;
+    virtual void SetFieldValueNull(const char *sFieldName) override;
 
     virtual std::wstring GetFieldString(const wchar_t *sFieldName) override;
     virtual void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) override;
@@ -69,6 +72,7 @@ public:
     virtual int32_t GetFieldInt32(const char *sFieldName) override;
     virtual void    SetFieldInt32(const wchar_t *sFieldName, int32_t lValue) override;
     virtual void    SetFieldInt32(const char *sFieldName, int32_t lValue) override;
+
     virtual int64_t GetFieldInt64(const wchar_t *sFieldName) override;
     virtual void    SetFieldInt64(const wchar_t *sFieldName, int64_t lValue) override;
     virtual int64_t GetFieldInt64(const char *sFieldName) override;
@@ -79,36 +83,47 @@ public:
     virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
     virtual void SetFieldDouble(const char *sFieldName, double dValue) override;
 
+    virtual time_t GetFieldDateTime(const char *sFieldName) override;
     virtual time_t GetFieldDateTime(const wchar_t *sFieldName) override;
     virtual void SetFieldDateTime(const wchar_t *sFieldName, const time_t &time) override;
+    virtual void SetFieldDateTime(const char *sFieldName, const time_t &time) override;
 
     virtual bool IsFieldValueNull(const wchar_t *sFieldName) override;
+    virtual bool IsFieldValueNull(const char *sFieldName) override;
 
+    virtual bool DoesFieldExist(const char *sFieldName) override;
     virtual bool DoesFieldExist(const wchar_t *sFieldName) override;
 
     virtual void Flush() override;
     virtual bool DeleteAllByStringValue(const wchar_t *sField, const wchar_t *sValue) override;
     virtual bool DeleteAllByStringValueUTF8(const char *sField, const char *sValue) override;
     virtual bool DeleteAllByLongValue(const wchar_t *sField, int32_t nValue) override;
+    virtual bool DeleteAllByInt64ValueUTF8(const char *sField, int64_t nValue) override;
+    virtual bool DeleteAllByInt64Value(const wchar_t *sField, int64_t nValue) override;
     virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, int32_t nValue) override;
     virtual bool DeleteAllByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue) override;
     virtual bool SeekByJsonField(const char *sField, const char *sFieldInJson, const wchar_t *sValue) override;
     virtual bool DeleteByLongValue(const wchar_t *sField, int32_t nValue) override;
+    virtual bool DeleteByInt64Value(const wchar_t *sField, int64_t nValue) override;
+    virtual bool DeleteByInt64Value(const char *sField, int64_t nValue);
     virtual bool DeleteByStringValue(const wchar_t *sField, const wchar_t *sValue) override;
     virtual bool DeleteByStringValueUTF8(const char *sField, const char *sValue) override;
-
+    
     void PrepareInsert();
     void CommitInsert();
     bool MoveFirstImpl(); // should be used for the inside implementations
 
 private:
-    int FindColumnIndex(const wchar_t *sFieldName);
+    int FindColumnIndex(const char *sFieldName);
     bool OpenImpl(const char *sql);
     void CloseStatement();
 
     void DoInsertDefault();
     bool DoUpdate();
     void OnErrorCode(int rc, const char *sFunctionName);
+    bool SeekByInt(const char *sIndex, const char *sValue);
+    bool DeleteAllByIntValue(const char *sField, const char *sValue);
+    bool DeleteByIntValue(const char *sField, const char *sValue);
 
 // Attributes
 private:
@@ -130,7 +145,9 @@ private:
     // When the table is empty, the largest actual rowid is instead assumed to be zero. This is done so that the first inserted rowid becomes 1.
     // Therefore, the only way to generate a rowid less than one is to have another row already in the table.
     int64_t m_nEditRowId {-1};
-    std::unordered_map<std::wstring, int, std::hash<std::basic_string<wchar_t>>> m_name_to_index;
+    // we do map column name as UTF8 lower case string
+    // NOTE: column name must be ANSI -> no special characters
+    std::unordered_map<std::string, int> m_name_to_index;
     //std::unordered_map<std::string, sqlite3_stmt *> m_select_states;
 
     sqlite_util::CFieldDataMap *m_pSaveData            {nullptr};

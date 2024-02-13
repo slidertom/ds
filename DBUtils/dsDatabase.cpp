@@ -80,6 +80,12 @@ bool dsDatabase::DoesTableExist(const wchar_t *sTable) const noexcept
     return m_pDatabase->DoesTableExist(sTable);
 }
 
+bool dsDatabase::DoesViewExist(const char *sView) const noexcept
+{
+    ASSERT(m_pDatabase);
+    return m_pDatabase->DoesViewExistUTF8(sView);
+}
+
 bool dsDatabase::IsSqLiteDB(const wchar_t *sPath) noexcept
 {
     return CSqLiteDatabaseImpl::IsSqLiteDB(sPath);
@@ -273,7 +279,17 @@ std::vector<std::string> dsDatabase::GetTableList() noexcept
     return m_pDatabase->GetTableList();
 }
 
+bool dsDatabase::DropForeignKeys(const wchar_t* sTableName) noexcept
+{
+    return m_pDatabase->DropForeignKeys(sTableName);
+}
+
 bool dsDatabase::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) noexcept
+{
+    return m_pDatabase->DropColumn(sTableName, sColumnName);
+}
+
+bool dsDatabase::DropColumn(const char *sTableName, const char *sColumnName) noexcept
 {
     return m_pDatabase->DropColumn(sTableName, sColumnName);
 }
@@ -284,6 +300,11 @@ bool dsDatabase::RemoveColumnCollateNoCase(const wchar_t *sTableName, const wcha
 }
 
 bool dsDatabase::DropTable(const wchar_t *sTableName) noexcept
+{
+    return m_pDatabase->DropTable(sTableName);
+}
+
+bool dsDatabase::DropTable(const char *sTableName) noexcept
 {
     return m_pDatabase->DropTable(sTableName);
 }
@@ -360,6 +381,10 @@ bool dsDatabase::CopyData(dsDatabase &dbSource, dsDatabase &dbTarget) noexcept
     const std::vector<std::string> arrTargetTables = dbTarget.GetTableList();
     copy_table_data.BeginCopy();
     for (const std::string &sTable : arrTargetTables) {
+        if (dbTarget.GetType() == dsDBType::SqLite && ::strcmp(sTable.c_str(), "sqlite_sequence") == 0) {
+            continue;
+        }
+
         dsTable table(&dbTarget, sTable.c_str());
         table.Flush();
 
@@ -392,6 +417,10 @@ bool dsDatabase::CloneTo(const wchar_t *sPath, dsDBType eType) noexcept
         std::vector<std::pair<std::string, dsTableFieldInfo>> tables_info;
         const std::vector<std::string> arrSourceTables = GetTableList();
         for (const std::string &sTable : arrSourceTables) {
+            if ( GetType() == dsDBType::SqLite && ::strcmp(sTable.c_str(), "sqlite_sequence") == 0 ) {
+                continue;
+            }
+
             dsTableFieldInfo info;
             if (!GetTableFieldInfo(sTable.c_str(), info)) { 
                 return false;
@@ -410,4 +439,10 @@ bool dsDatabase::CloneTo(const wchar_t *sPath, dsDBType eType) noexcept
     }
 
     return true;
+}
+
+bool dsDatabase::DoesIndexExist(const char *sIndex) const noexcept
+{
+    ASSERT(m_pDatabase);
+    return m_pDatabase->DoesIndexExistUTF8(sIndex);
 }

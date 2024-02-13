@@ -6,7 +6,8 @@
     #include "../dsTypes.h"
 #endif
 
-#include "unordered_map"
+#include <unordered_map>
+#include <string>
 
 class CSqLiteDatabaseImpl;
 class CSqLiteErrorHandler;

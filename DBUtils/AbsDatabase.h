@@ -41,6 +41,8 @@ public:
     // do leave possibility for the realization to use the best encoding system
     virtual bool DoesTableExist(const wchar_t *sTable) = 0;
     virtual bool DoesTableExistUTF8(const char *sTable) = 0;
+    virtual bool DoesViewExistUTF8(const char *sView) = 0;
+    virtual bool DoesIndexExistUTF8(const char *sIndex) = 0;
 
     virtual CAbsRecordset *CreateRecordset() = 0;
 
@@ -60,10 +62,16 @@ public:
     virtual std::vector<std::string> GetTableList() = 0;
 
     virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) = 0;
+    virtual bool DropColumn(const char *sTableName, const char *sColumnName)       = 0;
+
     virtual bool RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName) = 0;
+
     virtual bool DropTable(const wchar_t *sTableName) = 0;
+    virtual bool DropTable(const char *sTableName)    = 0;
+
     virtual bool DropTrigger(const wchar_t *sTriggerName) = 0;
     virtual bool DropIndex(const wchar_t *sIndexName) = 0;
+    virtual bool DropForeignKeys(const wchar_t* sTableName) = 0;
 
     virtual bool CreateTable(const char *sTableName, const dsTableFieldInfo &info) = 0;
     virtual bool CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info) = 0;

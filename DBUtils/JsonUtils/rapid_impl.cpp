@@ -16,6 +16,8 @@
     namespace rapidjson { typedef ::std::size_t SizeType; }
 #endif
 
+//#define RAPIDJSON_SSE42 // no difference? (the last checks) 5% faster with out this?
+#define RAPIDJSON_HAS_STDSTRING 1
 #ifndef RAPIDJSON_DOCUMENT_H_
     #include "Rapidjson/document.h"
     #include "Rapidjson/stringbuffer.h"
@@ -25,6 +27,17 @@
 #ifdef _DEBUG
     #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////////////////////
+// IF RAPIDJSON UPDATED PLEASE CHECK PERFORMANCE based on the current wrapper logic
+// e.g.: 973dc9c06dcd3d035ebd039cfb9ea457721ec213 works ~10% slower (as it would not be defined RAPID_SWAP)
+// e.g.: it's used articles load for testing
+// new rapidjson implementation -> use MAP also has no effect
+//////////////////////////////////////////////////////////////////////////////
+
+// can not be used RAPID_SWAP or RAPID_MOVE if edit mode -> rapidjson library crashes 
+//#define RAPID_SWAP // if it's defined during parse/read operation move will be used into object instead of copy operation ~10%
+//#define RAPID_MOVE // there is no any difference RAPID_SWAP or RAPID_MOVE
 
 namespace ds_json
 {
@@ -40,15 +53,30 @@ namespace ds_json
                 value_str = buffer.GetString();
             }
 
-            static inline void str2obj(const char *sJson, rapidjson::Document *doc) {
-                if ( !::strlen(sJson) ) {
+            static inline void str2obj(std::string &&sJson, rapidjson::Document *doc)
+            {
+                if ( sJson.empty() ) {
                     return;
                 }
+
+                doc->Parse<rapidjson::kParseStopWhenDoneFlag>(sJson.c_str());
+                if ( !doc->IsObject() && !doc->IsArray() ) {
+                    return;
+                }
+            }
+
+            static inline bool str2obj(const char *sJson, rapidjson::Document *doc) 
+            {
+                if ( !::strlen(sJson) ) {
+                    return false;
+                }
+
                 doc->Parse<rapidjson::kParseStopWhenDoneFlag>(sJson);
                 if ( !doc->IsObject() && !doc->IsArray() ) {
-                    TRACE(L"RapidJson: PARSE ERROR\n");
-                    return;
+                    return false;
                 }
+
+                return true;
             }
 
             static inline void obj2str(const rapidjson::Document *doc, std::string &sJson) {
@@ -63,6 +91,21 @@ namespace ds_json
         {
             rapidjson::Document *doc = (rapidjson::Document *)pImpl;
             internal::str2obj(sJson, doc);
+        }
+        void str2obj(std::string &&sJson, void *pImpl)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)pImpl;
+            internal::str2obj(std::move(sJson), doc);
+        }
+        void str2array(const char *sJson, void *pImpl) 
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)pImpl;
+            internal::str2obj(sJson, doc);
+        }
+        void str2array(std::string &&sJson, void *pImpl)
+        {
+            rapidjson::Document *doc = (rapidjson::Document *)pImpl;
+            internal::str2obj(std::move(sJson), doc);
         }
 
         void obj2str(const void *pImpl, std::string &sJson)
@@ -95,20 +138,20 @@ namespace ds_json
             rapidjson::Document::MemberIterator found = doc->FindMember(sField);
             if ( found == doc->MemberEnd() ) {
                 rapidjson::Value value;
-                value.SetString(value_str, strlen(value_str), allocator);
-                doc->AddMember(rapidjson::StringRef(sField), value, allocator);
+                value.SetString(value_str, ::strlen(value_str), allocator);
+                doc->AddMember(rapidjson::StringRef(sField), value.Move(), allocator);
+                ASSERT(value.IsNull());
             }
             else {
                 const auto nLen = ::strlen(value_str);
                 //if (nLen == 0) {
                 // currently we can not do this: as it can break 3'rd party applications:
-                // MatrixProject and WebKozijn (php, js layers) -> both applications don't check does value exists. 
+                // applications don't check does value exist. 
                 //    doc->EraseMember(found);
-                //}
-                //else {
-                    rapidjson::Value &value = found->value;
-                    value.SetString(value_str, nLen, allocator);
-                //}
+                // else => 
+                // do check defined like JSON_TEXT_EX
+                rapidjson::Value &value = found->value;
+                value.SetString(value_str, nLen, allocator);
             }
         }
 
@@ -119,7 +162,8 @@ namespace ds_json
             if ( found == doc->MemberEnd() ) {
                 rapidjson::Value value;
                 value.SetInt64(nValue);
-                doc->AddMember(rapidjson::StringRef(sField), value, doc->GetAllocator());
+                doc->AddMember(rapidjson::StringRef(sField), value.Move(), doc->GetAllocator());
+                ASSERT(value.IsNull());
             }
             else {
                 rapidjson::Value &value = found->value;
@@ -134,7 +178,8 @@ namespace ds_json
             if ( found == doc->MemberEnd() ) {
                 rapidjson::Value value;
                 value.SetInt64(nValue);
-                doc->AddMember(rapidjson::StringRef(sField), value, doc->GetAllocator());
+                doc->AddMember(rapidjson::StringRef(sField), value.Move(), doc->GetAllocator());
+                ASSERT(value.IsNull());
             }
             else {
                 rapidjson::Value &value = found->value;
@@ -149,7 +194,8 @@ namespace ds_json
             if ( found == doc->MemberEnd() ) {
                 rapidjson::Value value;
                 value.SetInt(nValue);
-                doc->AddMember(rapidjson::StringRef(sField), value, doc->GetAllocator());
+                doc->AddMember(rapidjson::StringRef(sField), value.Move(), doc->GetAllocator());
+                ASSERT(value.IsNull());
             }
             else {
                 rapidjson::Value &value = found->value;
@@ -164,7 +210,8 @@ namespace ds_json
             if ( found == doc->MemberEnd() ) {
                 rapidjson::Value value;
                 value.SetDouble(dValue);
-                doc->AddMember(rapidjson::StringRef(sField), value, doc->GetAllocator());
+                doc->AddMember(rapidjson::StringRef(sField), value.Move(), doc->GetAllocator());
+                ASSERT(value.IsNull());
             }
             else {
                 rapidjson::Value &value = found->value;
@@ -186,11 +233,13 @@ namespace ds_json
             rapidjson::Document::MemberIterator found = doc->FindMember(sField);
             if ( found == doc->MemberEnd() ) {
                 rapidjson::Value value(doc_obj->GetType());
+                //value.Swap(*doc_obj);
                 value.CopyFrom(*doc_obj, allocator);
-                doc->AddMember(rapidjson::StringRef(sField), value, allocator);
+                doc->AddMember(rapidjson::StringRef(sField), value.Move(), allocator);
             }
             else {
                 rapidjson::Value &value = found->value;
+                //value.Swap(*doc_obj);
                 value.CopyFrom(*doc_obj, allocator);
                 ASSERT(value.GetType() == doc_obj->GetType());
             }
@@ -204,10 +253,16 @@ namespace ds_json
                 return false;
             }
 
-            const rapidjson::Value &value = found->value;
+            rapidjson::Value &value = found->value;
             if ( value.IsObject() ) {
                 rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
-                doc_obj->CopyFrom(value, doc_obj->GetAllocator());
+                #if defined(RAPID_SWAP)
+                    ((rapidjson::Value *)doc_obj)->Swap(value);
+                #elif defined(RAPID_MOVE)
+                   *((rapidjson::Value *)doc_obj) = value;
+                #else
+                    doc_obj->CopyFrom(value, doc_obj->GetAllocator());
+                #endif
                 return true;
             }
             else if ( value.IsString() ) {
@@ -236,10 +291,16 @@ namespace ds_json
                 return false;
             }
 
-            const rapidjson::Value &value = found->value;
+            rapidjson::Value &value = found->value;
             if ( value.IsArray() ) {
                 rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
-                doc_obj->CopyFrom(value, doc_obj->GetAllocator());
+                #if defined(RAPID_SWAP)
+                    ((rapidjson::Value *)doc_obj)->Swap(value);
+                #elif defined(RAPID_MOVE)
+                    *((rapidjson::Value *)doc_obj) = value;
+                #else
+                    doc_obj->CopyFrom(value, doc_obj->GetAllocator());
+                #endif
                 return true;
             }
             else if ( value.IsString() ) {
@@ -284,7 +345,7 @@ namespace ds_json
                 return true;
             }
             else if ( value.IsString() ) {
-                nValue = ds_str_conv::string_to_long(value.GetString()); // ~= atoi(value_str.c_str());
+                nValue = ds_str_conv::string_to_time(value.GetString()); // ~= atoi(value_str.c_str());
                 return true;
             }
             
@@ -339,7 +400,7 @@ namespace ds_json
                 return true;
             }
             else if ( value.IsString() ) {
-                nValue = ds_str_conv::string_to_long(value.GetString()); // ~= atoi(value_str.c_str());
+                nValue = ds_str_conv::string_to_int64(value.GetString()); // ~= atoi(value_str.c_str());
                 return true;
             }
             else if ( value.IsNull() ) {
@@ -397,7 +458,7 @@ namespace ds_json
                 return true;
             }
             else if ( value.IsString() ) {
-                nValue = ds_str_conv::string_to_long(value.GetString()); // ~= atoi(value_str.c_str());
+                nValue = ds_str_conv::string_to_int32(value.GetString()); // ~= atoi(value_str.c_str());
                 return true;
             }
             else if ( value.IsNull() ) {
@@ -499,12 +560,22 @@ namespace ds_json
         //////////////////////////////////////////////////////////
         // array based specific
         //////////////////////////////////////////////////////////
-        void create_array(void *&impl) 
+        void create_array(void *&impl, size_t reserve_size) 
         {
             ASSERT(!impl);
             impl = new rapidjson::Document;
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             doc->SetArray();
+
+            if (reserve_size > 0) {
+                rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
+                doc->Reserve(reserve_size, allocator);
+            }
+        }
+
+        void destroy_array(void *&impl)
+        {
+            delete (rapidjson::Document *)impl;
         }
 
         void add_array_string(void *impl, const char *str) 
@@ -514,8 +585,9 @@ namespace ds_json
 
             rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
             rapidjson::Value value;
-            value.SetString(str, strlen(str), doc->GetAllocator());
-            doc->PushBack(value, allocator);
+            value.SetString(str, ::strlen(str), doc->GetAllocator());
+            doc->PushBack(value.Move(), allocator);
+            ASSERT(value.IsNull());
         }
 
         void add_array_int64(void *impl, int64_t nValue)
@@ -526,7 +598,8 @@ namespace ds_json
             rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
             rapidjson::Value value;
             value.SetInt64(nValue);
-            doc->PushBack(value, allocator);
+            doc->PushBack(value.Move(), allocator);
+            ASSERT(value.IsNull());
         }
 
         void add_array_int32(void *impl, int32_t nValue) 
@@ -537,7 +610,8 @@ namespace ds_json
             rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
             rapidjson::Value value;
             value.SetInt(nValue);
-            doc->PushBack(value, allocator);
+            doc->PushBack(value.Move(), allocator);
+            ASSERT(value.IsNull());
         }
 
         void add_array_double(void *impl, double dValue)
@@ -548,34 +622,10 @@ namespace ds_json
             rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
             rapidjson::Value value;
             value.SetDouble(dValue);
-            doc->PushBack(value, allocator);
+            doc->PushBack(value.Move(), allocator);
+            ASSERT(value.IsNull());
         }
-
-        void add_array_float(void *impl, float fValue)
-        {
-            rapidjson::Document *doc = (rapidjson::Document *)impl;
-            ASSERT(doc->IsArray());
-
-            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
-            rapidjson::Value value;
-            value.SetFloat(fValue);
-            doc->PushBack(value, allocator);
-        }
-        /*
-        void add_array_move_object(void *impl, const void *obj) 
-        {
-            rapidjson::Document *doc = (rapidjson::Document *)impl;
-            ASSERT(doc->IsArray());
-            rapidjson::Document::AllocatorType &allocator = doc->GetAllocator();
-            rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
-            rapidjson::Value value(doc_obj->GetType());
-            value.Swap(*doc_obj);
-            doc->PushBack(value, allocator);
-            //doc->PushBack(rapidjson::Document(std::move(*doc_obj)), allocator);
-            ASSERT(doc_obj->IsNull());
-            destroy(doc_obj);
-        }
-        */
+        
         void add_array_object(void *impl, const void *obj) 
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
@@ -584,8 +634,10 @@ namespace ds_json
 
             rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
             rapidjson::Value value(doc_obj->GetType());
+            //value = *((rapidjson::Value *)doc_obj);
+            //value.Swap(*((rapidjson::Value *)doc_obj));
             value.CopyFrom(*doc_obj, allocator);
-            doc->PushBack(value, allocator);
+            doc->PushBack(value.Move(), allocator);
             ASSERT(value.IsNull());
         }
 
@@ -594,6 +646,16 @@ namespace ds_json
             rapidjson::Document *doc = (rapidjson::Document *)impl;
             ASSERT(doc->IsArray());
             return doc->Size();
+        }
+
+        bool is_valid_array(const char *sJson)
+        {
+            rapidjson::Document doc;
+            doc.SetArray();
+            if ( !internal::str2obj(sJson, &doc) ) {
+                return false;
+            }
+            return doc.IsArray();
         }
         
         void get_array_string(const void *impl, size_t i, std::string &sValue) 
@@ -648,6 +710,7 @@ namespace ds_json
 
             rapidjson::Value &value = (*doc)[i];    
             rapidjson::Document *doc_obj = (rapidjson::Document *)obj;
+            //value.Swap(*doc_obj);
             value.CopyFrom(*doc_obj, allocator);
         }
         
@@ -655,12 +718,14 @@ namespace ds_json
         {
             rapidjson::Document *doc = (rapidjson::Document *)impl;
 
-            const rapidjson::Value &value = (*doc)[i];           
+            rapidjson::Value &value = (*doc)[i];           
             if ( value.IsString() ) {
                 str2obj(value.GetString(), obj);
             }
             else if ( value.IsObject() ) {
                 rapidjson::Document *obj_doc = (rapidjson::Document *)obj;
+                //((rapidjson::Value *)obj_doc)->Swap(value);
+                //*((rapidjson::Value *)obj_doc) = value;
                 obj_doc->CopyFrom(value, obj_doc->GetAllocator()); // this is the most slowest part, expected move usage
             }
             else if ( value.IsArray() ) {

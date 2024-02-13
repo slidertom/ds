@@ -7,6 +7,8 @@
     #include "Collections/debug_utils.h"
 #endif
 
+#include "../dsStrConv.h"
+
 #using <mscorlib.dll>
 #using <System.dll>
 #using <System.Data.dll>
@@ -25,10 +27,15 @@ using namespace System::Data::SqlClient;
 
 namespace dot_net_exception_format
 {
-    std::wstring FormatSQLException(SqlException ^e, const wchar_t *sFunctionName)
+    std::wstring FormatSQLException(SqlException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         std::wstring sFormatted;
-        sFormatted = L".NET SQL Exception [";
+        if (sSQL) {
+            sFormatted += L"SQL statement: ";
+            sFormatted += sSQL;
+            sFormatted += L". ";
+        }
+        sFormatted += L".NET SQL Exception [";
         sFormatted += sFunctionName;
         sFormatted += L"] - ";
         sFormatted += msclr::interop::marshal_as<std::wstring>(e->Message);
@@ -36,10 +43,15 @@ namespace dot_net_exception_format
         return sFormatted;
     }
 
-    std::wstring FormatArgException(ArgumentException ^e, const wchar_t *sFunctionName)
+    std::wstring FormatArgException(ArgumentException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         std::wstring sFormatted;
-        sFormatted = L".NET Argument Exception [";
+        if (sSQL) {
+            sFormatted += L"SQL statement: ";
+            sFormatted += sSQL;
+            sFormatted += L". ";
+        }
+        sFormatted += L".NET Argument Exception [";
         sFormatted += sFunctionName;
         sFormatted += L"] - ";
         sFormatted += msclr::interop::marshal_as<std::wstring>(e->Message);
@@ -47,10 +59,15 @@ namespace dot_net_exception_format
         return sFormatted;
     }
 
-    std::wstring FormatIndexOutOfRangeException(IndexOutOfRangeException ^e, const wchar_t *sFunctionName)
+    std::wstring FormatIndexOutOfRangeException(IndexOutOfRangeException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         std::wstring sFormatted;
-        sFormatted = L".NET IndexOutOfRange Exception [";
+        if (sSQL) {
+            sFormatted += L"SQL statement: ";
+            sFormatted += sSQL;
+            sFormatted += L". ";
+        }
+        sFormatted += L".NET IndexOutOfRange Exception [";
         sFormatted += sFunctionName;
         sFormatted += L"] - ";
         sFormatted += msclr::interop::marshal_as<std::wstring>(e->Message);
@@ -58,10 +75,15 @@ namespace dot_net_exception_format
         return sFormatted;
     }
 
-    std::wstring FormatInvalidCastException(InvalidCastException ^e, const wchar_t *sFunctionName)
+    std::wstring FormatInvalidCastException(InvalidCastException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         std::wstring sFormatted;
-        sFormatted = L".NET InvalidCast Exception [";
+        if (sSQL) {
+            sFormatted += L"SQL statement: ";
+            sFormatted += sSQL;
+            sFormatted += L". ";
+        }
+        sFormatted += L".NET InvalidCast Exception [";
         sFormatted += sFunctionName;
         sFormatted += L"] - ";
         sFormatted += msclr::interop::marshal_as<std::wstring>(e->Message);
@@ -79,39 +101,39 @@ public:
 
 // Operations
 public:
-    void OnDotNetSQLException(SqlException ^e, const wchar_t *sFunctionName)
+    void OnDotNetSQLException(SqlException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         if ( !m_pErrorHandler ) {
             return;
         }
-        const std::wstring str = dot_net_exception_format::FormatSQLException(e, sFunctionName);
+        const std::wstring str = dot_net_exception_format::FormatSQLException(e, sFunctionName, sSQL);
         (*m_pErrorHandler)(str.c_str());
     }
 
-    void OnDotNetArgException(ArgumentException ^e, const wchar_t *sFunctionName)
+    void OnDotNetArgException(ArgumentException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         if ( !m_pErrorHandler ) {
             return;
         }
-        const std::wstring str = dot_net_exception_format::FormatArgException(e, sFunctionName);
+        const std::wstring str = dot_net_exception_format::FormatArgException(e, sFunctionName, sSQL);
         (*m_pErrorHandler)(str.c_str());
     }
 
-    void OnDotNetIndexOutOfRangeException(IndexOutOfRangeException ^e, const wchar_t *sFunctionName)
+    void OnDotNetIndexOutOfRangeException(IndexOutOfRangeException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         if ( !m_pErrorHandler ) {
             return;
         }
-        const std::wstring str = dot_net_exception_format::FormatIndexOutOfRangeException(e, sFunctionName);
+        const std::wstring str = dot_net_exception_format::FormatIndexOutOfRangeException(e, sFunctionName, sSQL);
         (*m_pErrorHandler)(str.c_str());
     }
 
-    void OnDotNetInvalidCastException(InvalidCastException ^e, const wchar_t *sFunctionName)
+    void OnDotNetInvalidCastException(InvalidCastException ^e, const wchar_t *sFunctionName, const wchar_t *sSQL)
     {
         if ( !m_pErrorHandler ) {
             return;
         }
-        const std::wstring str = dot_net_exception_format::FormatInvalidCastException(e, sFunctionName);
+        const std::wstring str = dot_net_exception_format::FormatInvalidCastException(e, sFunctionName, sSQL);
         (*m_pErrorHandler)(str.c_str());
     }
 
@@ -164,13 +186,13 @@ public:
         }
         catch (ArgumentException ^aex)
         {
-            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::Open");
+            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::Open", nullptr);
             delete aex;
             return false;
         }
         catch(SqlException ^sql_ex)
         {
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::Open");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::Open", nullptr);
             delete sql_ex;
             return false;
         }
@@ -207,13 +229,13 @@ public:
         }
         catch (ArgumentException ^aex)
         {
-            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::Execute");
+            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::Execute", sSQL);
             delete aex;
             return false;
         }
         catch(SqlException ^sql_ex)
         {
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::Execute");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::Execute", sSQL);
             delete sql_ex;
             return false;
         }
@@ -280,38 +302,38 @@ public:
     {
         SqlConnection ^pConnection = gcnew SqlConnection;
         SqlCommand ^pCommand = gcnew SqlCommand();
+        std::wstring sSqlEx = L"SELECT TOP 0 * FROM ";
+        sSqlEx += sTable;
+        sSqlEx += L" WHERE 1 = 2";
         try
         {
             pConnection->ConnectionString = gcnew String(m_sConn.c_str());
             pConnection->Open();
 
             pCommand->Connection = pConnection;
-            std::wstring sSqlEx = L"SELECT TOP 0 * FROM ";
-            sSqlEx += sTable;
-            sSqlEx += L" WHERE 1 = 2";
             pCommand->CommandText = gcnew String(sSqlEx.c_str());
             SqlDataReader ^reader = pCommand->ExecuteReader();
             
             reader->Read();
 
-            const int nCount = reader->FieldCount;
-
-            for (int i=0;i<nCount;i++)
+            const int32_t nCount = reader->FieldCount;
+            for (int32_t i = 0; i < nCount; ++i)
             {
                 const std::wstring sColName = msclr::interop::marshal_as<std::wstring>(reader->GetName(i));
+                const std::string sColNameUTF8 = ds_str_conv::ConvertToUTF8(sColName.c_str());
                 const dsFieldType field_type = GetFieldType(reader->GetFieldType(i));
-                info[sColName] = field_type;
+                info[sColNameUTF8] = field_type;
             }
         }
         catch (ArgumentException ^aex)
         {
-            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::GetTableFieldInfo");
+            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::GetTableFieldInfo", sSqlEx.c_str());
             delete aex;
             return false;
         }
         catch (SqlException ^sql_ex)
         {
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::GetTableFieldInfo");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::GetTableFieldInfo", sSqlEx.c_str());
             delete sql_ex;
             return false;
         }
@@ -322,15 +344,15 @@ public:
     {
         SqlConnection ^pConnection = gcnew SqlConnection;
         SqlCommand ^pCommand = gcnew SqlCommand();
+        std::wstring sSqlEx = L"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '";
+        sSqlEx += sTable;
+        sSqlEx += L"'";
         try
         {
             pConnection->ConnectionString = gcnew String(m_sConn.c_str());
             pConnection->Open();
 
             pCommand->Connection = pConnection;
-            std::wstring sSqlEx = L"SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '";
-            sSqlEx += sTable;
-            sSqlEx += L"'";
             pCommand->CommandText = gcnew String(sSqlEx.c_str());
             SqlDataReader ^reader = pCommand->ExecuteReader();
             
@@ -342,13 +364,13 @@ public:
         }
         catch (ArgumentException ^aex)
         {
-            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::GetTableFieldInfo");
+            m_pErrorHandler->OnDotNetArgException(aex, L"CDotNetDatabaseImpl::GetTableFieldInfo", sSqlEx.c_str());
             delete aex;
             return false;
         }
         catch (SqlException ^sql_ex)
         {
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::GetTableFieldInfo");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetDatabaseImpl::GetTableFieldInfo", sSqlEx.c_str());
             delete sql_ex;
             return false;
         }
@@ -434,10 +456,12 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::Open");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::Open", sSQL);
             delete sql_ex;
             return false;
         }
+
+        m_sSQL = sSQL;
 
         return true;
     }
@@ -456,10 +480,12 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::SeekByString");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::SeekByString", sSQL);
             delete sql_ex;
             return false;
         }
+
+        m_sSQL = sSQL;
 
         return true;
     }
@@ -489,7 +515,7 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::IsEmpty");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::IsEmpty", m_sSQL.c_str());
             delete sql_ex;
         }
 
@@ -504,7 +530,7 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::MoveNext");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::MoveNext", m_sSQL.c_str());
             delete sql_ex;
             m_bIsOk = false;
         }
@@ -550,19 +576,19 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldString");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldString", m_sSQL.c_str());
             delete sql_ex;
         }
         catch (IndexOutOfRangeException ^index_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldString");
+            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldString", m_sSQL.c_str());
             delete index_ex;
         }
         catch (InvalidCastException ^cast_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldString");
+            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldString", m_sSQL.c_str());
             delete cast_ex;
         }
 
@@ -632,19 +658,19 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldLong");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldLong", m_sSQL.c_str());
             delete sql_ex;
         }
         catch (IndexOutOfRangeException ^index_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldLong");
+            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldLong", m_sSQL.c_str());
             delete index_ex;
         }
         catch (InvalidCastException ^cast_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldLong");
+            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldLong", m_sSQL.c_str());
             delete cast_ex;
         }
 
@@ -684,19 +710,19 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldDouble");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldDouble", m_sSQL.c_str());
             delete sql_ex;
         }
         catch (IndexOutOfRangeException ^index_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldDouble");
+            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldDouble", m_sSQL.c_str());
             delete index_ex;
         }
         catch (InvalidCastException ^cast_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldDouble");
+            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldDouble", m_sSQL.c_str());
             delete cast_ex;
         }
 
@@ -721,19 +747,19 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldDateTime");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::GetFieldDateTime", m_sSQL.c_str());
             delete sql_ex;
         }
         catch (IndexOutOfRangeException ^index_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldDateTime");
+            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::GetFieldDateTime", m_sSQL.c_str());
             delete index_ex;
         }
         catch (InvalidCastException ^cast_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldDateTime");
+            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::GetFieldDateTime", m_sSQL.c_str());
             delete cast_ex;
         }
         
@@ -760,19 +786,19 @@ public:
         catch (SqlException ^sql_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::IsFieldValueNull");
+            m_pErrorHandler->OnDotNetSQLException(sql_ex, L"CDotNetRecordSetImpl::IsFieldValueNull", m_sSQL.c_str());
             delete sql_ex;
         }
         catch (IndexOutOfRangeException ^index_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::IsFieldValueNull");
+            m_pErrorHandler->OnDotNetIndexOutOfRangeException(index_ex, L"CDotNetRecordSetImpl::IsFieldValueNull", m_sSQL.c_str());
             delete index_ex;
         }
         catch (InvalidCastException ^cast_ex)
         {
             ASSERT(FALSE);
-            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::IsFieldValueNull");
+            m_pErrorHandler->OnDotNetInvalidCastException(cast_ex, L"CDotNetRecordSetImpl::IsFieldValueNull", m_sSQL.c_str());
             delete cast_ex;
         }
 
@@ -804,6 +830,8 @@ private:
     bool m_bOpen;
 
     CDotNetErrorHandler *m_pErrorHandler;
+
+    std::wstring m_sSQL;
 };
 
 CDotNetDatabaseAbs *CAdoDotNetUtils::CreateDatabase()

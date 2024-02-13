@@ -21,8 +21,8 @@
     along with  this program; If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "string"
-#include "unordered_map"
+#include <string>
+#include <unordered_map>
 
 class CRoleCore;
 
@@ -62,7 +62,7 @@ public:
     typedef std::unordered_map<std::string, CRole*> CRolesMap;
     CRoleCore() { }
     CRoleCore(const CRoleCore &r) { *this = r; }
-    CRoleCore(CRoleCore &&r)  { 
+    CRoleCore(CRoleCore &&r) noexcept { 
         CRole *pRole = nullptr;
         for (auto &elem : r.m_roles_map) {
             pRole  = elem.second;
@@ -108,11 +108,12 @@ public:
 
 // Operators
 public:
-    void operator=(const CRoleCore &r) {
+    CRoleCore &operator=(const CRoleCore &r) {
         r.Clone(this);
+		return *this;
     }
 
-    CRoleCore &operator=(CRoleCore &&r) {
+    CRoleCore &operator=(CRoleCore &&r) noexcept {
         DeleteAllRoles(); // do delete all roles
         CRole *pRole = nullptr;
         for (auto &elem : r.m_roles_map) {
@@ -130,6 +131,7 @@ private:
     CRolesMap m_roles_map;
 };
 
+// NOTE: CRole derived class must contain static const char *GetRoleName() function.
 template <class role_class>
 class CGetRoleImpl {
 // Static operations
@@ -140,8 +142,8 @@ public:
         if ( !pRole ) {
             return nullptr;
         }
-        const role_class *pHoles = (const role_class *)pRole;
-        return pHoles;
+        const role_class *pRoleImpl = (const role_class *)pRole;
+        return pRoleImpl;
     }
 
     static role_class *GetRoleImpl(CRoleCore *pCore) {
@@ -150,8 +152,8 @@ public:
         if ( !pRole ) {
             return nullptr;
         }
-        role_class *pHoles = (role_class *)pRole;
-        return pHoles;
+        role_class *pRoleImpl = (role_class *)pRole;
+        return pRoleImpl;
     }
 };
 
@@ -209,12 +211,9 @@ inline void CRoleCore::Clone(CRoleCore *pTarget) const
 {
     pTarget->DeleteAllRoles(); // do delete all target roles
     CRole *pClone = nullptr;
-    auto end_it = m_roles_map.end();
-    for (auto it = m_roles_map.begin(); it != end_it; ++it)
-    {
-        pClone = it->second->Clone(pTarget);
-        // Possibility to clone only needed info
-        if ( pClone )  {
+    for (auto &elem : m_roles_map) {
+        pClone = elem.second->Clone(pTarget); 
+        if ( pClone )  { // Possibility to clone only required info
             pTarget->AddRole(pClone);
         }
     }

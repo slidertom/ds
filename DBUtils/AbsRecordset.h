@@ -10,7 +10,7 @@
     #include "dsStrConv.h"
 #endif
 
-#include "string"
+#include <string>
 
 class CAbsRecordset
 {
@@ -40,9 +40,11 @@ public:
     virtual bool OpenView(const wchar_t *sViewName) = 0;
 
     virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) = 0;
-    virtual bool SeekByString(const char *sIndex,    const char *sValue)    = 0;
-    virtual bool SeekByLong(const wchar_t *sIndex,   int32_t nValue)        = 0;
-    virtual bool SeekByLong(const char    *sIndex,   int32_t nValue)        = 0;
+    virtual bool SeekByString(const char    *sIndex, const char *sValue)    = 0;
+    virtual bool SeekByLong(const wchar_t   *sIndex, int32_t nValue)        = 0;
+    virtual bool SeekByLong(const char      *sIndex, int32_t nValue)        = 0;
+    virtual bool SeekByInt64(const wchar_t  *sIndex, int64_t nValue) { return this->SeekByLong(sIndex, (int32_t)nValue); }
+    virtual bool SeekByInt64(const char     *sIndex, int64_t nValue) { return this->SeekByLong(sIndex, (int32_t)nValue); }
 
     virtual void SetFieldBinary(const wchar_t *sFieldName, unsigned char  *pData, size_t nSize)  = 0;
     virtual void SetFieldBinary(const char *sFieldName, unsigned char  *pData, size_t nSize) {
@@ -56,8 +58,13 @@ public:
     }
     virtual void FreeBinary(unsigned char *pData) = 0;
 
-    virtual void SetFieldValueNull(const wchar_t *lpszName)  = 0;
-    virtual bool IsFieldValueNull(const wchar_t *sFieldName) = 0;
+    virtual void SetFieldValueNull(const char *sFieldName) {
+        const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
+        this->SetFieldValueNull(sFieldNameUTF16.c_str());
+    }
+    virtual void SetFieldValueNull(const wchar_t *sFieldName)  = 0;
+    virtual bool IsFieldValueNull(const wchar_t *sFieldName)   = 0;
+    virtual bool IsFieldValueNull(const char *sFieldName)      = 0;
 
     virtual std::wstring GetFieldString(const wchar_t *sFieldName)                = 0;
     virtual void SetFieldString(const wchar_t *sFieldName, const wchar_t *sValue) = 0;
@@ -88,8 +95,11 @@ public:
     }
 
     virtual time_t GetFieldDateTime(const wchar_t *sFieldName)                     = 0;
+    virtual time_t GetFieldDateTime(const char *sFieldName)                        = 0;
     virtual void   SetFieldDateTime(const wchar_t *sFieldName, const time_t &time) = 0;
+    virtual void   SetFieldDateTime(const char *sFieldName, const time_t &time)    = 0;
 
+    virtual bool DoesFieldExist(const char *sFieldName) = 0;
     virtual bool DoesFieldExist(const wchar_t *sFieldName) = 0; 
 
 // Default realizations - do override if it's required
@@ -131,6 +141,38 @@ public:
 
         bool bRetVal = false;
         while ( !IsEOF() && GetFieldStringUTF8(sField) == sValue ) {
+            VERIFY(Delete());
+            MoveNext();
+            bRetVal = true;
+        }
+
+        return bRetVal;
+    }
+
+    virtual bool DeleteAllByInt64Value(const wchar_t *sField, int64_t nValue)
+    {
+        if ( !SeekByInt64(sField, nValue) ) {
+            return false;
+        }
+
+        bool bRetVal = false;
+        while ( !IsEOF() && GetFieldInt64(sField) == nValue ) {
+            VERIFY(Delete());
+            MoveNext();
+            bRetVal = true;
+        }
+
+        return bRetVal;
+    }
+
+    virtual bool DeleteAllByInt64ValueUTF8(const char *sField, int64_t nValue) 
+    {
+        if ( !SeekByInt64(sField, nValue) ) {
+            return false;
+        }
+
+        bool bRetVal = false;
+        while ( !IsEOF() && GetFieldInt64(sField) == nValue ) {
             VERIFY(Delete());
             MoveNext();
             bRetVal = true;
@@ -207,6 +249,30 @@ public:
         if ( !Delete() ) {
             return false; 
         }
+        return true;
+    }
+
+    virtual bool DeleteByInt64Value(const wchar_t *sField, int64_t nValue)
+    {
+        if ( !SeekByInt64(sField, nValue) ) {
+            return false; 
+        }
+        if ( !Delete() ) {
+            return false; 
+        }
+
+        return true;
+    }
+
+    virtual bool DeleteByInt64Value(const char *sField, int64_t nValue)
+    {
+        if ( !SeekByInt64(sField, nValue) ) {
+            return false; 
+        }
+        if ( !Delete() ) {
+            return false; 
+        }
+
         return true;
     }
 

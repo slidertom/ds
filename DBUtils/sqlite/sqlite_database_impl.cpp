@@ -107,6 +107,7 @@ void CSqLiteDatabaseImpl::Close()
     }
     m_pDB = nullptr;
     m_sFilePath = L"";
+    m_pErrorHandler->SetDatabaseLocation("");
 
     ClearFieldsInfo();
 }
@@ -130,25 +131,6 @@ int process_ddl_row(void * pData, int nColumns,
 
     sqlite3 *db = (sqlite3*)pData;
     ::sqlite3_exec(db, values[0], NULL, NULL, NULL);
-
-    return 0;
-}
-
-// Insert from a table named by backup.{values[0]}
-// into main.{values[0]} in database pData.
-int process_dml_row(void *pData, int nColumns, 
-                    char **values, char **columns)
-{
-    if (nColumns != 1) {
-        return 1; // Error
-    }
-        
-    sqlite3* db = (sqlite3*)pData;
-
-    char *stmt = sqlite3_mprintf("insert into main.%q "
-                                    "select * from backup.%q", values[0], values[0]);
-    sqlite3_exec(db, stmt, NULL, NULL, NULL);
-    sqlite3_free(stmt);     
 
     return 0;
 }
@@ -195,6 +177,8 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_
     m_sFilePath = sPath;
     // UTF8 path required
     const std::string localFileName = ds_str_conv::ConvertToUTF8(sPath);
+    m_pErrorHandler->SetDatabaseLocation(localFileName.c_str());
+
     int nFlags = open_params.m_bReadOnly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE;
     
     // For shared database usage. Also for multithreaded database usage.
@@ -274,7 +258,8 @@ bool CSqLiteDatabaseImpl::OpenDB(const wchar_t *sPath, const dsOpenParams &open_
     // constraints enabled by default. 
     Execute("PRAGMA foreign_keys = ON");
     Execute("PRAGMA cache_size = 20000"); // default 2000
-    Execute("PRAGMA page_size = 65535");
+    Execute("PRAGMA page_size = 65536");  // Query or set the page size of the database. The page size must be a power of two between 512 and 65536 inclusive. 
+                                          // the default page size increased to 4096. The default page size is recommended for most applications. 
     Execute("PRAGMA temp_store=MEMORY;"); // PRAGMA temp_store = 0 | DEFAULT | 1 | FILE | 2 | MEMORY
 
     if ( open_params.m_bExclusive ) {
@@ -326,7 +311,7 @@ std::wstring CSqLiteDatabaseImpl::GetName()
 
 bool CSqLiteDatabaseImpl::DoesTableExistUTF8(const char *sTable)
 {
-     std::string sSQL  = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = '";
+    std::string sSQL  = "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = '";
                 sSQL += sTable;
                 sSQL += "' COLLATE NOCASE";
     
@@ -346,6 +331,24 @@ bool CSqLiteDatabaseImpl::DoesTableExist(const wchar_t *sTable)
 {
     std::string sTableUTF8 = ds_str_conv::ConvertToUTF8(sTable);
     return DoesTableExistUTF8(sTableUTF8.c_str());
+}
+
+bool CSqLiteDatabaseImpl::DoesViewExistUTF8(const char *sView)
+{
+    std::string sSQL = "SELECT 1 FROM sqlite_master WHERE type = 'view' AND name = '";
+    sSQL += sView;
+    sSQL += "' COLLATE NOCASE";
+
+    CSqLiteRecordsetImpl loader(this, m_pErrorHandler);
+    if (!loader.OpenSQLUTF8(sSQL.c_str())) {
+        return false;
+    }
+
+    if (!loader.MoveFirstImpl()) {
+        return false;
+    }
+
+    return true;
 }
 
 CAbsRecordset *CSqLiteDatabaseImpl::CreateRecordset()
@@ -406,6 +409,8 @@ bool CSqLiteDatabaseImpl::Execute(const char *sqlUTF8)
                     sFuncDescr += sPathUTF8;
                     sFuncDescr += ".";
                     sFuncDescr += " CSqLiteDatabaseImpl::ExecuteUTF8";
+                    sFuncDescr += " SQL: ";
+                    sFuncDescr += sqlUTF8;
         m_pErrorHandler->OnError(sqlUTF8, sFuncDescr.c_str());
         sqlite3_free(localError);
     }
@@ -450,8 +455,7 @@ bool CSqLiteDatabaseImpl::GetTableFieldInfo(const char *sTable, dsTableFieldInfo
     for (auto it = pFieldInfoMap->begin(); it != end_it; ++it) 
     {
         dsFieldType field_type = it->second.GetFieldType();
-        const std::wstring sColName = ds_str_conv::ConvertFromUTF8(it->first.c_str());
-        info[sColName] = field_type;
+        info[it->first] = field_type;
     }
 
     return true;
@@ -524,8 +528,8 @@ static int loadOrSaveDb(sqlite3 *pInMemory, const char *zFilename, int isSave)
 
 bool CSqLiteDatabaseImpl::Backup(const char *sBackupFile)
 {
-    const int32_t rc                    = ::loadOrSaveDb(m_pDB, sBackupFile, 1);
-    const bool bRet                     = rc == SQLITE_OK;
+    const int32_t rc = ::loadOrSaveDb(m_pDB, sBackupFile, 1);
+    const bool bRet  = (rc == SQLITE_OK);
 
     if ( !bRet ) {
         m_pErrorHandler->OnErrorCode(rc, m_pDB, "CSqLiteDatabaseImpl::Backup::loadOrSaveDb");
@@ -588,7 +592,7 @@ private:
     bool m_bStartTrans {false};
 };
 
-bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t *sColumnName, bool bDelete, bool bRemoveCollateNoCase)
+bool CSqLiteDatabaseImpl::RecreateTable(const char *sTableName, const char *sColumnName, bool bDelete, bool bRemoveCollateNoCase)
 {
     // CTransRestore has been implemented in order to have correct sequence of drop collumn functionality
     // which involves the usage of BEGIN TRANSACTION command.
@@ -599,34 +603,32 @@ bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t 
     // 3. Drop old table
     // 4. Rename new into old 
 
-    // Transaction must be controlled inside ModifyColumn
+    // Transaction must be controlled inside RecreateTable
     CTransRestore transRestore(this, m_bTransMode);
     // SQLite drop column implementation is based on https://www.sqlite.org/faq.html#q11
     ClearFieldsInfo(); // To always have newest fields information before collecting all the information.
-    const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
-    const sqlite_util::CFieldInfoMap *pFieldInfoMap = GetTableFieldInfoImpl(sTableNameUTF8.c_str());
+    const sqlite_util::CFieldInfoMap *pFieldInfoMap = GetTableFieldInfoImpl(sTableName);
     if ( !pFieldInfoMap ) {
-        std::string sError = "ModifyColumn failed. Table ";
-                    sError += sTableNameUTF8;
+        std::string sError = "RecreateTable failed. Table ";
+                    sError += sTableName;
                     sError += " does not exist.";
-        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::ModifyColumn");
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::RecreateTable");
         return false;
     }
 
     bool bColumnExist(false);
-    const std::string sColumnNameUTF8 = ds_str_conv::ConvertToUTF8(sColumnName);
     for (const auto &it : *pFieldInfoMap) {
-        if (it.first == sColumnNameUTF8) {
+        if (it.first == sColumnName) {
             bColumnExist = true;
             break;
         }
     }
 
-    if (!bColumnExist) {
+    if (!bColumnExist && (bDelete || bRemoveCollateNoCase)) {
         std::string sError = "ModifyColumn failed. No column ";
-                    sError += sColumnNameUTF8;            
+                    sError += sColumnName;            
                     sError += " defined in table ";
-                    sError += sTableNameUTF8;
+                    sError += sTableName;
                     sError += ".";
 
         m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::ModifyColumn");
@@ -636,7 +638,7 @@ bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t 
     // Get fields list with UNIQUE flag and create statements for indexes
     std::vector<std::string> sUniqueFields;
     std::unordered_map<std::string, std::string> mapIndexSQLs;
-    sqlite_util::sqlite_get_table_index_info(this, sTableNameUTF8.c_str(), m_pErrorHandler, sUniqueFields, mapIndexSQLs);
+    sqlite_util::sqlite_get_table_index_info(this, sTableName, m_pErrorHandler, sUniqueFields, mapIndexSQLs);
 
     std::string sMainSQL;
     sMainSQL += "PRAGMA foreign_keys=off;\n";
@@ -645,9 +647,11 @@ bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t 
     // Constructing CREATE statement
     std::string sPrimary;
     std::string sFieldsList;
-    sMainSQL += "CREATE TABLE \"" + sTableNameUTF8 + "_temporal\" (";
+    sMainSQL += "CREATE TABLE \"";
+    sMainSQL += sTableName;
+    sMainSQL += "_temporal\" (";
     for (const auto &it : *pFieldInfoMap) {
-        if (bDelete && it.first == sColumnNameUTF8) {
+        if (bDelete && it.first == sColumnName) {
             continue;
         }
 
@@ -675,7 +679,7 @@ bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t 
 
 		// Collate settings
         const char* pCollSeq;
-		const int ret = sqlite3_table_column_metadata(m_pDB, nullptr, sTableNameUTF8.c_str(), it.first.c_str(), nullptr, &pCollSeq, nullptr, nullptr, nullptr);
+		const int ret = sqlite3_table_column_metadata(m_pDB, nullptr, sTableName, it.first.c_str(), nullptr, &pCollSeq, nullptr, nullptr, nullptr);
         if (SQLITE_OK == ret) {
             const std::string sCollate = pCollSeq;
             if ("BINARY" != sCollate && !bRemoveCollateNoCase) { // Default is Binary
@@ -702,29 +706,31 @@ bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t 
 
     // Creating INSERT statement
     sMainSQL += "INSERT INTO ";
-    sMainSQL += sTableNameUTF8;
+    sMainSQL += sTableName;
     sMainSQL += "_temporal";
     sMainSQL += " (";
     sMainSQL += sFieldsList;
     sMainSQL += ") SELECT ";
     sMainSQL += sFieldsList;
     sMainSQL += " FROM ";
-    sMainSQL += sTableNameUTF8;
+    sMainSQL += sTableName;
     sMainSQL += ";\n";
 
-    sMainSQL += "DROP TABLE " + sTableNameUTF8 + ";\n";
+    sMainSQL += "DROP TABLE ";
+    sMainSQL += sTableName;
+    sMainSQL += ";\n";
 
     sMainSQL += "ALTER TABLE ";
-    sMainSQL += sTableNameUTF8;
+    sMainSQL += sTableName;
     sMainSQL += "_temporal";
     sMainSQL += " RENAME TO ";
-    sMainSQL += sTableNameUTF8;
+    sMainSQL += sTableName;
     sMainSQL += ";\n";
 
     // Restore Indexes
     // TODO: restore Triggers and Views
     for (const auto &it : mapIndexSQLs) {
-        if (it.first == sColumnNameUTF8) {
+        if (it.first == sColumnName) {
             continue;
         }
         sMainSQL += it.second + ";\n";
@@ -735,19 +741,30 @@ bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t 
      
     if (!Execute(sMainSQL.c_str())) {
         Execute("ROLLBACK;");
-        std::string sError = "ModifyColumn failed. SQL error: ";
+        std::string sError = "RecreateTable failed. SQL error: ";
                     sError += sMainSQL;            
                     sError += ".";
 
-        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::ModifyColumn");
+        m_pErrorHandler->OnError(sError.c_str(), "CSqLiteDatabaseImpl::RecreateTable");
         return false;
     }
 
     if (bDelete) {
-        auto found = m_table_field_info_map.find(sTableNameUTF8);
+        auto found = m_table_field_info_map.find(sTableName);
         if (found != m_table_field_info_map.end()) {
-            found->second->erase(sColumnNameUTF8);
+            found->second->erase(sColumnName);
         }
+    }
+
+    return true;
+}
+
+bool CSqLiteDatabaseImpl::DropForeignKeys(const wchar_t* sTableName)
+{
+    const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
+    // Re-create table without foreign keys
+    if (!RecreateTable(sTableNameUTF8.c_str(), "", false, false)) {
+        return false;
     }
 
     return true;
@@ -755,7 +772,18 @@ bool CSqLiteDatabaseImpl::ModifyColumn(const wchar_t *sTableName, const wchar_t 
 
 bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName)
 {
-    if (!ModifyColumn(sTableName, sColumnName, true, false)) {
+    const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
+    const std::string sColumnNameUTF8 = ds_str_conv::ConvertToUTF8(sColumnName);
+    if (!RecreateTable(sTableNameUTF8.c_str(), sColumnNameUTF8.c_str(), true, false)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool CSqLiteDatabaseImpl::DropColumn(const char *sTableName, const char *sColumnName)
+{
+    if (!RecreateTable(sTableName, sColumnName, true, false)) {
         return false;
     }
 
@@ -764,19 +792,25 @@ bool CSqLiteDatabaseImpl::DropColumn(const wchar_t *sTableName, const wchar_t *s
 
 bool CSqLiteDatabaseImpl::RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName)
 {
-    if (!ModifyColumn(sTableName, sColumnName, false, true)) {
+    const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
+    const std::string sColumnNameUTF8 = ds_str_conv::ConvertToUTF8(sColumnName);
+    if (!RecreateTable(sTableNameUTF8.c_str(), sColumnNameUTF8.c_str(), false, true)) {
         return false;
     }
 
     return true;
 }
-
 bool CSqLiteDatabaseImpl::DropTable(const wchar_t *sTableName)
 {
     const std::string sTableNameUTF8 = ds_str_conv::ConvertToUTF8(sTableName);
+    return this->DropTable(sTableNameUTF8.c_str());
+}
+
+bool CSqLiteDatabaseImpl::DropTable(const char *sTableName)
+{
     std::string sTriggerList;
     sTriggerList = "SELECT * FROM sqlite_master WHERE type='trigger' AND tbl_name='"; 
-    sTriggerList += sTableNameUTF8;
+    sTriggerList += sTableName;
     sTriggerList += "';";
 
     CSqLiteRecordsetImpl loaderTriggerList(this, m_pErrorHandler);
@@ -802,7 +836,7 @@ bool CSqLiteDatabaseImpl::DropTable(const wchar_t *sTableName)
     }
 
     std::string sSQL = "DROP TABLE ";
-    sSQL += sTableNameUTF8;
+    sSQL += sTableName;
     sSQL += ";";
 
     if (!Execute(sSQL.c_str())) {
@@ -894,4 +928,22 @@ bool CSqLiteDatabaseImpl::CreateDB(const wchar_t *sPath)
 {
     ASSERT(false);
     return false;
+}
+
+bool CSqLiteDatabaseImpl::DoesIndexExistUTF8(const char *sIndex)
+{
+    std::string sSQL = "SELECT 1 FROM sqlite_master WHERE type = 'index' AND name = '";
+    sSQL += sIndex;
+    sSQL += "' COLLATE NOCASE";
+
+    CSqLiteRecordsetImpl loader(this, m_pErrorHandler);
+    if (!loader.OpenSQLUTF8(sSQL.c_str())) {
+        return false;
+    }
+
+    if (!loader.MoveFirstImpl()) {
+        return false;
+    }
+
+    return true;
 }

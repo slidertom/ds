@@ -30,7 +30,7 @@ dsTable::dsTable(dsDatabase *pDatabase, const char *sTableNameUTF8)
 
 dsTable::~dsTable()
 {
-    //The database must be opened. Otherwise - memory leaks can be shown
+    // The database must be opened. Otherwise - memory leaks can be shown
     ASSERT(m_pDatabase->IsOpen());
     delete m_pSet;
 }
@@ -55,10 +55,9 @@ bool dsTable::OpenView(const wchar_t *sViewName) noexcept
 
 void dsTable::Flush() noexcept
 {
-    if ( !Open() ) {
+    if ( !this->Open() ) {
         return;
     }
-
     m_pSet->Flush();
 }
 
@@ -87,7 +86,7 @@ void dsTable::FreeBinary(unsigned char *pData) noexcept
     m_pSet->FreeBinary(pData);
 }
 
-bool dsTable::IsEOF() const    noexcept 
+bool dsTable::IsEOF() const noexcept 
 { 
     return m_pSet->IsEOF();
 }
@@ -99,7 +98,7 @@ void dsTable::MoveNext() noexcept
 
 bool dsTable::MoveFirst() noexcept 
 { 
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->MoveFirst(); 
 }
 
@@ -131,32 +130,43 @@ void dsTable::SetFieldRGB(const wchar_t *sFieldName, COLORREF color) noexcept
 
 bool dsTable::SeekIndex(const char *sIndex, const char *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->SeekByString(sIndex, sValue);
 }
 
 bool dsTable::SeekIndex(const wchar_t *sIndex, const wchar_t *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->SeekByString(sIndex, sValue);
 }
 
 bool dsTable::SeekIndex(const wchar_t *sIndex, int32_t nValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->SeekByLong(sIndex, nValue);
 }
 
 bool dsTable::SeekIndex(const char *sIndex, int32_t nValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->SeekByLong(sIndex, nValue);
+}
+
+bool dsTable::SeekIndex(const wchar_t *sIndex, int64_t nValue) noexcept
+{
+    VERIFY(this->Open());
+    return m_pSet->SeekByInt64(sIndex, nValue);
+}
+
+bool dsTable::SeekIndex(const char *sIndex, int64_t nValue) noexcept
+{
+    VERIFY(this->Open());
+    return m_pSet->SeekByInt64(sIndex, nValue);
 }
 
 bool dsTable::IsFieldValueNull(const char *sFieldName) const noexcept
 {
-    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
-    return m_pSet->IsFieldValueNull(sFieldNameUTF16.c_str());
+    return m_pSet->IsFieldValueNull(sFieldName);
 }
 
 bool dsTable::IsFieldValueNull(const wchar_t *sFieldName) const noexcept
@@ -236,8 +246,7 @@ void dsTable::SetFieldBool(const wchar_t *sFieldName, bool bValue) noexcept
 
 time_t dsTable::GetFieldDateTime(const char *sFieldName) const noexcept
 {
-    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
-    return m_pSet->GetFieldDateTime(sFieldNameUTF16.c_str());
+    return m_pSet->GetFieldDateTime(sFieldName);
 }
 
 time_t dsTable::GetFieldDateTime(const wchar_t *sFieldName) const noexcept
@@ -252,14 +261,12 @@ void dsTable::SetFieldDateTime(const wchar_t *sFieldName, time_t nValue) noexcep
 
 void dsTable::SetFieldDateTime(const char *sFieldName, time_t nValue) noexcept
 {
-    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
-    m_pSet->SetFieldDateTime(sFieldNameUTF16.c_str(), nValue);
+    m_pSet->SetFieldDateTime(sFieldName, nValue);
 }
 
 void dsTable::SetFieldNull(const char *sFieldName) noexcept
 {
-    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
-    m_pSet->SetFieldValueNull(sFieldNameUTF16.c_str());
+    m_pSet->SetFieldValueNull(sFieldName);
 }
 
 void dsTable::SetFieldNull(const wchar_t *sFieldName) noexcept
@@ -274,7 +281,7 @@ bool dsTable::Delete() noexcept
 
 void dsTable::AddNew() noexcept
 { 
-    VERIFY(Open());
+    VERIFY(this->Open());
     m_pSet->AddNew();
 }
 
@@ -290,44 +297,43 @@ bool dsTable::Update() noexcept
 
 int32_t dsTable::GetColumnCount() noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->GetColumnCount(); 
 }
 
 int32_t dsTable::GetRecordCount() noexcept
 { 
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->GetRecordCount(); 
 }
 
 std::wstring dsTable::GetColumnName(int32_t nCol) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->GetColumnName(nCol); 
 }
 
 dsFieldType dsTable::GetColumnType(int32_t nCol) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->GetColumnType(nCol); 
 }
 
 bool dsTable::DoesFieldExist(const char *sFieldName) noexcept
 {
-    VERIFY(Open());
-    const std::wstring sFieldNameUTF16 = ds_str_conv::ConvertFromUTF8(sFieldName);
-    return m_pSet->DoesFieldExist(sFieldNameUTF16.c_str());
+    VERIFY(this->Open());
+    return m_pSet->DoesFieldExist(sFieldName);
 }
 
 bool dsTable::DoesFieldExist(const wchar_t *sFieldName) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DoesFieldExist(sFieldName);
 }
 
-std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const wchar_t *sPrefix, int width) noexcept
+std::wstring dsTable::GetUniqueTextFieldValue(const wchar_t *sFieldName, const wchar_t *sPrefix, int32_t width) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     
     std::wstring sFormat  = L"%s%0";
                  sFormat += std::to_wstring(width);
@@ -358,50 +364,74 @@ dsDatabase *dsTable::GetDatabase() const noexcept
 
 bool dsTable::DeleteAllByIndex(const char *sField, const char *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteAllByStringValueUTF8(sField, sValue);
 }
 
 bool dsTable::DeleteAllByIndex(const wchar_t *sField, const wchar_t *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteAllByStringValue(sField, sValue);
 }
 
 bool dsTable::DeleteAllByIndex(const char *sField, int32_t nValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteAllByLongValueUTF8(sField, nValue);
 }
 
 bool dsTable::DeleteAllByIndex(const wchar_t *sField, int32_t nValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteAllByLongValue(sField, nValue);
+}
+
+bool dsTable::DeleteAllByIndex(const char *sField, int64_t nValue) noexcept
+{
+    VERIFY(this->Open());
+    return m_pSet->DeleteAllByInt64ValueUTF8(sField, nValue);
+}
+
+bool dsTable::DeleteAllByIndex(const wchar_t *sField, int64_t nValue) noexcept
+{
+    VERIFY(this->Open());
+    return m_pSet->DeleteAllByInt64Value(sField, nValue);
 }
 
 bool dsTable::DeleteByIndex(const wchar_t *sField, const wchar_t *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteByStringValue(sField, sValue);
 }
 
 bool dsTable::DeleteByIndex(const char *sField, const char *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteByStringValue(sField, sValue);
 }
 
 bool dsTable::DeleteByIndex(const wchar_t *sField, int32_t nValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteByLongValue(sField, nValue);
 }
 
 bool dsTable::DeleteByIndex(const char *sField, int32_t nValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteByLongValue(sField, nValue);
+}
+
+bool dsTable::DeleteByIndex(const wchar_t *sField, int64_t nValue) noexcept
+{
+    VERIFY(this->Open());
+    return m_pSet->DeleteByInt64Value(sField, nValue);
+}
+
+bool dsTable::DeleteByIndex(const char *sField, int64_t nValue) noexcept
+{
+    VERIFY(this->Open());
+    return m_pSet->DeleteByInt64Value(sField, nValue);
 }
 
 std::wstring dsTable::GetTableName() const noexcept
@@ -421,19 +451,19 @@ void dsTable::SetFieldStringUTF8(const char *sFieldName, const char *sValue) noe
 
 bool dsTable::DeleteAllByJsonField(const char *sField, const char *sJsonField, int32_t nValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteAllByJsonField(sField, sJsonField, nValue);
 }
 
 bool dsTable::DeleteAllByJsonField(const char *sField, const char *sJsonField, const wchar_t *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->DeleteAllByJsonField(sField, sJsonField, sValue);
 }
 
 bool dsTable::SeekByJsonField(const char *sField, const char *sJsonField, const wchar_t *sValue) noexcept
 {
-    VERIFY(Open());
+    VERIFY(this->Open());
     return m_pSet->SeekByJsonField(sField, sJsonField, sValue);
 }
 

@@ -26,6 +26,10 @@ namespace sqlite_util
             return dsFieldType::Text;
         }
 
+        if (sType == "LONGTEXT") {
+            return dsFieldType::Text;
+        }
+
         if ( sType == "REAL" ) {
             return dsFieldType::Double;
         }

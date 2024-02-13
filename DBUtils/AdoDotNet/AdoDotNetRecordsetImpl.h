@@ -57,11 +57,16 @@ public:
     virtual double GetFieldDouble(const wchar_t *sFieldName) override;
     virtual void SetFieldDouble(const wchar_t *sFieldName, double dValue) override;
 
+    virtual time_t GetFieldDateTime(const char *sFieldName) override;
     virtual time_t GetFieldDateTime(const wchar_t *sFieldName) override;
+
     virtual void   SetFieldDateTime(const wchar_t *sFieldName, const time_t &time) override;
+    virtual void   SetFieldDateTime(const char *sFieldName, const time_t &time) override;
     virtual bool IsFieldValueNull(const wchar_t *sFieldName) override;
+    virtual bool IsFieldValueNull(const char *sFieldName) override;
 
     virtual bool DoesFieldExist(const wchar_t *sFieldName) override;
+    virtual bool DoesFieldExist(const char *sFieldName) override;
 
     virtual bool SeekByString(const wchar_t *sIndex, const wchar_t *sValue) override;
     virtual bool SeekByString(const char *sIndex, const char *sValue)       override;

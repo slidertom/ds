@@ -6,8 +6,9 @@
     #include "dsTypes.h"
 #endif
 
-#include "unordered_map"
+#include <unordered_map>
+#include <string>
 
-class dsTableFieldInfo : public std::unordered_map<std::wstring, dsFieldType, std::hash<std::basic_string<wchar_t> > > { };
+class dsTableFieldInfo : public std::unordered_map<std::string, dsFieldType> { };
 
 #endif

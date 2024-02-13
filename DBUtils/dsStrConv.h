@@ -2,18 +2,27 @@
 #define __DS_STR_CONV_H__
 #pragma once
 
-#include "string"
+#include <string>
+#include <vector>
 
 namespace ds_str_conv
 {
     std::string ConvertToUTF8(const wchar_t *wstr);
     std::wstring ConvertFromUTF8(const char *str);
 
-    long string_to_long(const char *sValue);
+    // String without leading spaces is expected.
+    // Otherwise - an error is produced.
+    // std::from_chars returns std::errc::invalid_argument if "    123.12345" is passed as sValue.
+    int64_t string_to_int64(const char *sValue);
+    int32_t string_to_int32(const char *sValue);
+    time_t  string_to_time(const char *sValue);
 
-    std::string double_to_string(double dValue);
+    // String without leading spaces is expected.
+    // Otherwise - an error is produced.
     double string_to_double(const char *sValue);
+    std::string	double_to_string(const double dVal);
 
+    void MakeLower(std::string &str);
     void MakeLower(std::wstring &str);
     void MakeUpper(std::wstring &str);
     //void MakeUpper(std::string &str);

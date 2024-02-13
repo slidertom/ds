@@ -40,6 +40,8 @@ public:
     
     virtual bool DoesTableExist(const wchar_t *sTable) override;
     virtual bool DoesTableExistUTF8(const char *sTable) override;
+    virtual bool DoesViewExistUTF8(const char *sView) override;
+    virtual bool DoesIndexExistUTF8(const char *sIndex) override;
 
     virtual CAbsRecordset *CreateRecordset() override;
 
@@ -58,10 +60,13 @@ public:
     virtual std::vector<std::string> GetTableList() override;
 
     virtual bool DropColumn(const wchar_t *sTableName, const wchar_t *sColumnName) override;
+    virtual bool DropColumn(const char *sTableName, const char *sColumnName) override;
     virtual bool RemoveColumnCollateNoCase(const wchar_t *sTableName, const wchar_t *sColumnName) override;
     virtual bool DropTable(const wchar_t *sTableName) override;
+    virtual bool DropTable(const char *sTableName)    override;
     virtual bool DropTrigger(const wchar_t *sTriggerName) override;
     virtual bool DropIndex(const wchar_t *sIndexName) override;
+    virtual bool DropForeignKeys(const wchar_t* sTableName) override;
 
     virtual bool CreateTable(const char *sTableName, const dsTableFieldInfo &info) override;
     virtual bool CreateTables(const std::vector<std::pair<std::string, dsTableFieldInfo>> &tables_info) override;

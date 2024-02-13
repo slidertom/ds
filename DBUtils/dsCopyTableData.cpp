@@ -90,7 +90,7 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
             auto end_it = union_info.end();
             for (auto it = union_info.begin(); it != end_it; ++it) 
             {
-                const TCHAR *sFieldName = it->first.c_str();
+                const char *sFieldName = it->first.c_str();
 
                 if ( src_table.IsFieldValueNull(sFieldName) )
                 {
@@ -102,13 +102,13 @@ bool dsCopyTableData::CopyTableData(dsTable &src_table, dsTable &dst_table, cons
                 {
                 case dsFieldType::Text:
                     {
-                        const std::wstring sValue = src_table.GetFieldString(sFieldName);
-                        dst_table.SetFieldString(sFieldName, sValue.c_str());
+                        const std::string sValue = src_table.GetFieldStringUTF8(sFieldName);
+                        dst_table.SetFieldStringUTF8(sFieldName, sValue.c_str());
                     }
                     break;
                 case dsFieldType::Integer:
                     {
-                        const int nValue = src_table.GetFieldLong(sFieldName);
+                        const int32_t nValue = src_table.GetFieldLong(sFieldName);
                         dst_table.SetFieldLong(sFieldName, nValue);
                     }
                     break;
