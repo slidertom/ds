@@ -14,7 +14,7 @@ Text, Long/Integer, Blob, Double/Real field types are supported.
 Text field type addition: [**Json**](https://en.wikipedia.org/wiki/JSON) format support. [RapidJson](https://github.com/miloyip/rapidjson) used as backend.
 (PicoJson, sajson also can be used as backends. RapidJson used as the fastest one.)
 
-New backend to read json files: [simdjson](https://github.com/simdjson/simdjson): Parsing gigabytes of JSON per second.
+New backend to read json files: [**simdjson**](https://github.com/simdjson/simdjson): Parsing gigabytes of JSON per second.
 
 Use namespace ds_json::read to acceess simdjson.
 
