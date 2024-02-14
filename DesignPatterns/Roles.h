@@ -28,7 +28,7 @@ class CRoleCore;
 
 class CRole
 {
-// Contruction/Destruction
+// Construction/Destruction
 public:
     CRole(const std::string &sName, CRoleCore *pRoleCore) : m_sName(sName), m_pRoleCore(pRoleCore) { }
     CRole(const char *sName,        CRoleCore *pRoleCore) : m_sName(sName), m_pRoleCore(pRoleCore) { }
