@@ -14,15 +14,32 @@ Text, Long/Integer, Blob, Double/Real field types are supported.
 Text field type addition: [**Json**](https://en.wikipedia.org/wiki/JSON) format support. [RapidJson](https://github.com/miloyip/rapidjson) used as backend.
 (PicoJson, sajson also can be used as backends. RapidJson used as the fastest one.)
 
+New backend to read json files: [simdjson](https://github.com/simdjson/simdjson): Parsing gigabytes of JSON per second.
+
+Use namespace ds_json::read to acceess simdjson.
+
+```C++
+dsTable loader(&db, L"Table_Name");
+loader.MoveFirst(); // take the first record
+ds_json::read::object obj;
+ds_json::str2obj(std::move(loader.GetFieldStringUTF8("json_data")), obj);
+
+ds_json::read::array obj_array;
+obj.GetArray("json_array", obj_array);
+for (const ds_json::read::object &obj : obj_array) {
+	obj.GetTextUtf8("json_field");
+}
+```
+
 If you're a [**NoSQL**](https://en.wikipedia.org/wiki/NoSQL) type of person and SQL based database usage can not be avoided, then this might fit the bill perfectly.
 
 DS is an **exception free** code.
 
 Visual Studio Workspace Generation
-
+```
 cd DBUtils
-
 cmake.exe" CMakeLists.txt
+```
 
 Samples: 
 ```C++
