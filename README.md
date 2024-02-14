@@ -38,7 +38,7 @@ DS is an **exception free** code.
 Visual Studio Workspace Generation
 ```
 cd DBUtils
-cmake.exe" CMakeLists.txt
+cmake.exe CMakeLists.txt
 ```
 
 Samples: 
